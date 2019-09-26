@@ -14,6 +14,7 @@ Plug 'ryanoasis/vim-devicons'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 Plug 'mbbill/undotree'
+Plug 'majutsushi/tagbar'
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'octol/vim-cpp-enhanced-highlight'
 Plug 'morhetz/gruvbox'
@@ -27,6 +28,7 @@ let g:indentLine_char = '⎸'
 let g:indentLine_enabled = 0
 nnoremap <F6> :IndentLinesToggle<CR>
 
+nnoremap <F3> :TagbarToggle<CR>
 
 nnoremap <F5> :UndotreeToggle<CR>
 
@@ -171,7 +173,7 @@ set noerrorbells
 set novisualbell
 
 " Highlight matching brace
-set showmatch
+" set showmatch
 
 " Highlight all search results
 set hlsearch

@@ -95,14 +95,16 @@ alias la='ls -A'
 alias l='ls -CF'
 
 alias ..='cd ..'
-alias ...='cd../..'
-alias ....=cd'../../..'
+alias ...='cd../../'
+alias ....=cd'../../../'
 
 alias vimrc='vim ~/.vimrc'
 alias bashrc='vim ~/.bashrc'
 
 
 alias v='vim'
+
+alias QGC='~/./QGroundControl.AppImage' 
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
@@ -137,3 +139,5 @@ fi
 # fi
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+export PATH=$PATH:/opt/Xilinx/14.7/ISE_DS/ISE/bin/lin64:/opt/Xilinx/14.7/ISE_DS/ISE/sysgen/util:/opt/Xilinx/14.7/ISE_DS/ISE/../../../DocNav:/opt/Xilinx/14.7/ISE_DS/PlanAhead/bin:/opt/Xilinx/14.7/ISE_DS/EDK/bin/lin64:/opt/Xilinx/14.7/ISE_DS/EDK/gnu/microblaze/lin/bin:/opt/Xilinx/14.7/ISE_DS/EDK/gnu/powerpc-eabi/lin/bin:/opt/Xilinx/14.7/ISE_DS/EDK/gnu/arm/lin/bin:/opt/Xilinx/14.7/ISE_DS/EDK/gnu/microblaze/linux_toolchain/lin64_be/bin:/opt/Xilinx/14.7/ISE_DS/EDK/gnu/microblaze/linux_toolchain/lin64_le/bin:/opt/Xilinx/14.7/ISE_DS/common/bin/lin64
