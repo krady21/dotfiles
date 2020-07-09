@@ -3,6 +3,7 @@ call plug#begin('~/.vim/plugged')
 Plug 'bfrg/vim-cpp-modern'
 Plug 'dense-analysis/ale'
 Plug 'el-iot/buffer-tree'
+Plug 'gruvbox-community/gruvbox'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 Plug 'junegunn/gv.vim'
@@ -11,7 +12,6 @@ Plug 'justinmk/vim-dirvish'
 Plug 'machakann/vim-highlightedyank'
 Plug 'majutsushi/tagbar'
 Plug 'mbbill/undotree'
-Plug 'rafi/awesome-vim-colorschemes'
 Plug 'sheerun/vim-polyglot'
 Plug 'tmsvg/pear-tree'
 Plug 'tpope/vim-commentary'
@@ -32,8 +32,8 @@ endif
 
 call plug#end()
 
-" Enable built-in matchit plugin (% for if/else and tags)
-runtime macros/matchit.vim
+" Disable matchit
+let g:loaded_matchit = 1
 
 " Disable netrw
 let g:loaded_netrw = 1
@@ -68,6 +68,7 @@ noremap <leader>s :Ag<CR>
 noremap <leader>f :Files<CR>
 noremap <leader>c :Commits<CR>
 noremap <leader>b :Buffers<CR>
+noremap <leader>h :History<CR>
 
 let g:ycm_show_diagnostics_ui = 0
 let g:ycm_clangd_binary_path = "/home/boco/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04/bin/"
@@ -137,13 +138,12 @@ nnoremap <silent> <leader>du :windo diffupdate<CR>
 
 " Buffer mappings
 nnoremap <leader><leader> <C-^><CR>
+nnoremap <silent> ]b :bnext<CR>
+nnoremap <silent> [b :bprevious<CR>
 
 nnoremap <leader><space> :BufferTree<CR>
 nnoremap <leader><Tab> :buffer<Space><Tab>
 set wildcharm=<Tab>
-
-" Reset options when re-sourcing vim
-set nocompatible
 
 " Disabled for security reasons
 " https://github.com/numirias/security/blob/cf4f74e0c6c6e4bbd6b59823aa1b85fa913e26eb/doc/2019-06-04_ace-vim-neovim.md#readme
@@ -187,7 +187,7 @@ set smarttab
 
 " 1 tab == 4 spaces
 set shiftwidth=4
-set tabstop=4
+set softtabstop=4
 
 " Set how many lines of history vim has to remember
 set history=10000
@@ -202,10 +202,7 @@ set breakindent
 set showbreak=↳
 
 " Auto indent
-set ai
-
-" Smart indent
-set si
+set autoindent
 
 " Turn magic on for regular expressions
 set magic
@@ -245,7 +242,7 @@ set incsearch
 set nrformats+=alpha
 set nrformats-=octal
 
-" Open vimdiff splits vertically 
+" Open vimdiff splits vertically
 set diffopt=vertical,filler,context:3,iwhite
 
 " Enable undo file
@@ -287,12 +284,16 @@ autocmd SwapExists * let v:swapchoice = 'q'
 autocmd VimResized * wincmd =
 
 " Set spell for markdown, git commits and latex
-autocmd FileType gitcommit,markdown,tex setlocal spell complete+=kspell
-autocmd FileType gitcommit,markdown,tex hi SpellBad cterm=underline
+augroup Spell
+    autocmd!
+    autocmd FileType gitcommit,markdown,tex setlocal spell complete+=kspell
+    autocmd FileType gitcommit,markdown,tex hi SpellBad cterm=underline
+augroup END
 
 set termguicolors
 set t_Co=256
 
-colorscheme gruvbox
+" Keep them in this order
 set background=dark
 syntax on
+colorscheme gruvbox
