@@ -1,8 +1,8 @@
 call plug#begin('~/.vim/plugged')
 
+Plug 'FooSoft/vim-argwrap'
 Plug 'bfrg/vim-cpp-modern'
 Plug 'dense-analysis/ale'
-Plug 'el-iot/buffer-tree'
 Plug 'gruvbox-community/gruvbox'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
@@ -12,8 +12,10 @@ Plug 'justinmk/vim-dirvish'
 Plug 'machakann/vim-highlightedyank'
 Plug 'majutsushi/tagbar'
 Plug 'mbbill/undotree'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'sheerun/vim-polyglot'
 Plug 'tmsvg/pear-tree'
+Plug 'tommcdo/vim-exchange'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-fugitive'
@@ -22,7 +24,7 @@ Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-rhubarb'
 Plug 'tpope/vim-sleuth'
 Plug 'tpope/vim-surround'
-Plug 'ycm-core/YouCompleteMe'
+Plug 'unblevable/quick-scope'
 Plug 'yggdroot/indentline'
 if has('nvim') || has('patch-8.0.902')
   Plug 'mhinz/vim-signify'
@@ -44,7 +46,8 @@ let mapleader=","
 
 let g:pear_tree_repeatable_expand = 0
 
-let g:buffertree_compress = 1
+" Trigger a highlight in the appropriate direction when pressing these keys:
+let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
 
 nnoremap <F6> :IndentLinesToggle<CR>
 let g:indentLine_fileTypeExclude = ['text', 'json', 'markdown', 'xml']
@@ -63,17 +66,14 @@ map <leader>at :ALEToggle<CR>
 map <leader>ad :ALEDetail<CR>
 let g:ale_enabled = 0
 
+nnoremap <silent> <leader>aw :ArgWrap<CR>
+
 noremap <leader>r :Rg<CR>
 noremap <leader>s :Ag<CR>
 noremap <leader>f :Files<CR>
 noremap <leader>c :Commits<CR>
 noremap <leader>b :Buffers<CR>
 noremap <leader>h :History<CR>
-
-let g:ycm_show_diagnostics_ui = 0
-let g:ycm_clangd_binary_path = "/home/boco/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04/bin/"
-let g:ycm_autoclose_preview_window_after_insertion = 1
-let g:ycm_confirm_extra_conf = 0
 
 let g:fzf_colors =
 \ { 'fg':      ['fg', 'Normal'],
@@ -90,6 +90,44 @@ let g:fzf_colors =
   \ 'spinner': ['fg', 'Label'],
   \ 'header':  ['fg', 'Comment'] }
 
+
+let g:coc_disable_startup_warning = 1
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+" Use `[g` and `]g` to navigate diagnostics
+" Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
+nmap <silent> [g <Plug>(coc-diagnostic-prev)
+nmap <silent> ]g <Plug>(coc-diagnostic-next)
+
+" GoTo code navigation.
+nmap <silent> <leader>gd <Plug>(coc-definition)
+nmap <silent> <leader>gy <Plug>(coc-type-definition)
+nmap <silent> <leader>gi <Plug>(coc-implementation)
+nmap <silent> <leader>gr <Plug>(coc-references)
+
+" Use K to show documentation in preview window.
+nnoremap <silent> <leader>K :call <SID>show_documentation()<CR>
+
+function! s:show_documentation()
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  else
+    call CocAction('doHover')
+  endif
+endfunction
+
+" Symbol renaming.
+nmap <leader>rn <Plug>(coc-rename)
+
 " Command mode mappings
 cnoremap <C-a> <Home>
 cnoremap <C-e> <End>
@@ -101,10 +139,14 @@ nnoremap <Space>; ,
 noremap Y y$
 
 " To force myself not to use arrow keys ;)
-map <up> <nop>
-map <down> <nop>
-map <left> <nop>
-map <right> <nop>
+nnoremap <up> <nop>
+nnoremap <down> <nop>
+nnoremap <left> <nop>
+nnoremap <right> <nop>
+inoremap <up> <nop>
+inoremap <down> <nop>
+inoremap <left> <nop>
+inoremap <right> <nop>
 
 " Easier movement
 noremap K {
@@ -113,35 +155,29 @@ noremap H ^
 noremap L $
 
 " Quicly close a file with <leader>q
-noremap <leader>q :q<CR>
-
-" Quicly save a file with <leader>w
-noremap <leader>w :w<CR>
+nnoremap <leader>q :q<CR>
 
 " Quickly force close a file with <leader>Q
-noremap <leader>Q :q!<CR>
-
-" Quicly save and close a file with <leader>z
-noremap <leader>z :wq<CR>
+nnoremap <leader>Q :q!<CR>
 
 " Quickly get out of inserted mode without having to leave home row
 inoremap jj <Esc>
 
 " Clipboard mappings
 noremap <leader>y "+y
+noremap <leader>Y "+Y
 noremap <leader>p "+p
+noremap <leader>P "+P
 
 " Vimdiff mappings
-nnoremap <silent> <leader>dt :windo diffthis<CR>
-nnoremap <silent> <leader>do :windo diffoff!<CR>
-nnoremap <silent> <leader>du :windo diffupdate<CR>
+nnoremap <silent><leader>dt :windo diffthis<CR>
+nnoremap <silent><leader>do :windo diffoff!<CR>
+nnoremap <silent><leader>du :windo diffupdate<CR>
 
 " Buffer mappings
 nnoremap <leader><leader> <C-^><CR>
-nnoremap <silent> ]b :bnext<CR>
-nnoremap <silent> [b :bprevious<CR>
+nnoremap <leader><Space> :ls<CR>
 
-nnoremap <leader><space> :BufferTree<CR>
 nnoremap <leader><Tab> :buffer<Space><Tab>
 set wildcharm=<Tab>
 
@@ -149,8 +185,14 @@ set wildcharm=<Tab>
 " https://github.com/numirias/security/blob/cf4f74e0c6c6e4bbd6b59823aa1b85fa913e26eb/doc/2019-06-04_ace-vim-neovim.md#readme
 set nomodeline
 
+" Chage default statusline
+set statusline=%<\ %f\ %m%r%w%=%l\/%-6L\ %3c
+
 " Toggle to paste mode to stop cascading indents
 set pastetoggle=<F5>
+
+" Always show statusline
+" set laststatus=2
 
 " Hide buffers instead of closing them
 set hidden
@@ -265,13 +307,13 @@ endfunc
 
 " Strips trailing whitespace and saves cursor position
 function! <SID>StripTrailingWhitespaces()
-    " save last search & cursor position
-    let _s=@/
-    let l = line(".")
-    let c = col(".")
-    %s/\s\+$//e
-    let @/=_s
-    call cursor(l, c)
+  " save last search & cursor position
+  let _s=@/
+  let l = line(".")
+  let c = col(".")
+  %s/\s\+$//e
+  let @/=_s
+  call cursor(l, c)
 endfunction
 
 nnoremap <silent> <leader>t :call ToggleNumber()<CR>
@@ -285,9 +327,14 @@ autocmd VimResized * wincmd =
 
 " Set spell for markdown, git commits and latex
 augroup Spell
+  autocmd!
+  autocmd FileType gitcommit,markdown,tex setlocal spell complete+=kspell
+augroup END
+
+augroup Make
     autocmd!
-    autocmd FileType gitcommit,markdown,tex setlocal spell complete+=kspell
-    autocmd FileType gitcommit,markdown,tex hi SpellBad cterm=underline
+    autocmd FileType rust setlocal makeprg=cargo\ build
+    autocmd FileType python setlocal makeprg=python3\ %
 augroup END
 
 set termguicolors
