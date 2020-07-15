@@ -1,17 +1,19 @@
 call plug#begin('~/.vim/plugged')
 
+Plug 'puremourning/vimspector'
 Plug 'FooSoft/vim-argwrap'
 Plug 'bfrg/vim-cpp-modern'
-Plug 'dense-analysis/ale'
 Plug 'gruvbox-community/gruvbox'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 Plug 'junegunn/gv.vim'
 Plug 'junegunn/vim-easy-align'
 Plug 'justinmk/vim-dirvish'
+Plug 'kristijanhusak/vim-dirvish-git'
 Plug 'machakann/vim-highlightedyank'
 Plug 'majutsushi/tagbar'
 Plug 'mbbill/undotree'
+Plug 'mhinz/vim-signify'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'sheerun/vim-polyglot'
 Plug 'tmsvg/pear-tree'
@@ -21,33 +23,26 @@ Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-obsession'
 Plug 'tpope/vim-repeat'
-Plug 'tpope/vim-rhubarb'
 Plug 'tpope/vim-sleuth'
 Plug 'tpope/vim-surround'
-Plug 'unblevable/quick-scope'
+Plug 'wellle/targets.vim'
 Plug 'yggdroot/indentline'
-if has('nvim') || has('patch-8.0.902')
-  Plug 'mhinz/vim-signify'
-else
-  Plug 'mhinz/vim-signify', { 'branch': 'legacy' }
-endif
 
 call plug#end()
 
-" Disable matchit
-let g:loaded_matchit = 1
-
-" Disable netrw
-let g:loaded_netrw = 1
-let g:loaded_netrwPlugin = 1
+" Enable matchit
+runtime! macros/matchit.vim
 
 " Change the mapleader from \ to ,
 let mapleader=","
 
 let g:pear_tree_repeatable_expand = 0
 
-" Trigger a highlight in the appropriate direction when pressing these keys:
-let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
+" Start interactive EasyAlign in visual mode (e.g. vipga)
+xmap <leader>a <Plug>(EasyAlign)
+
+" Start interactive EasyAlign for a motion/text object (e.g. gaip)
+nmap <leader>a <Plug>(EasyAlign)
 
 nnoremap <F6> :IndentLinesToggle<CR>
 let g:indentLine_fileTypeExclude = ['text', 'json', 'markdown', 'xml']
@@ -62,11 +57,7 @@ let g:tagbar_indent = 1
 
 nnoremap <F4> :UndotreeToggle<CR>
 
-map <leader>at :ALEToggle<CR>
-map <leader>ad :ALEDetail<CR>
-let g:ale_enabled = 0
-
-nnoremap <silent> <leader>aw :ArgWrap<CR>
+nnoremap <silent> <leader>w :ArgWrap<CR>
 
 noremap <leader>r :Rg<CR>
 noremap <leader>s :Ag<CR>
@@ -155,31 +146,34 @@ noremap H ^
 noremap L $
 
 " Quicly close a file with <leader>q
-nnoremap <leader>q :q<CR>
+nnoremap <silent> <leader>q :q<CR>
 
 " Quickly force close a file with <leader>Q
-nnoremap <leader>Q :q!<CR>
+nnoremap <silent> <leader>Q :q!<CR>
 
 " Quickly get out of inserted mode without having to leave home row
 inoremap jj <Esc>
 
 " Clipboard mappings
 noremap <leader>y "+y
-noremap <leader>Y "+Y
 noremap <leader>p "+p
-noremap <leader>P "+P
 
 " Vimdiff mappings
-nnoremap <silent><leader>dt :windo diffthis<CR>
-nnoremap <silent><leader>do :windo diffoff!<CR>
-nnoremap <silent><leader>du :windo diffupdate<CR>
+nnoremap <silent> <leader>dt :windo diffthis<CR>
+nnoremap <silent> <leader>do :windo diffoff!<CR>
+nnoremap <silent> <leader>du :windo diffupdate<CR>
 
 " Buffer mappings
 nnoremap <leader><leader> <C-^><CR>
 nnoremap <leader><Space> :ls<CR>
+nnoremap <silent> ]b :bn<CR>
+nnoremap <silent> [b :bp<CR>
 
 nnoremap <leader><Tab> :buffer<Space><Tab>
 set wildcharm=<Tab>
+
+" Always show statusline
+set laststatus=2
 
 " Disabled for security reasons
 " https://github.com/numirias/security/blob/cf4f74e0c6c6e4bbd6b59823aa1b85fa913e26eb/doc/2019-06-04_ace-vim-neovim.md#readme
@@ -190,9 +184,6 @@ set statusline=%<\ %f\ %m%r%w%=%l\/%-6L\ %3c
 
 " Toggle to paste mode to stop cascading indents
 set pastetoggle=<F5>
-
-" Always show statusline
-" set laststatus=2
 
 " Hide buffers instead of closing them
 set hidden
@@ -229,7 +220,7 @@ set smarttab
 
 " 1 tab == 4 spaces
 set shiftwidth=4
-set softtabstop=4
+let &softtabstop = &shiftwidth
 
 " Set how many lines of history vim has to remember
 set history=10000
@@ -298,10 +289,10 @@ set wildignore+=*/.git/*,*/tmp/*,*~,*.swp,*.o
 " Toggle between number and relativenumber
 function! ToggleNumber()
     if(&relativenumber == 1)
-        set norelativenumber
-        set number
+      set norelativenumber
+      set number
     else
-        set relativenumber
+      set relativenumber
     endif
 endfunc
 
@@ -317,7 +308,7 @@ function! <SID>StripTrailingWhitespaces()
 endfunction
 
 nnoremap <silent> <leader>t :call ToggleNumber()<CR>
-nnoremap <leader>gw :call <SID>StripTrailingWhitespaces()<CR>
+nnoremap <leader>W :call <SID>StripTrailingWhitespaces()<CR>
 
 " Just don't open vim when there's a swapfile
 autocmd SwapExists * let v:swapchoice = 'q'
@@ -331,16 +322,12 @@ augroup Spell
   autocmd FileType gitcommit,markdown,tex setlocal spell complete+=kspell
 augroup END
 
-augroup Make
-    autocmd!
-    autocmd FileType rust setlocal makeprg=cargo\ build
-    autocmd FileType python setlocal makeprg=python3\ %
-augroup END
-
 set termguicolors
 set t_Co=256
 
 " Keep them in this order
 set background=dark
-syntax on
+if !exists("g:syntax_on")
+  syntax enable
+endif
 colorscheme gruvbox
