@@ -122,18 +122,11 @@ fi
 # colored GCC warnings and errors
 #export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
-# Set vim keybindings for bash
-set -o vi
-
 # some more ls aliases
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 
-alias apti='sudo apt install'
-alias aptr='sudo apt remove'
-alias apts='sudo apt-cache show'
-alias aptu='sudo apt update && sudo apt upgrade'
 alias ..='cd ..'
 alias ...='cd ../../'
 alias ....='cd ../../../'

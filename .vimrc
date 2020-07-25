@@ -1,7 +1,5 @@
 call plug#begin('~/.vim/plugged')
 
-Plug 'puremourning/vimspector'
-Plug 'FooSoft/vim-argwrap'
 Plug 'bfrg/vim-cpp-modern'
 Plug 'gruvbox-community/gruvbox'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
@@ -11,10 +9,12 @@ Plug 'junegunn/vim-easy-align'
 Plug 'justinmk/vim-dirvish'
 Plug 'kristijanhusak/vim-dirvish-git'
 Plug 'machakann/vim-highlightedyank'
-Plug 'majutsushi/tagbar'
-Plug 'mbbill/undotree'
+Plug 'majutsushi/tagbar', {'on': 'TagbarToggle'}
+Plug 'mbbill/undotree', {'on': 'UndotreeToggle'}
 Plug 'mhinz/vim-signify'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'orderthruchaos/sbd.vim'
+Plug 'romainl/Apprentice'
 Plug 'sheerun/vim-polyglot'
 Plug 'tmsvg/pear-tree'
 Plug 'tommcdo/vim-exchange'
@@ -38,26 +38,21 @@ let mapleader=","
 
 let g:pear_tree_repeatable_expand = 0
 
-" Start interactive EasyAlign in visual mode (e.g. vipga)
 xmap <leader>a <Plug>(EasyAlign)
-
-" Start interactive EasyAlign for a motion/text object (e.g. gaip)
 nmap <leader>a <Plug>(EasyAlign)
 
-nnoremap <F6> :IndentLinesToggle<CR>
-let g:indentLine_fileTypeExclude = ['text', 'json', 'markdown', 'xml']
-let g:indentLine_faster = 1
-let g:indentLine_char = '⎸'
-let g:indentLine_enabled = 1
-
-nnoremap <F3> :TagbarToggle<CR>
+nnoremap <F2> :TagbarToggle<CR>
 let g:tagbar_compact = 1
 let g:tagbar_autofocus = 1
 let g:tagbar_indent = 1
 
-nnoremap <F4> :UndotreeToggle<CR>
+nnoremap <F3> :UndotreeToggle<CR>
 
-nnoremap <silent> <leader>w :ArgWrap<CR>
+nnoremap <F4> :IndentLinesToggle<CR>
+let g:indentLine_fileTypeExclude = ['text', 'json', 'markdown', 'xml']
+let g:indentLine_faster = 1
+let g:indentLine_char = '⎸'
+let g:indentLine_enabled = 1
 
 noremap <leader>r :Rg<CR>
 noremap <leader>s :Ag<CR>
@@ -122,6 +117,11 @@ nmap <leader>rn <Plug>(coc-rename)
 " Command mode mappings
 cnoremap <C-a> <Home>
 cnoremap <C-e> <End>
+cnoremap <C-j> <Down>
+cnoremap <C-k> <Up>
+
+xnoremap < <gv
+xnoremap > >gv
 
 " Don't lose , for f because of mapleader
 nnoremap <Space>; ,
@@ -157,6 +157,8 @@ inoremap jj <Esc>
 " Clipboard mappings
 noremap <leader>y "+y
 noremap <leader>p "+p
+noremap <leader>Y "+Y
+noremap <leader>P "+P
 
 " Vimdiff mappings
 nnoremap <silent> <leader>dt :windo diffthis<CR>
@@ -166,8 +168,8 @@ nnoremap <silent> <leader>du :windo diffupdate<CR>
 " Buffer mappings
 nnoremap <leader><leader> <C-^><CR>
 nnoremap <leader><Space> :ls<CR>
-nnoremap <silent> ]b :bn<CR>
-nnoremap <silent> [b :bp<CR>
+nnoremap <silent> ]b :bnext<CR>
+nnoremap <silent> [b :bprevious<CR>
 
 nnoremap <leader><Tab> :buffer<Space><Tab>
 set wildcharm=<Tab>
@@ -262,6 +264,9 @@ set novisualbell
 " Do not highlight search results
 set nohlsearch
 
+" Always report changed lines
+set report=0
+
 " Enable smart-case search
 set smartcase
 
@@ -307,27 +312,43 @@ function! <SID>StripTrailingWhitespaces()
   call cursor(l, c)
 endfunction
 
-nnoremap <silent> <leader>t :call ToggleNumber()<CR>
-nnoremap <leader>W :call <SID>StripTrailingWhitespaces()<CR>
+nnoremap <silent> <F1> :call ToggleNumber()<CR>
+nnoremap <silent> <F12> :call <SID>StripTrailingWhitespaces()<CR>
 
 " Just don't open vim when there's a swapfile
-autocmd SwapExists * let v:swapchoice = 'q'
+augroup Swap
+  autocmd!
+  autocmd SwapExists * let v:swapchoice = 'q'
+augroup END
 
 " Automatically resize vim splits
-autocmd VimResized * wincmd =
+augroup Window
+  autocmd!
+  autocmd VimResized * wincmd =
+augroup END
 
-" Set spell for markdown, git commits and latex
 augroup Spell
   autocmd!
   autocmd FileType gitcommit,markdown,tex setlocal spell complete+=kspell
 augroup END
 
+augroup Wrap
+  autocmd!
+  autocmd FileType xml,json setlocal nowrap
+augroup END
+
 set termguicolors
 set t_Co=256
+
+" Change cursor chape
+let &t_SI = "\e[6 q"
+let &t_EI = "\e[2 q"
+
+filetype plugin indent on
 
 " Keep them in this order
 set background=dark
 if !exists("g:syntax_on")
   syntax enable
 endif
-colorscheme gruvbox
+colorscheme apprentice
