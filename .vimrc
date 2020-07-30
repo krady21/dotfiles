@@ -1,5 +1,6 @@
 call plug#begin('~/.vim/plugged')
 
+Plug 'arcticicestudio/nord-vim'
 Plug 'bfrg/vim-cpp-modern'
 Plug 'gruvbox-community/gruvbox'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
@@ -14,7 +15,6 @@ Plug 'mbbill/undotree', {'on': 'UndotreeToggle'}
 Plug 'mhinz/vim-signify'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'orderthruchaos/sbd.vim'
-Plug 'romainl/Apprentice'
 Plug 'sheerun/vim-polyglot'
 Plug 'tmsvg/pear-tree'
 Plug 'tommcdo/vim-exchange'
@@ -30,6 +30,15 @@ Plug 'yggdroot/indentline'
 
 call plug#end()
 
+filetype plugin indent on
+
+" Keep them in this order
+set background=dark
+if !exists("g:syntax_on")
+  syntax enable
+endif
+colorscheme nord
+
 " Enable matchit
 runtime! macros/matchit.vim
 
@@ -41,14 +50,14 @@ let g:pear_tree_repeatable_expand = 0
 xmap <leader>a <Plug>(EasyAlign)
 nmap <leader>a <Plug>(EasyAlign)
 
-nnoremap <F2> :TagbarToggle<CR>
+nnoremap <silent> <F2> :TagbarToggle<CR>
 let g:tagbar_compact = 1
 let g:tagbar_autofocus = 1
 let g:tagbar_indent = 1
 
-nnoremap <F3> :UndotreeToggle<CR>
+nnoremap <silent> <F3> :UndotreeToggle<CR>
 
-nnoremap <F4> :IndentLinesToggle<CR>
+nnoremap <silent> <F4> :IndentLinesToggle<CR>
 let g:indentLine_fileTypeExclude = ['text', 'json', 'markdown', 'xml']
 let g:indentLine_faster = 1
 let g:indentLine_char = '⎸'
@@ -57,9 +66,9 @@ let g:indentLine_enabled = 1
 noremap <leader>r :Rg<CR>
 noremap <leader>s :Ag<CR>
 noremap <leader>f :Files<CR>
+noremap <leader>F :GFiles?<CR>
 noremap <leader>c :Commits<CR>
 noremap <leader>b :Buffers<CR>
-noremap <leader>h :History<CR>
 
 let g:fzf_colors =
 \ { 'fg':      ['fg', 'Normal'],
@@ -157,8 +166,6 @@ inoremap jj <Esc>
 " Clipboard mappings
 noremap <leader>y "+y
 noremap <leader>p "+p
-noremap <leader>Y "+Y
-noremap <leader>P "+P
 
 " Vimdiff mappings
 nnoremap <silent> <leader>dt :windo diffthis<CR>
@@ -343,12 +350,3 @@ set t_Co=256
 " Change cursor chape
 let &t_SI = "\e[6 q"
 let &t_EI = "\e[2 q"
-
-filetype plugin indent on
-
-" Keep them in this order
-set background=dark
-if !exists("g:syntax_on")
-  syntax enable
-endif
-colorscheme apprentice
