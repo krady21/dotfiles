@@ -1,6 +1,5 @@
 call plug#begin('~/.vim/plugged')
 
-Plug 'arcticicestudio/nord-vim'
 Plug 'bfrg/vim-cpp-modern'
 Plug 'gruvbox-community/gruvbox'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
@@ -10,19 +9,17 @@ Plug 'junegunn/vim-easy-align'
 Plug 'justinmk/vim-dirvish'
 Plug 'kristijanhusak/vim-dirvish-git'
 Plug 'machakann/vim-highlightedyank'
-Plug 'majutsushi/tagbar', {'on': 'TagbarToggle'}
-Plug 'mbbill/undotree', {'on': 'UndotreeToggle'}
+Plug 'majutsushi/tagbar'
 Plug 'mhinz/vim-signify'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'orderthruchaos/sbd.vim'
+Plug 'rakr/vim-one'
 Plug 'sheerun/vim-polyglot'
 Plug 'tmsvg/pear-tree'
 Plug 'tommcdo/vim-exchange'
 Plug 'tpope/vim-commentary'
-Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-obsession'
-Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-sleuth'
 Plug 'tpope/vim-surround'
 Plug 'wellle/targets.vim'
@@ -30,20 +27,21 @@ Plug 'yggdroot/indentline'
 
 call plug#end()
 
-filetype plugin indent on
-
-" Keep them in this order
 set background=dark
-if !exists("g:syntax_on")
-  syntax enable
-endif
-colorscheme nord
+colorscheme one
+
+" Change cursor chape
+let &t_SI = "\e[6 q"
+let &t_EI = "\e[2 q"
 
 " Enable matchit
 runtime! macros/matchit.vim
 
 " Change the mapleader from \ to ,
 let mapleader=","
+
+let g:python_highlight_indent_errors = 0
+let g:python_highlight_space_errors = 0
 
 let g:pear_tree_repeatable_expand = 0
 
@@ -54,8 +52,6 @@ nnoremap <silent> <F2> :TagbarToggle<CR>
 let g:tagbar_compact = 1
 let g:tagbar_autofocus = 1
 let g:tagbar_indent = 1
-
-nnoremap <silent> <F3> :UndotreeToggle<CR>
 
 nnoremap <silent> <F4> :IndentLinesToggle<CR>
 let g:indentLine_fileTypeExclude = ['text', 'json', 'markdown', 'xml']
@@ -110,7 +106,7 @@ nmap <silent> <leader>gi <Plug>(coc-implementation)
 nmap <silent> <leader>gr <Plug>(coc-references)
 
 " Use K to show documentation in preview window.
-nnoremap <silent> <leader>K :call <SID>show_documentation()<CR>
+nnoremap <silent> <leader>D :call <SID>show_documentation()<CR>
 
 function! s:show_documentation()
   if (index(['vim','help'], &filetype) >= 0)
@@ -122,6 +118,13 @@ endfunction
 
 " Symbol renaming.
 nmap <leader>rn <Plug>(coc-rename)
+
+" Center search results
+nnoremap <silent> n nzz
+nnoremap <silent> N Nzz
+nnoremap <silent> * *zz
+nnoremap <silent> # #zz
+nnoremap <silent> g* g*zz
 
 " Command mode mappings
 cnoremap <C-a> <Home>
@@ -187,6 +190,9 @@ set laststatus=2
 " Disabled for security reasons
 " https://github.com/numirias/security/blob/cf4f74e0c6c6e4bbd6b59823aa1b85fa913e26eb/doc/2019-06-04_ace-vim-neovim.md#readme
 set nomodeline
+
+" Disable swapfiles
+set noswapfile
 
 " Chage default statusline
 set statusline=%<\ %f\ %m%r%w%=%l\/%-6L\ %3c
@@ -298,14 +304,22 @@ set undolevels=1000
 " Ignore files for completion
 set wildignore+=*/.git/*,*/tmp/*,*~,*.swp,*.o
 
+" Allows visual block over white space
+set virtualedit=block
+
+set ttyfast
+
+set termguicolors
+set t_Co=256
+
 " Toggle between number and relativenumber
 function! ToggleNumber()
-    if(&relativenumber == 1)
-      set norelativenumber
-      set number
-    else
-      set relativenumber
-    endif
+  if(&relativenumber == 1)
+    set norelativenumber
+    set number
+  else
+    set relativenumber
+  endif
 endfunc
 
 " Strips trailing whitespace and saves cursor position
@@ -322,12 +336,6 @@ endfunction
 nnoremap <silent> <F1> :call ToggleNumber()<CR>
 nnoremap <silent> <F12> :call <SID>StripTrailingWhitespaces()<CR>
 
-" Just don't open vim when there's a swapfile
-augroup Swap
-  autocmd!
-  autocmd SwapExists * let v:swapchoice = 'q'
-augroup END
-
 " Automatically resize vim splits
 augroup Window
   autocmd!
@@ -343,10 +351,3 @@ augroup Wrap
   autocmd!
   autocmd FileType xml,json setlocal nowrap
 augroup END
-
-set termguicolors
-set t_Co=256
-
-" Change cursor chape
-let &t_SI = "\e[6 q"
-let &t_EI = "\e[2 q"
