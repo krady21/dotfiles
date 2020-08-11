@@ -131,6 +131,8 @@ alias ..='cd ..'
 alias ...='cd ../../'
 alias ....='cd ../../../'
 
+alias vi='nvim'
+alias vim='nvim'
 alias vimrc='vim ~/.vimrc'
 alias bashrc='vim ~/.bashrc'
 alias tconf='vim ~/.tmux.conf'
