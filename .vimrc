@@ -4,12 +4,8 @@ Plug 'bfrg/vim-cpp-modern'
 Plug 'gruvbox-community/gruvbox'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
-Plug 'junegunn/gv.vim'
-Plug 'junegunn/vim-easy-align'
 Plug 'justinmk/vim-dirvish'
-Plug 'kristijanhusak/vim-dirvish-git'
 Plug 'machakann/vim-highlightedyank'
-Plug 'majutsushi/tagbar'
 Plug 'mhinz/vim-signify'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'orderthruchaos/sbd.vim'
@@ -30,30 +26,19 @@ call plug#end()
 set background=dark
 colorscheme one
 
-" Change cursor chape
-let &t_SI = "\e[6 q"
-let &t_EI = "\e[2 q"
-
-" Enable matchit
-runtime! macros/matchit.vim
-
 " Change the mapleader from \ to ,
 let mapleader=","
 
-let g:python_highlight_indent_errors = 0
-let g:python_highlight_space_errors = 0
-
 let g:pear_tree_repeatable_expand = 0
+
+omap ic <Plug>(signify-motion-inner-pending)
+xmap ic <Plug>(signify-motion-inner-visual)
+omap ac <Plug>(signify-motion-outer-pending)
+xmap ac <Plug>(signify-motion-outer-visual)
 
 xmap <leader>a <Plug>(EasyAlign)
 nmap <leader>a <Plug>(EasyAlign)
 
-nnoremap <silent> <F2> :TagbarToggle<CR>
-let g:tagbar_compact = 1
-let g:tagbar_autofocus = 1
-let g:tagbar_indent = 1
-
-nnoremap <silent> <F4> :IndentLinesToggle<CR>
 let g:indentLine_fileTypeExclude = ['text', 'json', 'markdown', 'xml']
 let g:indentLine_faster = 1
 let g:indentLine_char = '⎸'
@@ -65,21 +50,22 @@ noremap <leader>f :Files<CR>
 noremap <leader>F :GFiles?<CR>
 noremap <leader>c :Commits<CR>
 noremap <leader>b :Buffers<CR>
+noremap <leader>h :History<CR>
 
 let g:fzf_colors =
-\ { 'fg':      ['fg', 'Normal'],
-  \ 'bg':      ['bg', 'Normal'],
-  \ 'hl':      ['fg', 'Comment'],
-  \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
-  \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
-  \ 'hl+':     ['fg', 'Statement'],
-  \ 'info':    ['fg', 'PreProc'],
-  \ 'border':  ['fg', 'Ignore'],
-  \ 'prompt':  ['fg', 'Conditional'],
-  \ 'pointer': ['fg', 'Exception'],
-  \ 'marker':  ['fg', 'Keyword'],
-  \ 'spinner': ['fg', 'Label'],
-  \ 'header':  ['fg', 'Comment'] }
+      \ { 'fg':      ['fg', 'Normal'],
+      \ 'bg':      ['bg', 'Normal'],
+      \ 'hl':      ['fg', 'Comment'],
+      \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
+      \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
+      \ 'hl+':     ['fg', 'Statement'],
+      \ 'info':    ['fg', 'PreProc'],
+      \ 'border':  ['fg', 'Ignore'],
+      \ 'prompt':  ['fg', 'Conditional'],
+      \ 'pointer': ['fg', 'Exception'],
+      \ 'marker':  ['fg', 'Keyword'],
+      \ 'spinner': ['fg', 'Label'],
+      \ 'header':  ['fg', 'Comment'] }
 
 
 let g:coc_disable_startup_warning = 1
@@ -93,6 +79,13 @@ function! s:check_back_space() abort
   let col = col('.') - 1
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
+
+" Use <c-space> to trigger completion.
+if has('nvim')
+  inoremap <silent><expr> <c-space> coc#refresh()
+else
+  inoremap <silent><expr> <c-@> coc#refresh()
+endif
 
 " Use `[g` and `]g` to navigate diagnostics
 " Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
@@ -119,19 +112,13 @@ endfunction
 " Symbol renaming.
 nmap <leader>rn <Plug>(coc-rename)
 
-" Center search results
-nnoremap <silent> n nzz
-nnoremap <silent> N Nzz
-nnoremap <silent> * *zz
-nnoremap <silent> # #zz
-nnoremap <silent> g* g*zz
-
 " Command mode mappings
 cnoremap <C-a> <Home>
 cnoremap <C-e> <End>
 cnoremap <C-j> <Down>
 cnoremap <C-k> <Up>
 
+" Easier indentation in visual mode
 xnoremap < <gv
 xnoremap > >gv
 
@@ -197,9 +184,6 @@ set noswapfile
 " Chage default statusline
 set statusline=%<\ %f\ %m%r%w%=%l\/%-6L\ %3c
 
-" Toggle to paste mode to stop cascading indents
-set pastetoggle=<F5>
-
 " Hide buffers instead of closing them
 set hidden
 
@@ -207,7 +191,7 @@ set hidden
 set autoread
 
 " Update time for signify
-set updatetime=100
+set updatetime=50
 
 " Fix slow O inserts (be careful over slow connections)
 set timeout
@@ -306,8 +290,6 @@ set wildignore+=*/.git/*,*/tmp/*,*~,*.swp,*.o
 
 " Allows visual block over white space
 set virtualedit=block
-
-set ttyfast
 
 set termguicolors
 set t_Co=256
