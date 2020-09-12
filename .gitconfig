@@ -1,0 +1,17 @@
+[user]
+	email = bogdangrigoruta@gmail.com
+	name = Bogdan Grigoruta
+	username = krady21
+[core]
+	editor = nvim
+[merge]
+	tool = nvim -d
+[alias]
+	a = add
+	b = branch
+	c = commit
+	d = diff
+	l = log
+	lg = log --oneline --graph --decorate
+	s = status
+
