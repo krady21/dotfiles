@@ -8,14 +8,11 @@ Plug 'justinmk/vim-dirvish'
 Plug 'machakann/vim-highlightedyank'
 Plug 'mhinz/vim-signify'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
-Plug 'orderthruchaos/sbd.vim'
-Plug 'rakr/vim-one'
+Plug 'preservim/tagbar'
 Plug 'sheerun/vim-polyglot'
-Plug 'tmsvg/pear-tree'
-Plug 'tommcdo/vim-exchange'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-fugitive'
-Plug 'tpope/vim-obsession'
+Plug 'tpope/vim-rhubarb'
 Plug 'tpope/vim-sleuth'
 Plug 'tpope/vim-surround'
 Plug 'wellle/targets.vim'
@@ -24,68 +21,42 @@ Plug 'yggdroot/indentline'
 call plug#end()
 
 set background=dark
-colorscheme one
+set termguicolors
+colorscheme gruvbox
 
 " Change the mapleader from \ to ,
 let mapleader=","
-
-let g:pear_tree_repeatable_expand = 0
-
-omap ic <Plug>(signify-motion-inner-pending)
-xmap ic <Plug>(signify-motion-inner-visual)
-omap ac <Plug>(signify-motion-outer-pending)
-xmap ac <Plug>(signify-motion-outer-visual)
-
-xmap <leader>a <Plug>(EasyAlign)
-nmap <leader>a <Plug>(EasyAlign)
 
 let g:indentLine_fileTypeExclude = ['text', 'json', 'markdown', 'xml']
 let g:indentLine_faster = 1
 let g:indentLine_char = '⎸'
 let g:indentLine_enabled = 1
 
-noremap <leader>r :Rg<CR>
-noremap <leader>s :Ag<CR>
-noremap <leader>f :Files<CR>
-noremap <leader>F :GFiles?<CR>
-noremap <leader>c :Commits<CR>
-noremap <leader>b :Buffers<CR>
-noremap <leader>h :History<CR>
+let g:tagbar_compact = 1
+let g:tagbar_autofocus = 1
+let g:tagbar_indent = 1
+
+nnoremap <leader>s :Rg<CR>
+nnoremap <leader>f :Files<CR>
+nnoremap <leader>F :GFiles?<CR>
+nnoremap <leader>c :Commits<CR>
+nnoremap <leader>C :BCommits<CR>
+nnoremap <leader>b :Buffers<CR>
 
 let g:fzf_colors =
-      \ { 'fg':      ['fg', 'Normal'],
-      \ 'bg':      ['bg', 'Normal'],
-      \ 'hl':      ['fg', 'Comment'],
-      \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
-      \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
-      \ 'hl+':     ['fg', 'Statement'],
-      \ 'info':    ['fg', 'PreProc'],
-      \ 'border':  ['fg', 'Ignore'],
-      \ 'prompt':  ['fg', 'Conditional'],
-      \ 'pointer': ['fg', 'Exception'],
-      \ 'marker':  ['fg', 'Keyword'],
-      \ 'spinner': ['fg', 'Label'],
-      \ 'header':  ['fg', 'Comment'] }
-
-
-let g:coc_disable_startup_warning = 1
-inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
-
-function! s:check_back_space() abort
-  let col = col('.') - 1
-  return !col || getline('.')[col - 1]  =~# '\s'
-endfunction
-
-" Use <c-space> to trigger completion.
-if has('nvim')
-  inoremap <silent><expr> <c-space> coc#refresh()
-else
-  inoremap <silent><expr> <c-@> coc#refresh()
-endif
+            \ { 'fg':      ['fg', 'Normal'],
+            \ 'bg':      ['bg', 'Normal'],
+            \ 'hl':      ['fg', 'Comment'],
+            \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
+            \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
+            \ 'hl+':     ['fg', 'Statement'],
+            \ 'info':    ['fg', 'PreProc'],
+            \ 'border':  ['fg', 'Ignore'],
+            \ 'prompt':  ['fg', 'Conditional'],
+            \ 'pointer': ['fg', 'Exception'],
+            \ 'marker':  ['fg', 'Keyword'],
+            \ 'spinner': ['fg', 'Label'],
+            \ 'header':  ['fg', 'Comment'] }
 
 " Use `[g` and `]g` to navigate diagnostics
 " Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
@@ -99,44 +70,26 @@ nmap <silent> <leader>gi <Plug>(coc-implementation)
 nmap <silent> <leader>gr <Plug>(coc-references)
 
 " Use K to show documentation in preview window.
-nnoremap <silent> <leader>D :call <SID>show_documentation()<CR>
+nnoremap <silent> <leader>K :call <SID>show_documentation()<CR>
 
 function! s:show_documentation()
-  if (index(['vim','help'], &filetype) >= 0)
-    execute 'h '.expand('<cword>')
-  else
-    call CocAction('doHover')
-  endif
+    if (index(['vim','help'], &filetype) >= 0)
+        execute 'h '.expand('<cword>')
+    else
+        call CocAction('doHover')
+    endif
 endfunction
-
-" Symbol renaming.
-nmap <leader>rn <Plug>(coc-rename)
 
 " Command mode mappings
 cnoremap <C-a> <Home>
 cnoremap <C-e> <End>
-cnoremap <C-j> <Down>
-cnoremap <C-k> <Up>
 
 " Easier indentation in visual mode
 xnoremap < <gv
 xnoremap > >gv
 
-" Don't lose , for f because of mapleader
-nnoremap <Space>; ,
-
 " Make Y behave like C and D
 noremap Y y$
-
-" To force myself not to use arrow keys ;)
-nnoremap <up> <nop>
-nnoremap <down> <nop>
-nnoremap <left> <nop>
-nnoremap <right> <nop>
-inoremap <up> <nop>
-inoremap <down> <nop>
-inoremap <left> <nop>
-inoremap <right> <nop>
 
 " Easier movement
 noremap K {
@@ -144,18 +97,20 @@ noremap J }
 noremap H ^
 noremap L $
 
-" Quicly close a file with <leader>q
-nnoremap <silent> <leader>q :q<CR>
+" Use Ctrl-j for joining lines
+nnoremap <C-j> J
 
-" Quickly force close a file with <leader>Q
-nnoremap <silent> <leader>Q :q!<CR>
-
-" Quickly get out of inserted mode without having to leave home row
-inoremap jj <Esc>
+command! Q q
+command! W w
 
 " Clipboard mappings
 noremap <leader>y "+y
 noremap <leader>p "+p
+
+" Bracket autoexpansion
+inoremap (<CR> (<CR>)<C-o>O
+inoremap {<CR> {<CR>}<C-o>O
+inoremap [<CR> [<CR>]<C-o>O
 
 " Vimdiff mappings
 nnoremap <silent> <leader>dt :windo diffthis<CR>
@@ -168,8 +123,10 @@ nnoremap <leader><Space> :ls<CR>
 nnoremap <silent> ]b :bnext<CR>
 nnoremap <silent> [b :bprevious<CR>
 
-nnoremap <leader><Tab> :buffer<Space><Tab>
 set wildcharm=<Tab>
+
+" Highlight matching angle brackets
+set matchpairs+=<:>
 
 " Always show statusline
 set laststatus=2
@@ -289,47 +246,26 @@ set undolevels=1000
 set wildignore+=*/.git/*,*/tmp/*,*~,*.swp,*.o
 
 " Allows visual block over white space
-set virtualedit=block
-
-set termguicolors
-set t_Co=256
-
-" Toggle between number and relativenumber
-function! ToggleNumber()
-  if(&relativenumber == 1)
-    set norelativenumber
-    set number
-  else
-    set relativenumber
-  endif
-endfunc
+set virtualedit=block,insert
 
 " Strips trailing whitespace and saves cursor position
 function! <SID>StripTrailingWhitespaces()
-  " save last search & cursor position
-  let _s=@/
-  let l = line(".")
-  let c = col(".")
-  %s/\s\+$//e
-  let @/=_s
-  call cursor(l, c)
+    " save last search & cursor position
+    let _s=@/
+    let l = line(".")
+    let c = col(".")
+    %s/\s\+$//e
+    let @/=_s
+    call cursor(l, c)
 endfunction
 
-nnoremap <silent> <F1> :call ToggleNumber()<CR>
+nnoremap <silent> <F1> :set rnu!<CR>
+nnoremap <silent> <F2> :set spell!<CR>
+nnoremap <silent> <F3> :TagbarToggle<CR>
 nnoremap <silent> <F12> :call <SID>StripTrailingWhitespaces()<CR>
 
-" Automatically resize vim splits
-augroup Window
-  autocmd!
-  autocmd VimResized * wincmd =
-augroup END
-
-augroup Spell
-  autocmd!
-  autocmd FileType gitcommit,markdown,tex setlocal spell complete+=kspell
-augroup END
-
-augroup Wrap
-  autocmd!
-  autocmd FileType xml,json setlocal nowrap
+augroup Personal
+    autocmd!
+    autocmd FileType xml,json setlocal nowrap
+    autocmd TermOpen * startinsert
 augroup END
