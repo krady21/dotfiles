@@ -9,10 +9,10 @@ Plug 'machakann/vim-highlightedyank'
 Plug 'mhinz/vim-signify'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'preservim/tagbar'
-Plug 'sheerun/vim-polyglot'
+Plug 'rakr/vim-one'
+Plug 'tommcdo/vim-exchange'
 Plug 'tpope/vim-commentary'
-Plug 'tpope/vim-fugitive'
-Plug 'tpope/vim-rhubarb'
+Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-sleuth'
 Plug 'tpope/vim-surround'
 Plug 'wellle/targets.vim'
@@ -43,21 +43,6 @@ nnoremap <leader>c :Commits<CR>
 nnoremap <leader>C :BCommits<CR>
 nnoremap <leader>b :Buffers<CR>
 
-let g:fzf_colors =
-            \ { 'fg':      ['fg', 'Normal'],
-            \ 'bg':      ['bg', 'Normal'],
-            \ 'hl':      ['fg', 'Comment'],
-            \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
-            \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
-            \ 'hl+':     ['fg', 'Statement'],
-            \ 'info':    ['fg', 'PreProc'],
-            \ 'border':  ['fg', 'Ignore'],
-            \ 'prompt':  ['fg', 'Conditional'],
-            \ 'pointer': ['fg', 'Exception'],
-            \ 'marker':  ['fg', 'Keyword'],
-            \ 'spinner': ['fg', 'Label'],
-            \ 'header':  ['fg', 'Comment'] }
-
 " Use `[g` and `]g` to navigate diagnostics
 " Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
 nmap <silent> [g <Plug>(coc-diagnostic-prev)
@@ -80,6 +65,11 @@ function! s:show_documentation()
     endif
 endfunction
 
+" Search results centered
+nnoremap <silent> n nzz
+nnoremap <silent> N Nzz
+nnoremap <silent> * *zz
+
 " Command mode mappings
 cnoremap <C-a> <Home>
 cnoremap <C-e> <End>
@@ -97,8 +87,7 @@ noremap J }
 noremap H ^
 noremap L $
 
-" Use Ctrl-j for joining lines
-nnoremap <C-j> J
+command! -range Blame echo join(systemlist("git -C " . shellescape(expand('%:p:h')) . " blame -L <line1>,<line2> " . expand('%:t')), "\n")
 
 command! Q q
 command! W w
@@ -108,7 +97,6 @@ noremap <leader>y "+y
 noremap <leader>p "+p
 
 " Bracket autoexpansion
-inoremap (<CR> (<CR>)<C-o>O
 inoremap {<CR> {<CR>}<C-o>O
 inoremap [<CR> [<CR>]<C-o>O
 
@@ -267,5 +255,5 @@ nnoremap <silent> <F12> :call <SID>StripTrailingWhitespaces()<CR>
 augroup Personal
     autocmd!
     autocmd FileType xml,json setlocal nowrap
-    autocmd TermOpen * startinsert
+    autocmd VimResized * wincmd =
 augroup END
