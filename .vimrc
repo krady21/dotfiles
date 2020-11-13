@@ -1,36 +1,27 @@
 call plug#begin('~/.vim/plugged')
 
-Plug 'bfrg/vim-cpp-modern'
 Plug 'gruvbox-community/gruvbox'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 Plug 'justinmk/vim-dirvish'
-Plug 'machakann/vim-highlightedyank'
 Plug 'mhinz/vim-signify'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'preservim/tagbar'
-Plug 'rakr/vim-one'
+Plug 'sheerun/vim-polyglot'
 Plug 'tommcdo/vim-exchange'
 Plug 'tpope/vim-commentary'
-Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-sleuth'
 Plug 'tpope/vim-surround'
-Plug 'wellle/targets.vim'
-Plug 'yggdroot/indentline'
 
 call plug#end()
 
 set background=dark
 set termguicolors
+let g:gruvbox_sign_column = 'bg0'
+let g:gruvbox_invert_selection = 0
 colorscheme gruvbox
 
-" Change the mapleader from \ to ,
 let mapleader=","
-
-let g:indentLine_fileTypeExclude = ['text', 'json', 'markdown', 'xml']
-let g:indentLine_faster = 1
-let g:indentLine_char = '⎸'
-let g:indentLine_enabled = 1
 
 let g:tagbar_compact = 1
 let g:tagbar_autofocus = 1
@@ -39,22 +30,34 @@ let g:tagbar_indent = 1
 nnoremap <leader>s :Rg<CR>
 nnoremap <leader>f :Files<CR>
 nnoremap <leader>F :GFiles?<CR>
-nnoremap <leader>c :Commits<CR>
-nnoremap <leader>C :BCommits<CR>
 nnoremap <leader>b :Buffers<CR>
 
-" Use `[g` and `]g` to navigate diagnostics
-" Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
+let g:fzf_colors =
+\ { 'fg':      ['fg', 'Normal'],
+  \ 'bg':      ['bg', 'Normal'],
+  \ 'hl':      ['fg', 'Comment'],
+  \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
+  \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
+  \ 'hl+':     ['fg', 'Statement'],
+  \ 'info':    ['fg', 'PreProc'],
+  \ 'border':  ['fg', 'Ignore'],
+  \ 'prompt':  ['fg', 'Conditional'],
+  \ 'pointer': ['fg', 'Exception'],
+  \ 'marker':  ['fg', 'Keyword'],
+  \ 'spinner': ['fg', 'Label'],
+  \ 'header':  ['fg', 'Comment'] }
+
 nmap <silent> [g <Plug>(coc-diagnostic-prev)
 nmap <silent> ]g <Plug>(coc-diagnostic-next)
 
-" GoTo code navigation.
 nmap <silent> <leader>gd <Plug>(coc-definition)
 nmap <silent> <leader>gy <Plug>(coc-type-definition)
 nmap <silent> <leader>gi <Plug>(coc-implementation)
 nmap <silent> <leader>gr <Plug>(coc-references)
 
-" Use K to show documentation in preview window.
+" Symbol renaming.
+nmap <leader>rn <Plug>(coc-rename)
+
 nnoremap <silent> <leader>K :call <SID>show_documentation()<CR>
 
 function! s:show_documentation()
@@ -81,20 +84,22 @@ xnoremap > >gv
 " Make Y behave like C and D
 noremap Y y$
 
-" Easier movement
-noremap K {
-noremap J }
+" Select last pasted text
+nnoremap gp `[v`]
+
+" noremap K {
+" noremap J }
 noremap H ^
 noremap L $
 
 command! -range Blame echo join(systemlist("git -C " . shellescape(expand('%:p:h')) . " blame -L <line1>,<line2> " . expand('%:t')), "\n")
+command! -nargs=1 Rename try | saveas <args> | call delete(expand('#')) | silent bd # | endtry
 
-command! Q q
-command! W w
+cnoreabbrev Q q
+cnoreabbrev W w
 
-" Clipboard mappings
-noremap <leader>y "+y
-noremap <leader>p "+p
+" Smart buffer delete
+command! Sbd bp\|bd \#
 
 " Bracket autoexpansion
 inoremap {<CR> {<CR>}<C-o>O
@@ -111,13 +116,11 @@ nnoremap <leader><Space> :ls<CR>
 nnoremap <silent> ]b :bnext<CR>
 nnoremap <silent> [b :bprevious<CR>
 
-set wildcharm=<Tab>
-
 " Highlight matching angle brackets
 set matchpairs+=<:>
 
 " Always show statusline
-set laststatus=2
+set laststatus=1
 
 " Disabled for security reasons
 " https://github.com/numirias/security/blob/cf4f74e0c6c6e4bbd6b59823aa1b85fa913e26eb/doc/2019-06-04_ace-vim-neovim.md#readme
@@ -126,7 +129,7 @@ set nomodeline
 " Disable swapfiles
 set noswapfile
 
-" Chage default statusline
+" Change default statusline
 set statusline=%<\ %f\ %m%r%w%=%l\/%-6L\ %3c
 
 " Hide buffers instead of closing them
@@ -236,6 +239,9 @@ set wildignore+=*/.git/*,*/tmp/*,*~,*.swp,*.o
 " Allows visual block over white space
 set virtualedit=block,insert
 
+" Use system clipboard
+set clipboard=unnamedplus
+
 " Strips trailing whitespace and saves cursor position
 function! <SID>StripTrailingWhitespaces()
     " save last search & cursor position
@@ -247,13 +253,16 @@ function! <SID>StripTrailingWhitespaces()
     call cursor(l, c)
 endfunction
 
+command! Strip call <SID>StripTrailingWhitespaces()
+
 nnoremap <silent> <F1> :set rnu!<CR>
 nnoremap <silent> <F2> :set spell!<CR>
 nnoremap <silent> <F3> :TagbarToggle<CR>
-nnoremap <silent> <F12> :call <SID>StripTrailingWhitespaces()<CR>
+nnoremap <silent> <F4> :set wrap!<CR>
 
 augroup Personal
     autocmd!
     autocmd FileType xml,json setlocal nowrap
     autocmd VimResized * wincmd =
+    autocmd BufWritePre * if '<afile>' !~ '^scp:' && !isdirectory(expand('<afile>:h')) | call mkdir(expand('<afile>:h'), 'p') | endif
 augroup END
