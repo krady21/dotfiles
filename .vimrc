@@ -7,11 +7,11 @@ Plug 'justinmk/vim-dirvish'
 Plug 'mhinz/vim-signify'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'preservim/tagbar'
-Plug 'sheerun/vim-polyglot'
 Plug 'tommcdo/vim-exchange'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-sleuth'
 Plug 'tpope/vim-surround'
+Plug 'wellle/targets.vim'
 
 call plug#end()
 
@@ -55,9 +55,8 @@ nmap <silent> <leader>gy <Plug>(coc-type-definition)
 nmap <silent> <leader>gi <Plug>(coc-implementation)
 nmap <silent> <leader>gr <Plug>(coc-references)
 
-" Symbol renaming.
 nmap <leader>rn <Plug>(coc-rename)
-
+inoremap <silent><expr> <c-space> coc#refresh()
 nnoremap <silent> <leader>K :call <SID>show_documentation()<CR>
 
 function! s:show_documentation()
@@ -87,8 +86,8 @@ noremap Y y$
 " Select last pasted text
 nnoremap gp `[v`]
 
-" noremap K {
 " noremap J }
+" noremap K {
 noremap H ^
 noremap L $
 
@@ -97,9 +96,10 @@ command! -nargs=1 Rename try | saveas <args> | call delete(expand('#')) | silent
 
 cnoreabbrev Q q
 cnoreabbrev W w
+cnoreabbrev Wq wq
 
 " Smart buffer delete
-command! Sbd bp\|bd \#
+command! Sbd b#|bd#
 
 " Bracket autoexpansion
 inoremap {<CR> {<CR>}<C-o>O
