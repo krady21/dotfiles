@@ -1,12 +1,15 @@
 call plug#begin('~/.vim/plugged')
 
+Plug 'neovim/nvim-lspconfig'
+Plug 'nvim-lua/completion-nvim'
+Plug 'steelsojka/completion-buffers'
+
 Plug 'gruvbox-community/gruvbox'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 Plug 'justinmk/vim-dirvish'
+Plug 'liuchengxu/vista.vim'
 Plug 'mhinz/vim-signify'
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
-Plug 'preservim/tagbar'
 Plug 'tommcdo/vim-exchange'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-sleuth'
@@ -23,14 +26,38 @@ colorscheme gruvbox
 
 let mapleader=","
 
-let g:tagbar_compact = 1
-let g:tagbar_autofocus = 1
-let g:tagbar_indent = 1
+let g:completion_chain_complete_list = [
+    \{'complete_items': ['lsp', 'buffers']},
+    \{'mode': '<c-p>'},
+    \{'mode': '<c-n>'}
+\]
+
+lua require'lspconfig'.clangd.setup{on_attach=require'completion'.on_attach}
+lua require'lspconfig'.rust_analyzer.setup{on_attach=require'completion'.on_attach}
+lua require'lspconfig'.pyls.setup{on_attach=require'completion'.on_attach}
+lua require'lspconfig'.texlab.setup{on_attach=require'completion'.on_attach}
+
+nnoremap <silent> <leader>gd <cmd>lua vim.lsp.buf.definition()<CR>
+nnoremap <silent> <leader>gD <cmd>lua vim.lsp.buf.declaration()<CR>
+nnoremap <silent> <leader>gy <cmd>lua vim.lsp.buf.type_definition()<CR>
+nnoremap <silent> <leader>gi <cmd>lua vim.lsp.buf.implementation()<CR>
+nnoremap <silent> <leader>gr <cmd>lua vim.lsp.buf.references()<CR>
+nnoremap <silent> K          <cmd>lua vim.lsp.buf.hover()<CR>
+nnoremap <silent> <leader>gw <cmd>lua vim.lsp.buf.workspace_symbol()<CR>
+nnoremap <silent> <leader>rn <cmd>lua vim.lsp.buf.rename()<CR>
+
+nmap <silent> [g <cmd>lua vim.lsp.diagnostic.goto_prev()<CR>
+nmap <silent> ]g <cmd>lua vim.lsp.diagnostic.goto_next()<CR>
+
+let g:vista_sidebar_width = 40
 
 nnoremap <leader>s :Rg<CR>
 nnoremap <leader>f :Files<CR>
 nnoremap <leader>F :GFiles?<CR>
 nnoremap <leader>b :Buffers<CR>
+
+imap <c-x><c-k> <plug>(fzf-complete-word)
+imap <c-x><c-f> <plug>(fzf-complete-path)
 
 let g:fzf_colors =
 \ { 'fg':      ['fg', 'Normal'],
@@ -47,25 +74,8 @@ let g:fzf_colors =
   \ 'spinner': ['fg', 'Label'],
   \ 'header':  ['fg', 'Comment'] }
 
-nmap <silent> [g <Plug>(coc-diagnostic-prev)
-nmap <silent> ]g <Plug>(coc-diagnostic-next)
-
-nmap <silent> <leader>gd <Plug>(coc-definition)
-nmap <silent> <leader>gy <Plug>(coc-type-definition)
-nmap <silent> <leader>gi <Plug>(coc-implementation)
-nmap <silent> <leader>gr <Plug>(coc-references)
-
-nmap <leader>rn <Plug>(coc-rename)
-inoremap <silent><expr> <c-space> coc#refresh()
-nnoremap <silent> <leader>K :call <SID>show_documentation()<CR>
-
-function! s:show_documentation()
-    if (index(['vim','help'], &filetype) >= 0)
-        execute 'h '.expand('<cword>')
-    else
-        call CocAction('doHover')
-    endif
-endfunction
+" default gx is broken in newer versions of vim/nvim
+nmap gx yiW:!xdg-open <cWORD><CR> <C-r>" & <CR><CR>
 
 " Search results centered
 nnoremap <silent> n nzz
@@ -86,8 +96,6 @@ noremap Y y$
 " Select last pasted text
 nnoremap gp `[v`]
 
-" noremap J }
-" noremap K {
 noremap H ^
 noremap L $
 
@@ -115,6 +123,9 @@ nnoremap <leader><leader> <C-^><CR>
 nnoremap <leader><Space> :ls<CR>
 nnoremap <silent> ]b :bnext<CR>
 nnoremap <silent> [b :bprevious<CR>
+
+nnoremap <silent> ]q :cnext<CR>
+nnoremap <silent> [q :cprev<CR>
 
 " Highlight matching angle brackets
 set matchpairs+=<:>
@@ -158,6 +169,9 @@ set shortmess+=c
 
 " Allow backspacing over anything in insert mode
 set backspace=indent,eol,start
+
+" Insert mode completion config
+set completeopt=menuone,noinsert,noselect 
 
 " Use tabs instead of spaces
 set expandtab
@@ -229,7 +243,7 @@ set nrformats-=octal
 set diffopt=vertical,filler,context:3,iwhite
 
 " Enable undo file
-set undodir=~/.vim/undodir
+" set undodir=~/.vim/undodir
 set undofile
 set undolevels=1000
 
@@ -257,7 +271,7 @@ command! Strip call <SID>StripTrailingWhitespaces()
 
 nnoremap <silent> <F1> :set rnu!<CR>
 nnoremap <silent> <F2> :set spell!<CR>
-nnoremap <silent> <F3> :TagbarToggle<CR>
+nnoremap <silent> <F3> :Vista!!<CR>
 nnoremap <silent> <F4> :set wrap!<CR>
 
 augroup Personal
@@ -265,4 +279,5 @@ augroup Personal
     autocmd FileType xml,json setlocal nowrap
     autocmd VimResized * wincmd =
     autocmd BufWritePre * if '<afile>' !~ '^scp:' && !isdirectory(expand('<afile>:h')) | call mkdir(expand('<afile>:h'), 'p') | endif
+    autocmd BufEnter * lua require'completion'.on_attach()
 augroup END
