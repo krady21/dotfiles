@@ -2,13 +2,11 @@ call plug#begin('~/.vim/plugged')
 
 Plug 'neovim/nvim-lspconfig'
 Plug 'nvim-lua/completion-nvim'
-Plug 'steelsojka/completion-buffers'
 
 Plug 'gruvbox-community/gruvbox'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 Plug 'justinmk/vim-dirvish'
-Plug 'liuchengxu/vista.vim'
 Plug 'mhinz/vim-signify'
 Plug 'tommcdo/vim-exchange'
 Plug 'tpope/vim-commentary'
@@ -26,30 +24,38 @@ colorscheme gruvbox
 
 let mapleader=","
 
-let g:completion_chain_complete_list = [
-    \{'complete_items': ['lsp', 'buffers']},
-    \{'mode': '<c-p>'},
-    \{'mode': '<c-n>'}
-\]
+lua << EOF
+local nvim_lsp = require('lspconfig')
+local on_attach = function(client, bufnr)
+  local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+  local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
 
-lua require'lspconfig'.clangd.setup{on_attach=require'completion'.on_attach}
-lua require'lspconfig'.rust_analyzer.setup{on_attach=require'completion'.on_attach}
-lua require'lspconfig'.pyls.setup{on_attach=require'completion'.on_attach}
-lua require'lspconfig'.texlab.setup{on_attach=require'completion'.on_attach}
+  buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+  require'completion'.on_attach()
 
-nnoremap <silent> <leader>gd <cmd>lua vim.lsp.buf.definition()<CR>
-nnoremap <silent> <leader>gD <cmd>lua vim.lsp.buf.declaration()<CR>
-nnoremap <silent> <leader>gy <cmd>lua vim.lsp.buf.type_definition()<CR>
-nnoremap <silent> <leader>gi <cmd>lua vim.lsp.buf.implementation()<CR>
-nnoremap <silent> <leader>gr <cmd>lua vim.lsp.buf.references()<CR>
-nnoremap <silent> K          <cmd>lua vim.lsp.buf.hover()<CR>
-nnoremap <silent> <leader>gw <cmd>lua vim.lsp.buf.workspace_symbol()<CR>
-nnoremap <silent> <leader>rn <cmd>lua vim.lsp.buf.rename()<CR>
+  -- Mappings.
+  local opts = { noremap=true, silent=true }
+  buf_set_keymap('n', '<leader>gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
+  buf_set_keymap('n', '<leader>gy', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+  buf_set_keymap('n', '<leader>gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+  buf_set_keymap('n', '<leader>gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+  buf_set_keymap('n', '<leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+  buf_set_keymap('n', 'K',          '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
+  buf_set_keymap('i', '<C-k>',      '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+  buf_set_keymap('n', '<leader>=',  '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+  buf_set_keymap('n', '<leader>w',  '<cmd>lua vim.lsp.buf.workspace_symbol()<CR>', opts)
+  buf_set_keymap('n', '<leader>e',  '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
+  buf_set_keymap('n', '[g',         '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
+  buf_set_keymap('n', ']g',         '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
+end
 
-nmap <silent> [g <cmd>lua vim.lsp.diagnostic.goto_prev()<CR>
-nmap <silent> ]g <cmd>lua vim.lsp.diagnostic.goto_next()<CR>
+local servers = { "clangd", "rust_analyzer", "pyls", "texlab", "hls", "tsserver" }
+for _, lsp in ipairs(servers) do
+  nvim_lsp[lsp].setup { on_attach = on_attach }
+end
+EOF
 
-let g:vista_sidebar_width = 40
+let g:completion_matching_ignore_case = 0
 
 nnoremap <leader>s :Rg<CR>
 nnoremap <leader>f :Files<CR>
@@ -57,7 +63,6 @@ nnoremap <leader>F :GFiles?<CR>
 nnoremap <leader>b :Buffers<CR>
 
 imap <c-x><c-k> <plug>(fzf-complete-word)
-imap <c-x><c-f> <plug>(fzf-complete-path)
 
 let g:fzf_colors =
 \ { 'fg':      ['fg', 'Normal'],
@@ -100,7 +105,6 @@ noremap H ^
 noremap L $
 
 command! -range Blame echo join(systemlist("git -C " . shellescape(expand('%:p:h')) . " blame -L <line1>,<line2> " . expand('%:t')), "\n")
-command! -nargs=1 Rename try | saveas <args> | call delete(expand('#')) | silent bd # | endtry
 
 cnoreabbrev Q q
 cnoreabbrev W w
@@ -121,8 +125,6 @@ nnoremap <silent> <leader>du :windo diffupdate<CR>
 " Buffer mappings
 nnoremap <leader><leader> <C-^><CR>
 nnoremap <leader><Space> :ls<CR>
-nnoremap <silent> ]b :bnext<CR>
-nnoremap <silent> [b :bprevious<CR>
 
 nnoremap <silent> ]q :cnext<CR>
 nnoremap <silent> [q :cprev<CR>
@@ -256,6 +258,11 @@ set virtualedit=block,insert
 " Use system clipboard
 set clipboard=unnamedplus
 
+if executable('rg')
+    set grepprg=rg\ --no-heading\ --vimgrep
+    set grepformat=%f:%l:%c:%m
+endif
+
 " Strips trailing whitespace and saves cursor position
 function! <SID>StripTrailingWhitespaces()
     " save last search & cursor position
@@ -271,13 +278,11 @@ command! Strip call <SID>StripTrailingWhitespaces()
 
 nnoremap <silent> <F1> :set rnu!<CR>
 nnoremap <silent> <F2> :set spell!<CR>
-nnoremap <silent> <F3> :Vista!!<CR>
-nnoremap <silent> <F4> :set wrap!<CR>
+nnoremap <silent> <F3> :set wrap!<CR>
 
 augroup Personal
     autocmd!
     autocmd FileType xml,json setlocal nowrap
     autocmd VimResized * wincmd =
     autocmd BufWritePre * if '<afile>' !~ '^scp:' && !isdirectory(expand('<afile>:h')) | call mkdir(expand('<afile>:h'), 'p') | endif
-    autocmd BufEnter * lua require'completion'.on_attach()
 augroup END
