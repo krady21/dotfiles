@@ -1,7 +1,7 @@
 call plug#begin('~/.vim/plugged')
 
 Plug 'neovim/nvim-lspconfig'
-Plug 'nvim-lua/completion-nvim'
+Plug 'hrsh7th/nvim-compe'
 
 Plug 'gruvbox-community/gruvbox'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
@@ -11,35 +11,39 @@ Plug 'mhinz/vim-signify'
 Plug 'tommcdo/vim-exchange'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-sleuth'
-Plug 'tpope/vim-surround'
 Plug 'wellle/targets.vim'
 
 call plug#end()
 
-set background=dark
 set termguicolors
 let g:gruvbox_sign_column = 'bg0'
 let g:gruvbox_invert_selection = 0
+let g:gruvbox_contrast_dark = 'soft'
 colorscheme gruvbox
 
 let mapleader=","
 
-lua << EOF
+:lua << EOF
 local nvim_lsp = require('lspconfig')
+vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
+  vim.lsp.diagnostic.on_publish_diagnostics, {
+    underline = false,
+    virtual_text = false
+  }
+)
 local on_attach = function(client, bufnr)
   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
   local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
 
   buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
-  require'completion'.on_attach()
 
   -- Mappings.
   local opts = { noremap=true, silent=true }
   buf_set_keymap('n', '<leader>gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
   buf_set_keymap('n', '<leader>gy', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
-  buf_set_keymap('n', '<leader>gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
   buf_set_keymap('n', '<leader>gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
   buf_set_keymap('n', '<leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+  buf_set_keymap('n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   buf_set_keymap('n', 'K',          '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
   buf_set_keymap('i', '<C-k>',      '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
   buf_set_keymap('n', '<leader>=',  '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
@@ -47,20 +51,23 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', '<leader>e',  '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
   buf_set_keymap('n', '[g',         '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
   buf_set_keymap('n', ']g',         '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
+
+  require'compe'.setup {
+    source = {
+      nvim_lsp = true;
+    };
+  }
 end
 
-local servers = { "clangd", "rust_analyzer", "pyls", "texlab", "hls", "tsserver" }
+local servers = { "clangd", "rust_analyzer", "pyls", "texlab", "hls" }
 for _, lsp in ipairs(servers) do
   nvim_lsp[lsp].setup { on_attach = on_attach }
 end
 EOF
 
-let g:completion_matching_ignore_case = 0
-
 nnoremap <leader>s :Rg<CR>
 nnoremap <leader>f :Files<CR>
 nnoremap <leader>F :GFiles?<CR>
-nnoremap <leader>b :Buffers<CR>
 
 imap <c-x><c-k> <plug>(fzf-complete-word)
 
@@ -126,6 +133,7 @@ nnoremap <silent> <leader>du :windo diffupdate<CR>
 nnoremap <leader><leader> <C-^><CR>
 nnoremap <leader><Space> :ls<CR>
 
+" Quickfix mappings
 nnoremap <silent> ]q :cnext<CR>
 nnoremap <silent> [q :cprev<CR>
 
@@ -173,7 +181,7 @@ set shortmess+=c
 set backspace=indent,eol,start
 
 " Insert mode completion config
-set completeopt=menuone,noinsert,noselect 
+set completeopt=menuone,noinsert,noselect
 
 " Use tabs instead of spaces
 set expandtab
@@ -189,7 +197,7 @@ let &softtabstop = &shiftwidth
 set history=10000
 
 " Wrap text to new line
-set wrap
+set nowrap
 
 " Keep indentation when wrapping
 set breakindent
@@ -258,6 +266,7 @@ set virtualedit=block,insert
 " Use system clipboard
 set clipboard=unnamedplus
 
+cnoreabbrev grep silent grep!
 if executable('rg')
     set grepprg=rg\ --no-heading\ --vimgrep
     set grepformat=%f:%l:%c:%m
@@ -265,7 +274,6 @@ endif
 
 " Strips trailing whitespace and saves cursor position
 function! <SID>StripTrailingWhitespaces()
-    " save last search & cursor position
     let _s=@/
     let l = line(".")
     let c = col(".")
@@ -276,13 +284,14 @@ endfunction
 
 command! Strip call <SID>StripTrailingWhitespaces()
 
-nnoremap <silent> <F1> :set rnu!<CR>
-nnoremap <silent> <F2> :set spell!<CR>
-nnoremap <silent> <F3> :set wrap!<CR>
+nnoremap <silent> <F1> :set invrnu<CR>
+nnoremap <silent> <F2> :set invspell<CR>
+nnoremap <silent> <F3> :set invlist<CR>
+nnoremap <silent> <F4> :set invwrap<CR>
 
 augroup Personal
     autocmd!
-    autocmd FileType xml,json setlocal nowrap
+    autocmd FileType cpp,java setlocal commentstring=//\ %s
     autocmd VimResized * wincmd =
     autocmd BufWritePre * if '<afile>' !~ '^scp:' && !isdirectory(expand('<afile>:h')) | call mkdir(expand('<afile>:h'), 'p') | endif
 augroup END
