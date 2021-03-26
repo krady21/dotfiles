@@ -50,7 +50,7 @@ alias ....='cd ../../../'
 
 alias vi='nvim'
 alias vim='nvim'
-alias vimrc='vim ~/.vimrc'
+alias vimrc='vim ~/.config/nvim/init.vim'
 alias bashrc='vim ~/.bashrc'
 alias tconf='vim ~/.tmux.conf'
 
@@ -68,7 +68,7 @@ fi
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
-export FZF_DEFAULT_COMMAND='fd --type file'
+export FZF_DEFAULT_COMMAND='fd --type f  --follow --no-ignore'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
 export VISUAL=vim
