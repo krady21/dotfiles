@@ -5,54 +5,42 @@ packadd! targets.vim
 packadd! vim-commentary
 packadd! vim-dirvish
 packadd! vim-sleuth
+packadd! vim-surround
 
 set statusline=%<\ %f\ %m%r%w%=%l\/%-6L\ %3c
 set laststatus=1
 set hidden
 set nomodeline
-set backspace=indent,eol,start
 set noswapfile
 set matchpairs+=<:>
-set autoread
 set updatetime=50
 set splitbelow
 set splitright
-set encoding=utf-8
 set shortmess+=c
 set completeopt=menuone,noinsert,noselect
-set history=10000
 set nowrap
 set breakindent
 set showbreak=↳
-set autoindent
 set magic
 set number
 set relativenumber
-set numberwidth=4
-set ruler
-set wildmenu
 set lazyredraw
-set noerrorbells
-set novisualbell
 set nohlsearch
 set report=0
 set smartcase
 set ignorecase
 set incsearch
 set nrformats+=alpha
-set nrformats-=octal
 set dictionary=/usr/share/dict/words
-set diffopt+=vertical,context:3,iwhite,indent-heuristic,algorithm:patience
+set diffopt+=context:3,indent-heuristic,algorithm:patience
 set undofile
-set undolevels=1000
 set wildignore+=*/.git/*,*/tmp/*,*~,*.swp,*.o
 set virtualedit=block,insert
 set clipboard=unnamedplus
 set listchars=tab:>\ ,trail:∙,nbsp:•
 set expandtab
-set smarttab
 set shiftwidth=4
-let &softtabstop = &shiftwidth
+set softtabstop=4
 set rtp+=$HOME/.fzf
 
 set background=dark
@@ -77,9 +65,6 @@ inoremap [<CR> [<CR>]<C-o>O
 nnoremap <leader><leader> <C-^><CR>
 nnoremap <leader><Space> :ls<CR>
 
-xnoremap < <gv
-xnoremap > >gv
-
 noremap Y y$
 
 nnoremap <silent> n nzz
@@ -100,15 +85,10 @@ nnoremap <silent> <F2> :set invspell<CR>
 nnoremap <silent> <F3> :set invlist<CR>
 nnoremap <silent> <F4> :set invwrap<CR>
 
-nmap gx yiW:!xdg-open <cWORD><CR> <C-r>" & <CR><CR>
-
-function! <SID>StripTrailingWhitespaces()
-  let _s=@/
-  let l = line(".")
-  let c = col(".")
-  %s/\s\+$//e
-  let @/=_s
-  call cursor(l, c)
+function! StripTrailingWhitespace()
+  let l:save = winsaveview()
+  keeppatterns %s/\s\+$//e
+  call winrestview(l:save)
 endfunction
 
 command! Strip call <SID>StripTrailingWhitespaces()
@@ -122,15 +102,6 @@ endif
 nnoremap <leader>s :Rg<CR>
 nnoremap <leader>f :Files<CR>
 nnoremap <leader>F :GFiles?<CR>
-
-let g:loaded_compe_snippets_nvim=0
-let g:loaded_compe_treesitter=0
-let g:loaded_compe_spell=0
-let g:loaded_compe_path=0
-let g:loaded_compe_nvim_lua=0
-let g:loaded_compe_calc=0
-let g:loaded_compe_tags=0
-let g:loaded_compe_emoji=0
 
 :lua << EOF
 local nvim_lsp = require('lspconfig')
@@ -176,8 +147,8 @@ end
 EOF
 
 augroup Personal
-    autocmd!
-    autocmd FileType cpp,java setlocal commentstring=//\ %s
-    autocmd VimResized * wincmd =
-    autocmd BufWritePre * if '<afile>' !~ '^scp:' && !isdirectory(expand('<afile>:h')) | call mkdir(expand('<afile>:h'), 'p') | endif
+  autocmd!
+  autocmd FileType cpp,java setlocal commentstring=//\ %s
+  autocmd BufWritePre * if '<afile>' !~ '^scp:' && !isdirectory(expand('<afile>:h')) | call mkdir(expand('<afile>:h'), 'p') | endif
+  autocmd TextYankPost * silent! lua vim.highlight.on_yank {timeout=200}
 augroup END
