@@ -1,17 +1,45 @@
 [user]
-	email = bogdangrigoruta@gmail.com
-	name = Bogdan Grigoruta
-	username = krady21
-[core]
-	editor = nvim
-[merge]
-	tool = nvim -d
-[alias]
-	a = add
-	b = branch
-	c = commit
-	d = diff
-	l = log
-	lg = log --oneline --graph --decorate
-	s = status
+    email = bogdangrigoruta@gmail.com
+    name = Bogdan Grigoruță
+    username = krady21
 
+[core]
+    editor = nvim
+
+[diff]
+    tool = vimdiff3
+    algorithm = patience
+
+[difftool.vimdiff3]
+    path = nvim
+
+[merge]
+    tool = vimdiff3
+
+[mergetool.vimdiff3]
+    path = nvim
+
+[fetch]
+    prune = true
+
+[pull]
+    rebase = true
+
+[alias]
+    a = add --verbose
+    aa = add --all --verbose
+    b = branch
+    c = commit --verbose
+    ca = commit --verbose --amend
+    co = checkout
+    d = diff
+    f = fetch
+    l = log --oneline --graph --decorate
+    last = log -1 HEAD --stat
+    r = reset
+    rh = reset --hard
+    ri = rebase -i
+    ra = rebase --abort
+    ra = rebase --continue
+    s = status
+    su = submodule update --init --recursive
