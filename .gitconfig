@@ -22,24 +22,13 @@
 [fetch]
     prune = true
 
-[pull]
-    rebase = true
-
 [alias]
     a = add --verbose
     aa = add --all --verbose
-    b = branch
     c = commit --verbose
     ca = commit --verbose --amend
     co = checkout
-    d = diff
-    f = fetch
     l = log --oneline --graph --decorate
     last = log -1 HEAD --stat
-    r = reset
-    rh = reset --hard
-    ri = rebase -i
-    ra = rebase --abort
-    ra = rebase --continue
     s = status
     su = submodule update --init --recursive

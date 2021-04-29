@@ -171,8 +171,7 @@ hi! link Float        String
 hi! link Character    String
 hi! link ModeMsg      Todo
 hi! link MoreMsg      ModeMsg
-
-hi! NonText guifg=bg
+hi! link NonText      Comment
 
 " ============================================================================
 " Specific Languages
@@ -191,10 +190,6 @@ hi! link cssMedia      Notice
 hi! link cssColor      Number
 hi! link cssTagName    Normal
 hi! link cssImportant  Notice
-
-" CtrlP
-hi! link CtrlPBufferHid Todo
-hi! link CtrlPBufferPath Todo
 
 call s:Color("CtrlPMode1", s:white, s:gray1, s:t_white, s:t_gray1, "bold")
 
@@ -216,18 +211,9 @@ hi! link DiffAdd    diffAdded
 hi! link DiffDelete diffRemoved
 hi! link DiffText   diffLine
 
-" Dot (GraphViz)
-hi! link dotKeyChar Normal
-
 " Git commits
 hi! link gitCommitSummary  String
 hi! link gitCommitOverflow ErrorMsg
-
-" HAML
-hi! link hamlId      Title
-hi! link hamlClass   Directory
-hi! link htmlArg     Normal
-hi! link hamlDocType Comment
 
 " HTML
 hi! link htmlLink           Directory
@@ -363,24 +349,6 @@ hi! link TabLineFill StatusLine
 
 call s:Color("TabLineSel", s:white, s:gray2, s:t_white, s:t_gray2, "bold")
 
-" Neovim terminal colors
-let g:terminal_color_0 = s:black1
-let g:terminal_color_1 = s:red
-let g:terminal_color_2 = s:green
-let g:terminal_color_3 = s:yellow
-let g:terminal_color_4 = s:blue
-let g:terminal_color_5 = s:pink
-let g:terminal_color_6 = s:turqoise
-let g:terminal_color_7 = s:white
-let g:terminal_color_8 = s:black1
-let g:terminal_color_9 = s:red
-let g:terminal_color_10 = s:green
-let g:terminal_color_11 = s:yellow
-let g:terminal_color_12 = s:blue
-let g:terminal_color_13 = s:pink
-let g:terminal_color_14 = s:turqoise
-let g:terminal_color_15 = s:white
-
 " Spell checking
 call s:Color("SpellBad", s:red, "NONE", s:t_red, "NONE", "underline")
 
@@ -391,8 +359,8 @@ hi! link LspDiagnosticsDefaultError Keyword
 hi! link LspDiagnosticsSignWarning Function
 hi! link LspDiagnosticsDefaultWarning Function
 
-hi! link LspDiagnosticsSignInformation Normal
-hi! link LspDiagnosticsDefaultInformation Normal
+hi! link LspDiagnosticsSignInformation Include
+hi! link LspDiagnosticsDefaultInformation Include
 
-hi! link LspDiagnosticsSignHint rustAttribute
-hi! link LspDiagnosticsDefaultHint rustAttribute
+hi! link LspDiagnosticsSignHint Include
+hi! link LspDiagnosticsDefaultHint Include
