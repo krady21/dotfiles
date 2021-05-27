@@ -25,6 +25,7 @@
 [alias]
     a = add --verbose
     aa = add --all --verbose
+    b = branch
     c = commit --verbose
     ca = commit --verbose --amend
     co = checkout
