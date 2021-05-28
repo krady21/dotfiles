@@ -58,8 +58,6 @@ let s:visual   = "#665c54"
 " gruvbox orange
 let s:orange2  = "#fe8019"
 
-
-
 " ============================================================================
 " Terminal Colors
 "
@@ -114,7 +112,7 @@ call s:Color("Cursor", "NONE", s:gray2, "NONE", s:t_gray2)
 call s:Color("Visual", "NONE", s:visual, "NONE", s:t_gray2)
 call s:Color("CursorLine", "NONE", s:gray2, "NONE", s:t_gray2)
 call s:Color("Normal", s:white, s:gray1, s:t_white, s:t_gray1)
-call s:Color("Search", s:yellow, "NONE", s:t_yellow, "NONE", "bold")
+call s:Color("Search", s:black1, s:yellow, "NONE", s:t_yellow)
 call s:Color("Title", s:white, "NONE", s:t_white, "NONE", "bold")
 
 call s:Color("LineNr", s:gray4, "NONE", s:t_gray4, "NONE")
@@ -191,8 +189,6 @@ hi! link cssColor      Number
 hi! link cssTagName    Normal
 hi! link cssImportant  Notice
 
-call s:Color("CtrlPMode1", s:white, s:gray1, s:t_white, s:t_gray1, "bold")
-
 " D
 hi! link dDebug        Notice
 hi! link dOperator     Operator
@@ -201,15 +197,20 @@ hi! link dAnnotation   Directory
 hi! link dAttribute    dAnnotation
 
 " Diffs
-hi! link diffFile    WarningMsg
-hi! link diffLine    Number
-hi! link diffAdded   String
-hi! link diffRemoved Keyword
 
-hi! link DiffChange Notice
-hi! link DiffAdd    diffAdded
-hi! link DiffDelete diffRemoved
-hi! link DiffText   diffLine
+call s:Color("DiffDelete", s:gray1, s:red, s:t_gray1, s:t_red)
+call s:Color("DiffAdd", s:gray1, s:green, s:t_gray1, s:t_green)
+call s:Color("DiffChange", s:gray1, s:turqoise, s:t_gray1, s:t_turqoise)
+call s:Color("DiffText", s:gray1, s:yellow, s:t_gray1, s:t_yellow)
+" hi! link diffFile    WarningMsg
+" hi! link diffLine    Number
+" hi! link diffAdded   String
+" hi! link diffRemoved Keyword
+
+" hi! link DiffChange Notice
+" hi! link DiffAdd    diffAdded
+" hi! link DiffDelete diffRemoved
+" hi! link DiffText   diffLine
 
 " Git commits
 hi! link gitCommitSummary  String
@@ -350,7 +351,7 @@ hi! link TabLineFill StatusLine
 call s:Color("TabLineSel", s:white, s:gray2, s:t_white, s:t_gray2, "bold")
 
 " Spell checking
-call s:Color("SpellBad", s:red, "NONE", s:t_red, "NONE", "underline")
+call s:Color("SpellBad", "NONE", "NONE", "NONE", "NONE", "underline")
 
 " LSP
 hi! link LspDiagnosticsSignError Keyword
@@ -362,5 +363,5 @@ hi! link LspDiagnosticsDefaultWarning Function
 hi! link LspDiagnosticsSignInformation Include
 hi! link LspDiagnosticsDefaultInformation Include
 
-hi! link LspDiagnosticsSignHint Include
-hi! link LspDiagnosticsDefaultHint Include
+hi! link LspDiagnosticsSignHint String
+hi! link LspDiagnosticsDefaultHint String
