@@ -2,20 +2,17 @@ local g, o, w, b = vim.g, vim.o, vim.wo, vim.bo
 local cmd, fn = vim.cmd, vim.fn
 local map = vim.api.nvim_set_keymap
 
-local paq = require'paq-nvim'.paq
-
-paq {'savq/paq-nvim'}
-paq {'neovim/nvim-lspconfig'}
-paq {'hrsh7th/nvim-compe'}
-paq {'junegunn/fzf', run = fn['fzf#install']}
-paq {'junegunn/fzf.vim'}
-paq {'justinmk/vim-dirvish'}
-paq {'tommcdo/vim-exchange'}
-paq {'tpope/vim-commentary'}
-paq {'tpope/vim-repeat'}
-paq {'tpope/vim-sleuth'}
-paq {'tpope/vim-surround'}
-paq {'wellle/targets.vim'}
+cmd('packadd! fzf')
+cmd('packadd! fzf.vim')
+cmd('packadd! nvim-compe')
+cmd('packadd! nvim-lspconfig')
+cmd('packadd! targets.vim')
+cmd('packadd! vim-commentary')
+cmd('packadd! vim-dirvish')
+cmd('packadd! vim-exchange')
+cmd('packadd! vim-repeat')
+cmd('packadd! vim-sleuth')
+cmd('packadd! vim-surround')
 
 g.mapleader = ' '
 w.wrap = false
@@ -31,10 +28,6 @@ o.report = 0
 o.shiftwidth = 4
 o.softtabstop = 4
 o.expandtab = true
-o.hidden = true
-b.undofile = true
-b.swapfile = false
-b.modeline = false
 o.splitbelow = true
 o.splitright = true
 o.lazyredraw = true
@@ -42,6 +35,11 @@ o.hlsearch = false
 o.incsearch = true
 o.smartcase = true
 o.ignorecase = true
+o.hidden = true
+b.undofile = true
+b.swapfile = false
+b.modeline = false
+b.nrformats = 'bin,hex,alpha'
 o.virtualedit = 'block,insert'
 o.clipboard = 'unnamedplus'
 o.inccommand = 'nosplit'
@@ -51,7 +49,6 @@ o.listchars = 'tab:| ,trail:∙,nbsp:•'
 o.dictionary = '/usr/share/dict/words'
 o.wildignore = '*/.git/*,*/tmp/*,*.swp,*.o,*.pyc'
 o.diffopt = 'internal,filler,closeoff,indent-heuristic,algorithm:patience'
-b.nrformats = 'bin,hex,alpha'
 o.shortmess = o.shortmess .. 'c'
 
 o.termguicolors = true
@@ -108,6 +105,14 @@ augroup Personal
 augroup END
 ]])
 
+vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
+  vim.lsp.diagnostic.on_publish_diagnostics, {
+    underline = false,
+    signs = true,
+    virtual_text = false,
+  }
+)
+
 local on_attach = function(client, bufnr)
   local function buf_map(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
   local function buf_opt(...) vim.api.nvim_buf_set_option(bufnr, ...) end
@@ -137,14 +142,6 @@ local on_attach = function(client, bufnr)
   buf_map('n', '[g',         '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
   buf_map('n', ']g',         '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
 end
-
-vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
-  vim.lsp.diagnostic.on_publish_diagnostics, {
-    underline = false,
-    signs = true,
-    virtual_text = false,
-  }
-)
 
 local nvim_lsp = require('lspconfig')
 local servers = { "clangd", "rust_analyzer", "pyright", "texlab", "hls", "gopls" }
