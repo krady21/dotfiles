@@ -26,7 +26,7 @@ if exists("syntax_on")
   syntax reset
 end
 
-let colors_name = "happy_hacking"
+let g:colors_name = "happy_hacking"
 
 " ============================================================================
 " GUI Colors
@@ -112,7 +112,7 @@ call s:Color("Cursor", "NONE", s:gray2, "NONE", s:t_gray2)
 call s:Color("Visual", "NONE", s:visual, "NONE", s:t_gray2)
 call s:Color("CursorLine", "NONE", s:gray2, "NONE", s:t_gray2)
 call s:Color("Normal", s:white, s:gray1, s:t_white, s:t_gray1)
-call s:Color("Search", s:black1, s:yellow, "NONE", s:t_yellow)
+call s:Color("Search", s:gray1, s:orange2, "NONE", s:t_yellow)
 call s:Color("Title", s:white, "NONE", s:t_white, "NONE", "bold")
 
 call s:Color("LineNr", s:gray4, "NONE", s:t_gray4, "NONE")
@@ -141,7 +141,7 @@ call s:Color("Regexp", s:orange, "NONE", s:t_orange, "NONE")
 call s:Color("Macro", s:orange, "NONE", s:t_orange, "NONE")
 call s:Color("Function", s:yellow, "NONE", s:t_yellow, "NONE")
 call s:Color("Notice", s:yellow, "NONE", s:t_yellow, "NONE")
-call s:Color("IncSearch", s:gray1, s:orange2, s:t_gray1, s:t_yellow)
+call s:Color("IncSearch", s:gray1, s:orange2, s:t_gray1, s:t_orange)
 call s:Color("Include", s:white, "NONE", s:t_white, "NONE")
 call s:Color("Delimiter", s:white, "NONE", s:t_white, "NONE")
 
@@ -202,15 +202,13 @@ call s:Color("DiffDelete", s:gray1, s:red, s:t_gray1, s:t_red)
 call s:Color("DiffAdd", s:gray1, s:green, s:t_gray1, s:t_green)
 call s:Color("DiffChange", s:gray1, s:turqoise, s:t_gray1, s:t_turqoise)
 call s:Color("DiffText", s:gray1, s:yellow, s:t_gray1, s:t_yellow)
-" hi! link diffFile    WarningMsg
-" hi! link diffLine    Number
-" hi! link diffAdded   String
-" hi! link diffRemoved Keyword
 
-" hi! link DiffChange Notice
-" hi! link DiffAdd    diffAdded
-" hi! link DiffDelete diffRemoved
-" hi! link DiffText   diffLine
+call s:Color("diffRemoved", s:gray1, s:red, s:t_red, "NONE")
+call s:Color("diffAdded", s:gray1, s:green, s:t_green, "NONE")
+call s:Color("diffChanged", s:turqoise, "NONE", s:t_turqoise, "NONE")
+call s:Color("diffFile", s:orange, "NONE", s:t_orange, "NONE")
+call s:Color("diffNewFile", s:yellow, "NONE", s:t_yellow, "NONE")
+call s:Color("diffLine", s:turqoise, "NONE", s:t_turqoise, "NONE")
 
 " Git commits
 hi! link gitCommitSummary  String
@@ -348,10 +346,11 @@ hi! link WildMenu PmenuSel
 hi! link TabLine     StatusLine
 hi! link TabLineFill StatusLine
 
-call s:Color("TabLineSel", s:white, s:gray2, s:t_white, s:t_gray2, "bold")
+call s:Color("TabLineSel", s:white, s:gray3, s:t_white, s:t_gray3)
 
 " Spell checking
-call s:Color("SpellBad", "NONE", "NONE", "NONE", "NONE", "underline")
+call s:Color("SpellBad", "NONE", "NONE", "NONE", "NONE", "undercurl")
+hi! SpellBad guisp=NONE
 
 " LSP
 hi! link LspDiagnosticsSignError Keyword
@@ -363,5 +362,5 @@ hi! link LspDiagnosticsDefaultWarning Function
 hi! link LspDiagnosticsSignInformation Include
 hi! link LspDiagnosticsDefaultInformation Include
 
-hi! link LspDiagnosticsSignHint String
-hi! link LspDiagnosticsDefaultHint String
+hi! link LspDiagnosticsSignHint Include
+hi! link LspDiagnosticsDefaultHint Include

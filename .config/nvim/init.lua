@@ -1,102 +1,108 @@
-local g, o, w, b = vim.g, vim.o, vim.wo, vim.bo
-local cmd, fn = vim.cmd, vim.fn
-local map = vim.api.nvim_set_keymap
+local install_path = vim.fn.stdpath('data') .. '/site/pack/paqs/start/paq-nvim'
 
-cmd('packadd! fzf')
-cmd('packadd! fzf.vim')
-cmd('packadd! nvim-compe')
-cmd('packadd! nvim-lspconfig')
-cmd('packadd! targets.vim')
-cmd('packadd! vim-commentary')
-cmd('packadd! vim-dirvish')
-cmd('packadd! vim-exchange')
-cmd('packadd! vim-repeat')
-cmd('packadd! vim-sleuth')
-cmd('packadd! vim-surround')
-
-g.mapleader = ' '
-w.wrap = false
-w.number = true
-w.relativenumber = true
-w.breakindent = true
-w.foldenable = false
-w.foldmethod = 'indent'
-o.path = '.,,**'
-o.showbreak = '↳'
-o.laststatus = 1
-o.report = 0
-o.shiftwidth = 4
-o.softtabstop = 4
-o.expandtab = true
-o.splitbelow = true
-o.splitright = true
-o.lazyredraw = true
-o.hlsearch = false
-o.incsearch = true
-o.smartcase = true
-o.ignorecase = true
-o.hidden = true
-b.undofile = true
-b.swapfile = false
-b.modeline = false
-b.nrformats = 'bin,hex,alpha'
-o.virtualedit = 'block,insert'
-o.clipboard = 'unnamedplus'
-o.inccommand = 'nosplit'
-o.completeopt = 'menuone,noselect'
-o.statusline = '%< %f %m%r%w%=%l/%-6L %3c '
-o.listchars = 'tab:| ,trail:∙,nbsp:•'
-o.dictionary = '/usr/share/dict/words'
-o.wildignore = '*/.git/*,*/tmp/*,*.swp,*.o,*.pyc'
-o.diffopt = 'internal,filler,closeoff,indent-heuristic,algorithm:patience'
-o.shortmess = o.shortmess .. 'c'
-
-o.termguicolors = true
-g.colors_name = 'happy_hacking'
-
-if fn['executable']('rg') then
-  o.grepprg = 'rg --no-heading --vimgrep'
-  o.grepformat = '%f:%l:%c:%m'
+if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
+  vim.fn.system({'git', 'clone', 'https://github.com/savq/paq-nvim.git', install_path})
 end
 
-map('', 'H', '^', {noremap = true})
-map('', 'L', '$', {noremap = true})
+local paq = require'paq-nvim'.paq
 
-map('i', '{<CR>', '{<CR>}<C-o>O', {noremap = true})
-map('i', '[<CR>', '[<CR>]<C-o>O', {noremap = true})
+paq {'savq/paq-nvim'}
+paq {'neovim/nvim-lspconfig'}
+paq {'hrsh7th/nvim-compe'}
+paq {'junegunn/fzf', run = vim.fn['fzf#install']}
+paq {'junegunn/fzf.vim'}
+paq {'justinmk/vim-dirvish'}
+paq {'tommcdo/vim-exchange'}
+paq {'tpope/vim-commentary'}
+paq {'tpope/vim-repeat'}
+paq {'tpope/vim-sleuth'}
+paq {'tpope/vim-surround'}
+paq {'wellle/targets.vim'}
 
-map('n', 'Y', 'y$', {noremap = true})
-map('n', 'gp', '`[v`]', {noremap = true})
+vim.opt.breakindent = true
+vim.opt.clipboard = 'unnamedplus'
+vim.opt.completeopt = 'menuone,noselect'
+vim.opt.dictionary = '/usr/share/dict/words'
+vim.opt.diffopt = vim.opt.diffopt + 'indent-heuristic,algorithm:histogram'
+vim.opt.expandtab = true
+vim.opt.foldenable = false
+vim.opt.foldmethod = 'indent'
+vim.opt.hidden = true
+vim.opt.hlsearch = false
+vim.opt.ignorecase = true
+vim.opt.inccommand = 'nosplit'
+vim.opt.incsearch = true
+vim.opt.laststatus = 1
+vim.opt.lazyredraw = true
+vim.opt.listchars = 'tab:| ,trail:∙,nbsp:•'
+vim.opt.modeline = false
+vim.opt.nrformats = 'bin,hex,alpha'
+vim.opt.number = true
+vim.opt.path = '.,,**'
+vim.opt.relativenumber = true
+vim.opt.report = 0
+vim.opt.shiftwidth = 4
+vim.opt.shortmess = vim.opt.shortmess + 'c'
+vim.opt.showbreak = '↳'
+vim.opt.smartcase = true
+vim.opt.softtabstop = 4
+vim.opt.splitbelow = true
+vim.opt.splitright = true
+vim.opt.statusline = '%< %f %m%r%w%=%l/%-6L %3c '
+vim.opt.swapfile = false
+vim.opt.termguicolors = true
+vim.opt.undofile = true
+vim.opt.virtualedit = 'block,insert'
+vim.opt.wildignore = '*/.git/*,*/tmp/*,*.swp,*.o,*.pyc'
+vim.opt.wrap = false
 
-map('n', '<leader><leader>', '<C-^>', {noremap = true})
+vim.g.mapleader = ' '
+vim.g.colors_name = 'happy_hacking'
 
-map('n', '<C-j>', ':cnext<CR>', {noremap = true, silent = true})
-map('n', '<C-k>', ':cprev<CR>', {noremap = true, silent = true})
+if vim.fn['executable']('rg') then
+  vim.opt.grepprg = 'rg --no-heading --vimgrep'
+  vim.opt.grepformat = '%f:%l:%c:%m'
+end
 
-map('n', '<leader>dt', ':windo diffthis<CR>', {noremap = true, silent = true})
-map('n', '<leader>do', ':windo diffoff<CR>', {noremap = true, silent = true})
+vim.api.nvim_set_keymap('', 'H', '^', {noremap = true})
+vim.api.nvim_set_keymap('', 'L', '$', {noremap = true})
 
-map('n', '<F1>', ':set invrnu<CR>', {noremap = true, silent = true})
-map('n', '<F2>', ':set invspell<CR>', {noremap = true, silent = true})
-map('n', '<F3>', ':set invwrap<CR>', {noremap = true, silent = true})
-map('n', '<F4>', ':set invlist<CR>', {noremap = true, silent = true})
+vim.api.nvim_set_keymap('i', '{<CR>', '{<CR>}<C-o>O', {noremap = true})
+vim.api.nvim_set_keymap('i', '[<CR>', '[<CR>]<C-o>O', {noremap = true})
 
-map('n', '<leader>f', ':Files<CR>', {noremap = true})
-map('n', '<leader>F', ':GFiles<CR>', {noremap = true})
-map('n', '<leader>G', ':GFiles?<CR>', {noremap = true})
-map('n', '<leader>h', ':History<CR>', {noremap = true})
-map('n', '<leader>s', ':Rg<CR>', {noremap = true})
+vim.api.nvim_set_keymap('n', 'Y', 'y$', {noremap = true})
+vim.api.nvim_set_keymap('n', 'gp', '`[v`]', {noremap = true})
 
-cmd('cnoreabbrev Q q')
-cmd('cnoreabbrev W w')
-cmd('cnoreabbrev Wq wq')
-cmd('cnoreabbrev Qa qa')
+vim.api.nvim_set_keymap('n', '<leader><leader>', '<C-^>', {noremap = true})
 
-cmd([[command! Whitespace let b:save = winsaveview() | keeppatterns %s/\s\+$//e | call winrestview(b:save)]])
-cmd([[command! -range Blame echo join(systemlist("git -C " . shellescape(expand('%:p:h')) . " blame -L <line1>,<line2> " . expand('%:t')), "\n")]])
-cmd([[command! Sbd b#|bd#]])
+vim.api.nvim_set_keymap('n', '<C-j>', ':cnext<CR>', {noremap = true, silent = true})
+vim.api.nvim_set_keymap('n', '<C-k>', ':cprev<CR>', {noremap = true, silent = true})
 
-cmd([[
+vim.api.nvim_set_keymap('n', '<leader>dt', ':windo diffthis<CR>', {noremap = true, silent = true})
+vim.api.nvim_set_keymap('n', '<leader>do', ':windo diffoff<CR>', {noremap = true, silent = true})
+vim.api.nvim_set_keymap('n', '<leader>du', ':windo diffupdate<CR>', {noremap = true, silent = true})
+
+vim.api.nvim_set_keymap('n', '<F1>', ':set invrnu<CR>', {noremap = true, silent = true})
+vim.api.nvim_set_keymap('n', '<F2>', ':set invspell<CR>', {noremap = true, silent = true})
+vim.api.nvim_set_keymap('n', '<F3>', ':set invwrap<CR>', {noremap = true, silent = true})
+vim.api.nvim_set_keymap('n', '<F4>', ':set invlist<CR>', {noremap = true, silent = true})
+
+vim.api.nvim_set_keymap('n', '<leader>f', ':Files<CR>', {noremap = true})
+vim.api.nvim_set_keymap('n', '<leader>F', ':GFiles<CR>', {noremap = true})
+vim.api.nvim_set_keymap('n', '<leader>G', ':GFiles?<CR>', {noremap = true})
+vim.api.nvim_set_keymap('n', '<leader>h', ':History<CR>', {noremap = true})
+vim.api.nvim_set_keymap('n', '<leader>s', ':Rg<CR>', {noremap = true})
+
+vim.cmd('cnoreabbrev Q q')
+vim.cmd('cnoreabbrev W w')
+vim.cmd('cnoreabbrev Wq wq')
+vim.cmd('cnoreabbrev Qa qa')
+
+vim.cmd([[command! Whitespace let b:save = winsaveview() | keeppatterns %s/\s\+$//e | call winrestview(b:save)]])
+vim.cmd([[command! -range Blame echo join(systemlist("git -C " . shellescape(expand('%:p:h')) . " blame -L <line1>,<line2> " . expand('%:t')), "\n")]])
+vim.cmd([[command! Sbd b#|bd#]])
+
+vim.cmd([[
 augroup Personal
   autocmd!
   autocmd FileType cpp,java setlocal commentstring=//\ %s
@@ -114,33 +120,26 @@ vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
 )
 
 local on_attach = function(client, bufnr)
-  local function buf_map(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-  local function buf_opt(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+  require('compe').setup({ preselect = 'disable', source = { nvim_lsp = true } }, bufnr)
 
-  require('compe').setup({
-    preselect = 'disable';
-    source = {
-      nvim_lsp = true;
-    };
-  }, bufnr)
-
-  buf_opt('omnifunc', 'v:lua.vim.lsp.omnifunc')
-  cmd('setlocal signcolumn=yes')
+  vim.cmd('setlocal signcolumn=yes')
+  vim.opt_local.omnifunc = 'v:lua.vim.lsp.omnifunc'
+  -- vim.opt_local.signcolumn = 'yes'
 
   local opts = { noremap=true, silent=true }
-  buf_map('n', '<leader>gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
-  buf_map('n', '<leader>gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-  buf_map('n', '<leader>gy', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
-  buf_map('n', '<leader>gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-  buf_map('n', '<leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-  buf_map('n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
-  buf_map('n', 'K',          '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
-  buf_map('i', '<C-k>',      '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-  buf_map('n', '<leader>=',  '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
-  buf_map('n', '<leader>w',  '<cmd>lua vim.lsp.buf.workspace_symbol()<CR>', opts)
-  buf_map('n', '<leader>e',  '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
-  buf_map('n', '[g',         '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
-  buf_map('n', ']g',         '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gy', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K',          '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'i', '<C-k>',      '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>=',  '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>w',  '<cmd>lua vim.lsp.buf.workspace_symbol()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>e',  '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '[g',         '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', ']g',         '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
 end
 
 local nvim_lsp = require('lspconfig')
