@@ -9,11 +9,13 @@ local paq = require'paq-nvim'.paq
 paq {'savq/paq-nvim'}
 paq {'neovim/nvim-lspconfig'}
 paq {'hrsh7th/nvim-compe'}
+
 paq {'junegunn/fzf', run = vim.fn['fzf#install']}
 paq {'junegunn/fzf.vim'}
 paq {'justinmk/vim-dirvish'}
 paq {'tommcdo/vim-exchange'}
 paq {'tpope/vim-commentary'}
+paq {'tpope/vim-fugitive', opt = true}
 paq {'tpope/vim-repeat'}
 paq {'tpope/vim-sleuth'}
 paq {'tpope/vim-surround'}
@@ -25,8 +27,6 @@ vim.opt.completeopt = 'menuone,noselect'
 vim.opt.dictionary = '/usr/share/dict/words'
 vim.opt.diffopt = vim.opt.diffopt + 'indent-heuristic,algorithm:histogram'
 vim.opt.expandtab = true
-vim.opt.foldenable = false
-vim.opt.foldmethod = 'indent'
 vim.opt.hidden = true
 vim.opt.hlsearch = false
 vim.opt.ignorecase = true
@@ -57,7 +57,7 @@ vim.opt.wildignore = '*/.git/*,*/tmp/*,*.swp,*.o,*.pyc'
 vim.opt.wrap = false
 
 vim.g.mapleader = ' '
-vim.g.colors_name = 'happy_hacking'
+vim.g.colors_name = 'paper'
 
 if vim.fn['executable']('rg') then
   vim.opt.grepprg = 'rg --no-heading --vimgrep'
@@ -99,7 +99,6 @@ vim.cmd('cnoreabbrev Wq wq')
 vim.cmd('cnoreabbrev Qa qa')
 
 vim.cmd([[command! Whitespace let b:save = winsaveview() | keeppatterns %s/\s\+$//e | call winrestview(b:save)]])
-vim.cmd([[command! -range Blame echo join(systemlist("git -C " . shellescape(expand('%:p:h')) . " blame -L <line1>,<line2> " . expand('%:t')), "\n")]])
 vim.cmd([[command! Sbd b#|bd#]])
 
 vim.cmd([[
@@ -124,7 +123,6 @@ local on_attach = function(client, bufnr)
 
   vim.cmd('setlocal signcolumn=yes')
   vim.opt_local.omnifunc = 'v:lua.vim.lsp.omnifunc'
-  -- vim.opt_local.signcolumn = 'yes'
 
   local opts = { noremap=true, silent=true }
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)

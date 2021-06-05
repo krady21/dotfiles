@@ -1,0 +1,4 @@
+include light-256.theme
+data.location=~/.local/share/task
+#hooks.location=~/.config/task/hooks
+

@@ -27,40 +27,8 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
-. ~/git-prompt.sh
 export GIT_PS1_SHOWDIRTYSTATE=1
 export PS1='\[\033[01;32m\]\u@\h\[\033[00m\] \[\033[01;33m\]\w\[\033[00m\]\[\033[01;34m\]$(__git_ps1 " (%s)")\[\033[00m\] \n\\$ \[$(tput sgr0)\]'
-
-# enable color support of ls and also add handy aliases
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='ls --color=auto'
-    alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
-fi
-
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
-
-alias ..='cd ..'
-alias ...='cd ../../'
-alias ....='cd ../../../'
-
-alias vi='nvim'
-alias vim='nvim'
-alias vimrc='vim ~/.config/nvim/init.vim'
-alias bashrc='vim ~/.bashrc'
-alias tconf='vim ~/.tmux.conf'
-
-alias open='xdg-open'
-alias python='python3.6'
-alias pip='pip3'
-
-# Add an "alert" alias for long running commands.  Use like so:
-#   sleep 10; alert
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
@@ -71,18 +39,12 @@ fi
 export FZF_DEFAULT_COMMAND='fd --type f  --follow --no-ignore'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
-export VISUAL=vim
+export LESSHISTFILE=-
+
+export VISUAL=nvim
 export EDITOR="$VISUAL"
 
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-
-export PATH=$PATH:/usr/local/MATLAB/R2017a/bin
-export PATH=$PATH:/home/boco/.dotnet
-export PATH=$PATH:/home/boco/.luarocks/bin
-
-export DOTNET_ROOT="$(dirname $(which dotnet))"
-
-export MESA_GL_VERSION_OVERRIDE=3.3 
 
 source $HOME/bin/*
 [ -f "/home/boco/.ghcup/env" ] && source "/home/boco/.ghcup/env"

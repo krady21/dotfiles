@@ -1,0 +1,21 @@
+[/]
+foreground-color='rgb(0,0,0)'
+highlight-foreground-color='rgb(0,0,0)'
+visible-name='Paper'
+palette=['rgb(0,0,0)', 'rgb(204,62,40)', 'rgb(33,102,9)', 'rgb(181,137,0)', 'rgb(30,111,204)', 'rgb(92,33,165)', 'rgb(21,140,134)', 'rgb(170,170,170)', 'rgb(85,85,85)', 'rgb(204,62,40)', 'rgb(33,102,9)', 'rgb(181,137,0)', 'rgb(30,111,204)', 'rgb(92,33,165)', 'rgb(21,140,134)', 'rgb(170,170,170)']
+cell-width-scale=1.0
+bold-is-bright=true
+cursor-shape='block'
+cursor-colors-set=false
+highlight-colors-set=true
+use-system-font=false
+use-transparent-background=false
+use-theme-colors=false
+font='Roboto Mono 12'
+use-theme-transparency=false
+scrollback-unlimited=true
+cursor-blink-mode='off'
+background-color='rgb(242,238,222)'
+background-transparency-percent=17
+highlight-background-color='rgb(216,213,199)'
+audible-bell=false
