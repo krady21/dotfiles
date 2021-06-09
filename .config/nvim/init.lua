@@ -21,6 +21,9 @@ paq {'tpope/vim-sleuth'}
 paq {'tpope/vim-surround'}
 paq {'wellle/targets.vim'}
 
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
 vim.opt.breakindent = true
 vim.opt.clipboard = 'unnamedplus'
 vim.opt.completeopt = 'menuone,noselect'

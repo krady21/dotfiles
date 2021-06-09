@@ -46,7 +46,6 @@ export EDITOR="$VISUAL"
 
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 
-source $HOME/bin/*
 [ -f "/home/boco/.ghcup/env" ] && source "/home/boco/.ghcup/env"
 
 export GCC_ARM_FOLDER=/home/boco/gcc-arm-none-eabi-9-2020-q2-update/bin
