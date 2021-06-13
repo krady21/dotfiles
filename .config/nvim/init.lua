@@ -108,6 +108,7 @@ vim.cmd([[
 augroup Personal
   autocmd!
   autocmd FileType cpp,java setlocal commentstring=//\ %s
+  autocmd QuickFixCmdPost [^l]* cwindow
   autocmd BufWritePre * if '<afile>' !~ '^scp:' && !isdirectory(expand('<afile>:h')) | call mkdir(expand('<afile>:h'), 'p') | endif
   autocmd TextYankPost * silent! lua vim.highlight.on_yank {timeout = 200}
 augroup END
