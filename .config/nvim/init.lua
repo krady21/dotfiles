@@ -1,28 +1,5 @@
-local install_path = vim.fn.stdpath('data') .. '/site/pack/paqs/start/paq-nvim'
-
-if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
-  vim.fn.system({'git', 'clone', 'https://github.com/savq/paq-nvim.git', install_path})
-end
-
-local paq = require'paq-nvim'.paq
-
-paq {'savq/paq-nvim'}
-paq {'neovim/nvim-lspconfig'}
-paq {'hrsh7th/nvim-compe'}
-
-paq {'junegunn/fzf', run = vim.fn['fzf#install']}
-paq {'junegunn/fzf.vim'}
-paq {'justinmk/vim-dirvish'}
-paq {'tommcdo/vim-exchange'}
-paq {'tpope/vim-commentary'}
-paq {'tpope/vim-fugitive', opt = true}
-paq {'tpope/vim-repeat'}
-paq {'tpope/vim-sleuth'}
-paq {'tpope/vim-surround'}
-paq {'wellle/targets.vim'}
-
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
+vim.g.mapleader = ' '
+vim.g.colors_name = 'paper'
 
 vim.opt.breakindent = true
 vim.opt.clipboard = 'unnamedplus'
@@ -38,7 +15,6 @@ vim.opt.incsearch = true
 vim.opt.laststatus = 1
 vim.opt.lazyredraw = true
 vim.opt.listchars = 'tab:| ,trail:∙,nbsp:•'
-vim.opt.modeline = false
 vim.opt.nrformats = 'bin,hex,alpha'
 vim.opt.number = true
 vim.opt.path = '.,,**'
@@ -58,9 +34,6 @@ vim.opt.undofile = true
 vim.opt.virtualedit = 'block,insert'
 vim.opt.wildignore = '*/.git/*,*/tmp/*,*.swp,*.o,*.pyc'
 vim.opt.wrap = false
-
-vim.g.mapleader = ' '
-vim.g.colors_name = 'paper'
 
 if vim.fn['executable']('rg') then
   vim.opt.grepprg = 'rg --no-heading --vimgrep'
@@ -114,13 +87,9 @@ augroup Personal
 augroup END
 ]])
 
-vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
-  vim.lsp.diagnostic.on_publish_diagnostics, {
-    underline = false,
-    signs = true,
-    virtual_text = false,
-  }
-)
+vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, { underline = false, virtual_text = false })
+vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "single" })
+vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "single" })
 
 local on_attach = function(client, bufnr)
   require('compe').setup({ preselect = 'disable', source = { nvim_lsp = true } }, bufnr)
