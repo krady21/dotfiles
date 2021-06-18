@@ -28,3 +28,6 @@
 [submodule ".config/nvim/pack/plug/opt/vim-fugitive"]
 	path = .config/nvim/pack/plug/opt/vim-fugitive
 	url = git@github.com:tpope/vim-fugitive.git
+[submodule ".config/nvim/pack/plug/start/vim-dirvish"]
+	path = .config/nvim/pack/plug/start/vim-dirvish
+	url = git@github.com:justinmk/vim-dirvish.git

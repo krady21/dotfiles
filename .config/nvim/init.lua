@@ -80,21 +80,19 @@ vim.cmd([[command! Sbd b#|bd#]])
 vim.cmd([[
 augroup Personal
   autocmd!
-  autocmd FileType cpp,java setlocal commentstring=//\ %s
   autocmd QuickFixCmdPost [^l]* cwindow
   autocmd BufWritePre * if '<afile>' !~ '^scp:' && !isdirectory(expand('<afile>:h')) | call mkdir(expand('<afile>:h'), 'p') | endif
   autocmd TextYankPost * silent! lua vim.highlight.on_yank {timeout = 200}
 augroup END
 ]])
 
-vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, { underline = false, virtual_text = false })
+vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, { underline = false, virtual_text = false, signs = false })
 vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "single" })
 vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "single" })
 
 local on_attach = function(client, bufnr)
   require('compe').setup({ preselect = 'disable', source = { nvim_lsp = true } }, bufnr)
 
-  vim.cmd('setlocal signcolumn=yes')
   vim.opt_local.omnifunc = 'v:lua.vim.lsp.omnifunc'
 
   local opts = { noremap=true, silent=true }
@@ -108,9 +106,10 @@ local on_attach = function(client, bufnr)
   vim.api.nvim_buf_set_keymap(bufnr, 'i', '<C-k>',      '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>=',  '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>w',  '<cmd>lua vim.lsp.buf.workspace_symbol()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>e',  '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '[g',         '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', ']g',         '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>q',  '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>e',  '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics({border = "single"})<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '[g',         '<cmd>lua vim.lsp.diagnostic.goto_prev({popup_opts = {border = "single"}})<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', ']g',         '<cmd>lua vim.lsp.diagnostic.goto_next({popup_opts = {border = "single"}})<CR>', opts)
 end
 
 local nvim_lsp = require('lspconfig')
