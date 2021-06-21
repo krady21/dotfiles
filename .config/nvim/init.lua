@@ -5,7 +5,7 @@ vim.opt.breakindent = true
 vim.opt.clipboard = 'unnamedplus'
 vim.opt.completeopt = 'menuone,noselect'
 vim.opt.dictionary = '/usr/share/dict/words'
-vim.opt.diffopt = vim.opt.diffopt + 'indent-heuristic,algorithm:histogram'
+vim.opt.diffopt:append('indent-heuristic,algorithm:histogram')
 vim.opt.expandtab = true
 vim.opt.hidden = true
 vim.opt.hlsearch = false
@@ -15,13 +15,13 @@ vim.opt.incsearch = true
 vim.opt.laststatus = 1
 vim.opt.lazyredraw = true
 vim.opt.listchars = 'tab:| ,trail:∙,nbsp:•'
-vim.opt.nrformats = 'bin,hex,alpha'
+vim.opt.nrformats:append('alpha')
 vim.opt.number = true
 vim.opt.path = '.,,**'
 vim.opt.relativenumber = true
 vim.opt.report = 0
 vim.opt.shiftwidth = 4
-vim.opt.shortmess = vim.opt.shortmess + 'c'
+vim.opt.shortmess:append('c')
 vim.opt.showbreak = '↳'
 vim.opt.smartcase = true
 vim.opt.softtabstop = 4
@@ -92,7 +92,6 @@ vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.s
 
 local on_attach = function(client, bufnr)
   require('compe').setup({ preselect = 'disable', source = { nvim_lsp = true } }, bufnr)
-
   vim.opt_local.omnifunc = 'v:lua.vim.lsp.omnifunc'
 
   local opts = { noremap=true, silent=true }
@@ -112,8 +111,8 @@ local on_attach = function(client, bufnr)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', ']g',         '<cmd>lua vim.lsp.diagnostic.goto_next({popup_opts = {border = "single"}})<CR>', opts)
 end
 
-local nvim_lsp = require('lspconfig')
+local lspconfig = require('lspconfig')
 local servers = { "clangd", "rust_analyzer", "pyright", "texlab", "hls", "gopls" }
-for _, lsp in ipairs(servers) do
-  nvim_lsp[lsp].setup { on_attach = on_attach }
+for _, server in ipairs(servers) do
+  lspconfig[server].setup { on_attach = on_attach }
 end

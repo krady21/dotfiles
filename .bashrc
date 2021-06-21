@@ -2,12 +2,12 @@
 # See bash(1) for more options
 HISTCONTROL=ignoreboth
 
-# append to the history file, don't overwrite it
-shopt -s histappend
-
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
 HISTSIZE=10000
 HISTFILESIZE=120000
+
+# append to the history file, don't overwrite it
+shopt -s histappend
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
@@ -43,19 +43,14 @@ export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export RIPGREP_CONFIG_PATH=~/.config/rg/ripgreprc
 
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export GCC_ARM_FOLDER=/home/boco/gcc-arm-none-eabi-9-2020-q2-update/bin
 
 [ -f "/home/boco/.ghcup/env" ] && source "/home/boco/.ghcup/env"
 
-export GCC_ARM_FOLDER=/home/boco/gcc-arm-none-eabi-9-2020-q2-update/bin
-
-# enable color support of ls and also add handy aliases
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='ls --color=auto'
-    alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
-fi
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
 
 alias ..='cd ..'
 alias ...='cd ../../'
