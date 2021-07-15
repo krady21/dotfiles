@@ -1,7 +1,4 @@
-vim.g.colors_name = 'gruvbox'
-vim.g.gruvbox_contrast_dark = 'soft'
-vim.g.gruvbox_sign_column = 'bg0'
-vim.g.gruvbox_invert_selection = 0
+vim.g.colors_name = 'nord'
 
 vim.opt.breakindent = true
 vim.opt.clipboard = 'unnamedplus'

@@ -1,3 +1,0 @@
-Paper theme icons
-Fonts: Source Code Pro, Fira Code Nerd Font Mono, mononoki
-Application theme: Livingroom-Dark-Chocolate
