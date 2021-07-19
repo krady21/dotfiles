@@ -1,3 +1,25 @@
+local install_path = vim.fn.stdpath('data') .. '/site/pack/packer/start/packer.nvim'
+
+if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
+  vim.fn.system({'git', 'clone', 'https://github.com/wbthomason/packer.nvim', install_path})
+end
+
+require('packer').startup(function(use)
+  use {'wbthomason/packer.nvim'}
+  use {'neovim/nvim-lspconfig'}
+  use {'hrsh7th/nvim-compe'}
+  use {'junegunn/fzf'}
+  use {'junegunn/fzf.vim'}
+  use {'justinmk/vim-dirvish'}
+  use {'tommcdo/vim-exchange'}
+  use {'tpope/vim-commentary'}
+  use {'tpope/vim-fugitive'}
+  use {'tpope/vim-repeat'}
+  use {'tpope/vim-sleuth'}
+  use {'tpope/vim-surround'}
+  use {'wellle/targets.vim'}
+end)
+
 vim.g.colors_name = 'nord'
 
 vim.opt.breakindent = true
