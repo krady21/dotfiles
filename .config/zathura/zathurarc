@@ -1,11 +1,11 @@
 set selection-clipboard clipboard
 set guioptions none
 
-set default-bg "#3b4252"
+set default-bg "#f2eede"
 set recolor true
-set recolor-darkcolor "#d8dee9"
-set recolor-lightcolor "#3b4252"
-set statusbar-fg "#d8dee9"
-set statusbar-bg "#3b4252"
+set recolor-darkcolor "#000000"
+set recolor-lightcolor "#f2eede"
+set statusbar-fg "#000000"
+set statusbar-bg "#f2eede"
 
 map t toggle_statusbar

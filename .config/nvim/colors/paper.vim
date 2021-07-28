@@ -8,10 +8,7 @@
 set background=light
 
 hi clear
-
-if exists('g:syntax_on')
-  syntax reset
-endif
+syntax reset
 
 let g:colors_name = 'paper'
 
@@ -54,6 +51,7 @@ command! -nargs=+ Hi call s:Hi(<f-args>)
 " Available colors
 let s:colors = {
 \  'background': '#f2eede',
+\  'lbackground': '#f7f3e3',
 \  'black': '#000000',
 \  'blue': '#1e6fcc',
 \  'green': '#216609',
@@ -125,11 +123,12 @@ endif
 " simply use its name (e.g. "black").
 
 " Generic highlight groups
-Hi ColorColumn NONE lgrey1 NONE
+Hi ColorColumn NONE lbackground NONE
 Hi Comment grey NONE NONE
 Hi Conceal NONE NONE NONE
 Hi Constant black NONE NONE
 Hi Cursor NONE lgrey1 NONE
+Hi CursorLine NONE lbackground NONE
 Hi CursorLineNR black NONE bold
 Hi Directory purple NONE NONE
 Hi ErrorMsg red NONE bold
@@ -141,7 +140,7 @@ Hi LineNr black NONE NONE
 Hi Macro orange NONE NONE
 Hi MatchParen NONE NONE bold
 Hi MoreMsg black NONE NONE
-Hi NonText background NONE NONE
+Hi NonText lgrey2 NONE NONE
 Hi Normal black background NONE
 Hi NormalFloat black background NONE
 Hi Bold black NONE bold
@@ -155,12 +154,12 @@ Hi Regexp orange NONE NONE
 Hi Search NONE lyellow NONE
 Hi IncSearch NONE lyellow NONE
 Hi Special black NONE NONE
-Hi SpellBad red NONE bold,underline
-Hi SpellCap purple NONE underline
-Hi SpellLocal green NONE underline
-Hi SpellRare purple NONE underline
-Hi StatusLine black lgrey2 NONE
-Hi StatusLineNC dgrey lgrey1 NONE
+Hi SpellBad red NONE bold,undercurl
+Hi SpellCap purple NONE undercurl
+Hi SpellLocal green NONE undercurl
+Hi SpellRare purple NONE undercurl
+Hi StatusLine black lgrey1 NONE
+Hi StatusLineNC black lgrey1 NONE
 Hi String green NONE NONE
 Hi TabLine dgrey lgrey2 NONE
 Hi TabLineFill black lgrey2 NONE
@@ -173,7 +172,6 @@ Hi Underlined NONE NONE underline
 
 hi! link Boolean Keyword
 hi! link Character String
-hi! link CursorLine Cursor
 hi! link Error ErrorMsg
 hi! link Folded Comment
 hi! link Label Keyword
@@ -192,6 +190,7 @@ hi! link WildMenu PmenuSel
 Hi WhiteOnOrange white orange NONE
 Hi WhiteOnYellow white yellow NONE
 Hi WhiteOnRed white red NONE
+Hi BlackOnLightYellow black lyellow NONE
 Hi Yellow yellow NONE bold
 
 " ALE
@@ -212,7 +211,7 @@ hi! link cssTagName Keyword
 Hi DiffAdd NONE lgreen NONE
 Hi DiffChange NONE NONE NONE
 Hi DiffDelete red NONE NONE
-Hi DiffText NONE lyellow NONE
+Hi DiffText NONE lgreen NONE
 Hi diffFile black NONE bold
 Hi diffLine blue NONE NONE
 hi! link diffAdded DiffAdd
@@ -231,6 +230,12 @@ Hi hamlClass black NONE NONE
 Hi hamlId black NONE NONE
 Hi hamlTag black NONE bold
 hi! link hamlDocType Comment
+
+" hop.nvim
+Hi HopNextKey red NONE bold
+Hi HopNextKey1 yellow NONE NONE
+Hi HopNextKey2 yellow NONE NONE
+hi! clear HopUnmatched
 
 " HTML
 Hi htmlTag black NONE bold
@@ -268,10 +273,6 @@ hi! link jsonKeyword String
 
 " Lua
 hi! link luaFunction Keyword
-
-" LSP
-Hi LspDiagnosticsUnderlineError NONE NONE underline red
-Hi LspDiagnosticsUnderlineWarning NONE NONE underline yellow
 
 " Make
 hi! link makeTarget Function
@@ -359,21 +360,5 @@ hi! link yardType Todo
 hi! link yardTypeList Todo
 
 delcommand Hi
-
-" FZF
-let g:fzf_colors =
-\ { 'fg':      ['fg', 'Normal'],
-  \ 'bg':      ['bg', 'Normal'],
-  \ 'hl':      ['fg', 'Comment'],
-  \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
-  \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
-  \ 'hl+':     ['fg', 'Statement'],
-  \ 'info':    ['fg', 'PreProc'],
-  \ 'border':  ['fg', 'Ignore'],
-  \ 'prompt':  ['fg', 'Conditional'],
-  \ 'pointer': ['fg', 'Exception'],
-  \ 'marker':  ['fg', 'Keyword'],
-  \ 'spinner': ['fg', 'Label'],
-  \ 'header':  ['fg', 'Comment'] }
 
 " vim: et ts=2 sw=2
