@@ -7,7 +7,6 @@ end
 require("packer").startup(function(use)
   use {"wbthomason/packer.nvim"}
   use {"neovim/nvim-lspconfig"}
-  use {"hrsh7th/nvim-compe"}
   use {"junegunn/fzf"}
   use {"junegunn/fzf.vim"}
   use {"justinmk/vim-dirvish"}
@@ -18,6 +17,7 @@ require("packer").startup(function(use)
   use {"wellle/targets.vim"}
 end)
 
+vim.cmd("syntax on")
 vim.cmd("colorscheme paper")
 
 vim.opt.breakindent = true
@@ -26,10 +26,8 @@ vim.opt.completeopt = "menuone,noselect"
 vim.opt.dictionary = "/usr/share/dict/words"
 vim.opt.diffopt:append("indent-heuristic,algorithm:histogram")
 vim.opt.expandtab = true
-vim.opt.hidden = true
 vim.opt.hlsearch = false
 vim.opt.ignorecase = true
-vim.opt.inccommand = "nosplit"
 vim.opt.incsearch = true
 vim.opt.lazyredraw = true
 vim.opt.listchars = "tab:> ,trail:∙,nbsp:•"
@@ -58,44 +56,50 @@ if vim.fn["executable"]("rg") then
   vim.opt.grepformat = "%f:%l:%c:%m"
 end
 
-vim.g.fzf_preview_window = {}
+vim.g.fzf_preview_window = ""
 vim.g.fzf_colors = {
-  ['fg'] = { 'fg', 'Normal' },
-  ['bg'] = { 'bg', 'Normal' },
-  ['hl'] = { 'fg', 'Comment' },
-  ['fg+'] = { 'fg', 'Cursorline', 'CursorColumn', 'Normal' },
-  ['bg+'] = { 'bg', 'CursorLine', 'CursorColumn' },
-  ['hl+'] = { 'fg', 'Statement' },
-  ['info'] = { 'fg', 'PreProc' },
-  ['border'] = { 'fg', 'Ignore' },
-  ['prompt'] = { 'fg', 'Conditional' },
-  ['pointer'] = { 'fg', 'Exception' },
-  ['marker'] = { 'fg', 'Keyword' },
-  ['spinner'] = { 'fg', 'Label' },
-  ['header'] = { 'fg', 'Comment' },
+  ["fg"] = { "fg", "Normal" },
+  ["bg"] = { "bg", "Normal" },
+  ["hl"] = { "fg", "Comment" },
+  ["fg+"] = { "fg", "Cursorline", "CursorColumn", "Normal" },
+  ["bg+"] = { "bg", "CursorLine", "CursorColumn" },
+  ["hl+"] = { "fg", "Statement" },
+  ["info"] = { "fg", "PreProc" },
+  ["border"] = { "fg", "Ignore" },
+  ["prompt"] = { "fg", "Conditional" },
+  ["pointer"] = { "fg", "Exception" },
+  ["marker"] = { "fg", "Keyword" },
+  ["spinner"] = { "fg", "Label" },
+  ["header"] = { "fg", "Comment" },
 }
 
-vim.api.nvim_set_keymap("", "H", "^", {noremap = true})
-vim.api.nvim_set_keymap("", "L", "$", {noremap = true})
-vim.api.nvim_set_keymap("i", "{<CR>", "{<CR>}<C-o>O", {noremap = true})
-vim.api.nvim_set_keymap("i", "[<CR>", "[<CR>]<C-o>O", {noremap = true})
-vim.api.nvim_set_keymap("n", "Y", "y$", {noremap = true})
-vim.api.nvim_set_keymap("n", "gp", "`[v`]", {noremap = true})
-vim.api.nvim_set_keymap("n", "<space><space>", "<C-^>", {noremap = true})
-vim.api.nvim_set_keymap("n", "<C-j>", ":cnext<CR>", {noremap = true, silent = true})
-vim.api.nvim_set_keymap("n", "<C-k>", ":cprev<CR>", {noremap = true, silent = true})
-vim.api.nvim_set_keymap("n", "<space>dt", ":windo diffthis<CR>", {noremap = true, silent = true})
-vim.api.nvim_set_keymap("n", "<space>do", ":windo diffoff<CR>", {noremap = true, silent = true})
-vim.api.nvim_set_keymap("n", "<space>du", ":windo diffupdate<CR>", {noremap = true, silent = true})
-vim.api.nvim_set_keymap("n", "<F1>", ":set invrnu<CR>", {noremap = true, silent = true})
-vim.api.nvim_set_keymap("n", "<F2>", ":set invspell<CR>", {noremap = true, silent = true})
-vim.api.nvim_set_keymap("n", "<F3>", ":set invwrap<CR>", {noremap = true, silent = true})
-vim.api.nvim_set_keymap("n", "<F4>", ":set invlist<CR>", {noremap = true, silent = true})
-vim.api.nvim_set_keymap("n", "<space>f", ":Files<CR>", {noremap = true})
-vim.api.nvim_set_keymap("n", "<space>F", ":GFiles<CR>", {noremap = true})
-vim.api.nvim_set_keymap("n", "<space>G", ":GFiles?<CR>", {noremap = true})
-vim.api.nvim_set_keymap("n", "<space>h", ":History<CR>", {noremap = true})
-vim.api.nvim_set_keymap("n", "<space>s", ":Rg<CR>", {noremap = true})
+local opts = { noremap = true }
+
+vim.api.nvim_set_keymap("", "H", "^", opts)
+vim.api.nvim_set_keymap("", "L", "$", opts)
+
+vim.api.nvim_set_keymap("i", "{<CR>", "{<CR>}<C-o>O", opts)
+vim.api.nvim_set_keymap("i", "[<CR>", "[<CR>]<C-o>O", opts)
+
+vim.api.nvim_set_keymap("n", "gp", "`[v`]", opts)
+vim.api.nvim_set_keymap("n", "<space><space>", "<C-^>", opts)
+
+vim.api.nvim_set_keymap("n", "<C-j>", "<cmd>cnext<CR>", opts)
+vim.api.nvim_set_keymap("n", "<C-k>", "<cmd>cprev<CR>", opts)
+
+vim.api.nvim_set_keymap("n", "<space>dt", "<cmd>windo diffthis<CR>", opts)
+vim.api.nvim_set_keymap("n", "<space>do", "<cmd>windo diffoff<CR>", opts)
+
+vim.api.nvim_set_keymap("n", "<F1>", "<cmd>set invrnu<CR>", opts)
+vim.api.nvim_set_keymap("n", "<F2>", "<cmd>set invspell<CR>", opts)
+vim.api.nvim_set_keymap("n", "<F3>", "<cmd>set invwrap<CR>", opts)
+vim.api.nvim_set_keymap("n", "<F4>", "<cmd>set invlist<CR>", opts)
+
+vim.api.nvim_set_keymap("n", "<space>f", "<cmd>Files<CR>", opts)
+vim.api.nvim_set_keymap("n", "<space>F", "<cmd>GFiles<CR>", opts)
+vim.api.nvim_set_keymap("n", "<space>G", "<cmd>GFiles?<CR>", opts)
+vim.api.nvim_set_keymap("n", "<space>h", "<cmd>History<CR>", opts)
+vim.api.nvim_set_keymap("n", "<space>s", "<cmd>Rg<CR>", opts)
 
 vim.cmd("cnoreabbrev Q q")
 vim.cmd("cnoreabbrev W w")
@@ -114,19 +118,13 @@ augroup Personal
 augroup END
 ]])
 
-vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
-  vim.lsp.diagnostic.on_publish_diagnostics, {
-    underline = false,
-    virtual_text = false,
-    signs = true,
-  }
-)
+vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "single" })
+vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "single" })
+vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, { underline = false, virtual_text = false, signs = false })
 
 local on_attach = function(client, bufnr)
-  require("compe").setup({ preselect = "disable", source = { nvim_lsp = true } }, bufnr)
   vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
 
-  local opts = { noremap = true, silent = true }
   vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
   vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", opts)
   vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>gy", "<cmd>lua vim.lsp.buf.type_definition()<CR>", opts)
@@ -138,13 +136,18 @@ local on_attach = function(client, bufnr)
   vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>=",  "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
   vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>w",  "<cmd>lua vim.lsp.buf.workspace_symbol()<CR>", opts)
   vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>q",  "<cmd>lua vim.lsp.diagnostic.set_qflist()<CR>", opts)
-  vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>e",  "<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>", opts)
-  vim.api.nvim_buf_set_keymap(bufnr, "n", "[g",        "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>", opts)
-  vim.api.nvim_buf_set_keymap(bufnr, "n", "]g",        "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>", opts)
+  vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>e",  "<cmd>lua vim.lsp.diagnostic.show_line_diagnostics({border = 'single'})<CR>", opts)
+  vim.api.nvim_buf_set_keymap(bufnr, "n", "[g",        "<cmd>lua vim.lsp.diagnostic.goto_prev({popup_opts = {border = 'single'}})<CR>", opts)
+  vim.api.nvim_buf_set_keymap(bufnr, "n", "]g",        "<cmd>lua vim.lsp.diagnostic.goto_next({popup_opts = {border = 'single'}})<CR>", opts)
 end
 
 local lspconfig = require("lspconfig")
-local servers = { "clangd", "rust_analyzer", "pyright", "texlab", "hls", "gopls" }
+local servers = { "clangd", "rust_analyzer", "pyright", "texlab", "hls" }
 for _, server in ipairs(servers) do
-  lspconfig[server].setup { on_attach = on_attach, flags = { debounce_text_changes = 200 }}
+  lspconfig[server].setup {
+    on_attach = on_attach,
+    flags = {
+      debounce_text_changes = 200
+    }
+  }
 end

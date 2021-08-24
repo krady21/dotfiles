@@ -8,9 +8,12 @@
 set background=light
 
 hi clear
-syntax reset
 
-let g:colors_name = 'paper'
+if exists('g:syntax_on')
+  syntax reset
+endif
+
+let colors_name = 'paper'
 
 " Function for creating a highlight group
 "
@@ -185,20 +188,6 @@ hi! link Type Keyword
 hi! link Visual Cursor
 hi! link WildMenu PmenuSel
 
-" These highlight groups can be used for statuslines, for example when
-" displaying ALE warnings and errors.
-Hi WhiteOnOrange white orange NONE
-Hi WhiteOnYellow white yellow NONE
-Hi WhiteOnRed white red NONE
-Hi BlackOnLightYellow black lyellow NONE
-Hi Yellow yellow NONE bold
-
-" ALE
-Hi ALEError red NONE bold
-Hi ALEErrorSign red NONE bold
-Hi ALEWarning orange NONE bold
-Hi ALEWarningSign orange NONE bold
-
 " CSS
 hi! link cssClassName Keyword
 hi! link cssColor Number
@@ -231,12 +220,6 @@ Hi hamlId black NONE NONE
 Hi hamlTag black NONE bold
 hi! link hamlDocType Comment
 
-" hop.nvim
-Hi HopNextKey red NONE bold
-Hi HopNextKey1 yellow NONE NONE
-Hi HopNextKey2 yellow NONE NONE
-hi! clear HopUnmatched
-
 " HTML
 Hi htmlTag black NONE bold
 hi! link htmlArg Identifier
@@ -244,14 +227,6 @@ hi! link htmlLink Directory
 hi! link htmlScriptTag htmlTag
 hi! link htmlSpecialTagName htmlTag
 hi! link htmlTagName htmlTag
-
-" Inko
-Hi inkoCommentBold grey NONE bold
-Hi inkoCommentItalic grey NONE italic
-Hi inkoCommentTitle grey NONE bold
-hi! link inkoCommentInlineUrl Number
-hi! link inkoInstanceVariable Directory
-hi! link inkoKeywordArgument Regexp
 
 " Java
 hi! link javaAnnotation Directory
@@ -358,6 +333,12 @@ hi! link yamlPlainScalar String
 hi! link yardComment Comment
 hi! link yardType Todo
 hi! link yardTypeList Todo
+
+" Neovim LSP
+hi! link LspDiagnosticsDefaultError Normal
+hi! link LspDiagnosticsDefaultWarning Normal
+hi! link LspDiagnosticsDefaultInformation Normal
+hi! link LspDiagnosticsDefaultHint Normal
 
 delcommand Hi
 
