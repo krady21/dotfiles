@@ -37,9 +37,6 @@ export EDITOR="$VISUAL"
 
 export LESSHISTFILE=-
 
-export FZF_DEFAULT_COMMAND='fd --type f  --follow --no-ignore'
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-
 export RIPGREP_CONFIG_PATH=~/.config/rg/ripgreprc
 
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
@@ -56,6 +53,5 @@ alias ..='cd ..'
 alias ...='cd ../../'
 alias ....='cd ../../../'
 
-alias vi='nvim'
 alias vim='nvim'
 alias open='xdg-open'
