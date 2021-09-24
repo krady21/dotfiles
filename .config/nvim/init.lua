@@ -1,25 +1,8 @@
-local o, l, fn, cmd = vim.opt, vim.opt_local, vim.fn, vim.cmd
+local g, o, l, fn, cmd = vim.g, vim.opt, vim.opt_local, vim.fn, vim.cmd
 
 local function nnoremap(lhs, rhs) vim.api.nvim_set_keymap("n", lhs, rhs, { noremap = true }) end
 local function inoremap(lhs, rhs) vim.api.nvim_set_keymap("i", lhs, rhs, { noremap = true }) end
 local function noremap(lhs, rhs)  vim.api.nvim_set_keymap("", lhs, rhs, { noremap = true }) end
-
-local install_path = fn.stdpath("data") .. "/site/pack/packer/start/packer.nvim"
-if fn.empty(fn.glob(install_path)) > 0 then
-  fn.system({"git", "clone", "https://github.com/wbthomason/packer.nvim", install_path})
-end
-
-require("packer").startup(function(use)
-  use {"wbthomason/packer.nvim"}
-  use {"neovim/nvim-lspconfig"}
-  use {"justinmk/vim-dirvish"}
-  use {"tpope/vim-commentary"}
-  use {"tpope/vim-repeat"}
-  use {"tpope/vim-sleuth"}
-  use {"tpope/vim-surround"}
-  use {"wellle/targets.vim"}
-  use {"ibhagwan/fzf-lua", requires = {"vijaymarupudi/nvim-fzf"}}
-end)
 
 cmd("colorscheme paper")
 
@@ -84,7 +67,6 @@ nnoremap("<space>F", "<cmd>lua require('fzf-lua').git_files()<CR>")
 nnoremap("<space>G", "<cmd>lua require('fzf-lua').git_status()<CR>")
 nnoremap("<space>h", "<cmd>lua require('fzf-lua').oldfiles()<CR>")
 nnoremap("<space>s", "<cmd>lua require('fzf-lua').live_grep()<CR>")
-nnoremap("<space>b", "<cmd>lua require('fzf-lua').buffers()<CR>")
 
 cmd("cnoreabbrev Q q")
 cmd("cnoreabbrev W w")
@@ -92,9 +74,9 @@ cmd("cnoreabbrev Wq wq")
 cmd("cnoreabbrev Qa qa")
 
 function whitespace()
-    local save = fn.winsaveview()
-    cmd([[keeppatterns %s/\s\+$//e]])
-    fn.winrestview(save)
+  local save = fn.winsaveview()
+  cmd([[keeppatterns %s/\s\+$//e]])
+  fn.winrestview(save)
 end
 
 cmd([[command! White lua whitespace()]])
@@ -109,7 +91,7 @@ augroup Personal
 augroup END
 ]])
 
-require'fzf-lua'.setup {
+require("fzf-lua").setup {
   fzf_colors = {
     ["fg"] = { "fg", "Normal" },
     ["bg"] = { "bg", "Normal" },
@@ -147,36 +129,54 @@ local on_attach = function(client, bufnr)
   buf_nnoremap("]g",        "<cmd>lua vim.lsp.diagnostic.goto_next({popup_opts = {border = 'single'}})<CR>")
 
   l.omnifunc = "v:lua.vim.lsp.omnifunc"
-  -- l.complete:append('o')
+  -- l.complete = 'o'
 end
 
-local lspconfig = require("lspconfig")
-local servers = { "clangd", "rust_analyzer", "pyright", "texlab", "hls" }
-for _, server in ipairs(servers) do
-  lspconfig[server].setup {
-    on_attach = on_attach,
-    flags = {
-      debounce_text_changes = 200
+local defaults = {
+  on_attach = on_attach,
+  flags = {
+    debounce_text_changes = 200
+  },
+  handlers = {
+    ["textDocument/hover"] = vim.lsp.with(
+      vim.lsp.handlers.hover, {
+        border = "single"
+      }
+    ),
+    ["textDocument/signatureHelp"] = vim.lsp.with(
+      vim.lsp.handlers.signature_help, {
+        border = "single"
+      }
+    ),
+    ["textDocument/publishDiagnostics"] = vim.lsp.with(
+      vim.lsp.diagnostic.on_publish_diagnostics, {
+        signs = false,
+        underline = false,
+        virtual_text = true,
+      }
+    )
+  }
+}
+
+local rust_analyzer = {
+  settings = {
+    ["rust-analyzer"] = {
+      cargo = {
+        allFeatures = true
+      }
     }
   }
+}
+
+local servers = {
+  ["clangd"] = {},
+  ["hls"] = {},
+  ["pyright"] = {},
+  ["rust_analyzer"] = rust_analyzer,
+  ["texlab"] = {},
+}
+
+local lspconfig = require("lspconfig")
+for server, config in pairs(servers) do
+  lspconfig[server].setup(vim.tbl_deep_extend("force", defaults, config))
 end
-
-vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(
-  vim.lsp.handlers.hover, {
-    border = "single"
-  }
-)
-
-vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(
-  vim.lsp.handlers.signature_help, {
-    border = "single"
-  }
-)
-
-vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
-  vim.lsp.diagnostic.on_publish_diagnostics, {
-    underline = false,
-    virtual_text = true,
-    signs = false,
-  }
-)

@@ -31,7 +31,6 @@
 [alias]
     a = add
     aa = add -A
-    b = branch
     c = commit 
     ca = commit --amend
     co = checkout
