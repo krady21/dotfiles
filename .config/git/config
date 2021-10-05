@@ -6,6 +6,9 @@
 [core]
     editor = nvim
 
+[advice]
+    statusHints = false
+
 [diff]
     tool = vimdiff3
     algorithm = histogram
@@ -24,6 +27,9 @@
 
 [pull]
     ff = only
+
+[rebase]
+    autoSquash = true
 
 [fetch]
     prune = true

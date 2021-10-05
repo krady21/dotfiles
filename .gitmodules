@@ -22,3 +22,6 @@
 [submodule ".config/nvim/pack/plug/start/vim-dirvish"]
 	path = .config/nvim/pack/plug/start/vim-dirvish
 	url = git@github.com:justinmk/vim-dirvish.git
+[submodule ".config/nvim/pack/plug/start/nvim-dap"]
+	path = .config/nvim/pack/plug/start/nvim-dap
+	url = git@github.com:mfussenegger/nvim-dap.git
