@@ -11,8 +11,8 @@ local lldb = {
     name = "Launch",
     type = "lldb",
     request = "launch",
-    program = function() 
-      return vim.fn.input('Path: ', vim.fn.getcwd() .. '/', 'file') 
+    program = function()
+      return vim.fn.input('Path: ', vim.fn.getcwd() .. '/', 'file')
     end,
     stopOnEntry = false,
     args = {},

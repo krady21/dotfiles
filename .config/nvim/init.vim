@@ -6,14 +6,16 @@ set completeopt=menuone,noselect
 set dictionary=/usr/share/dict/words
 set diffopt+=indent-heuristic,algorithm:histogram
 set expandtab
-set nohlsearch
 set ignorecase
 set incsearch
 set lazyredraw
 set listchars=tab:\|\ ,trail:∙,nbsp:•
+set nohlsearch
+set noswapfile
+set nowrap
 set nrformats+=alpha
 set number
-set path=".,,**"
+set path=.,,**
 set relativenumber
 set report=0
 set shiftwidth=4
@@ -24,12 +26,10 @@ set softtabstop=4
 set splitbelow
 set splitright
 set statusline=%<\ %f\ %m%r%w%=%l\/%-6L\ %3c
-set noswapfile
 set termguicolors
 set undofile
 set virtualedit=block,insert
 set wildignore=*/.git/*,*/tmp/*,*.o,*.pyc
-set nowrap
 
 if executable("rg")
   set grepprg=rg\ --no-heading\ --vimgrep
@@ -68,11 +68,7 @@ nnoremap <space>s <cmd>lua require("fzf-lua").live_grep()<CR>
 
 nnoremap <space>b <cmd>lua require("dap").toggle_breakpoint()<CR>
 nnoremap <space>c <cmd>lua require("dap").continue()<CR>
-nnoremap <space>n <cmd>lua require("dap").step_over()<CR>
-nnoremap <space>i <cmd>lua require("dap").step_into()<CR>
-nnoremap <space>o <cmd>lua require("dap").step_out()<CR>
 nnoremap <space>r <cmd>lua require("dap").repl.toggle()<CR>
-nnoremap <space>k <cmd>lua require("dap.ui.widgets").hover()<CR>
 
 cnoreabbrev Q q
 cnoreabbrev W w

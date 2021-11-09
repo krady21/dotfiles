@@ -1,4 +1,7 @@
 require("fzf-lua").setup {
+  winopts = {
+    hl_border = "VertSplit",
+  },
   fzf_colors = {
     ["fg"] = { "fg", "Normal" },
     ["bg"] = { "bg", "Normal" },

@@ -335,10 +335,10 @@ hi! link yardType Todo
 hi! link yardTypeList Todo
 
 " Neovim LSP
-hi! link DiagnosticError Normal
-hi! link DiagnosticWarn Normal
-hi! link DiagnosticInfo Normal
-hi! link DiagnosticHint Normal
+Hi DiagnosticError red NONE NONE
+Hi DiagnosticWarn yellow NONE NONE
+Hi DiagnosticHint blue NONE NONE
+Hi DiagnosticInfo black NONE NONE
 
 delcommand Hi
 

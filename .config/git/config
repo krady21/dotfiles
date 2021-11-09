@@ -44,3 +44,4 @@
     last = log -1 HEAD --stat
     s = status
     su = submodule update --init --recursive
+    w = worktree
