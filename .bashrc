@@ -39,10 +39,11 @@ export LESSHISTFILE=-
 
 export RIPGREP_CONFIG_PATH=~/.config/rg/ripgreprc
 
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 export GCC_ARM_FOLDER=/home/boco/gcc-arm-none-eabi-9-2020-q2-update/bin
 
-[ -f "/home/boco/.ghcup/env" ] && source "/home/boco/.ghcup/env"
+export PATH=$PATH:/usr/local/go/bin
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOPATH/bin
 
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'
