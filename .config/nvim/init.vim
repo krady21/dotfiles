@@ -79,6 +79,10 @@ augroup Personal
   autocmd QuickFixCmdPost [^l]* cwindow
   autocmd BufWritePre * call mkdir(expand("<afile>:h"), "p")
   autocmd TextYankPost * silent! lua vim.highlight.on_yank {timeout = 200}
+  autocmd FileType c,cpp setlocal commentstring=//\ %s
+  autocmd FileType go setlocal tabstop=4
+  autocmd FileType python setlocal makeprg=python\ %
+  autocmd FileType rust compiler cargo
 augroup END
 
 lua << EOF
@@ -88,9 +92,10 @@ if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
   vim.fn.system({"git", "clone", "https://github.com/savq/paq-nvim.git", install_path})
 end
 
-require "paq" {
+require("paq") {
   "ibhagwan/fzf-lua",
   "justinmk/vim-dirvish",
+  "leoluz/nvim-dap-go",
   "mfussenegger/nvim-dap",
   "neovim/nvim-lspconfig",
   "nvim-lua/plenary.nvim",
@@ -153,6 +158,8 @@ local lldb = {
 dap.configurations.c = lldb
 dap.configurations.cpp = lldb
 dap.configurations.rust = lldb
+
+require('dap-go').setup()
 
 -- LSP
 local on_attach = function(client, bufnr)
@@ -230,6 +237,7 @@ local rust_analyzer = {
 }
 
 local servers = {
+  ["bashls"] = {},
   ["clangd"] = {},
   ["gopls"] = gopls,
   ["hls"] = {},
