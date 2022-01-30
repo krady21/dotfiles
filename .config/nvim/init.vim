@@ -80,7 +80,7 @@ augroup Personal
   autocmd BufWritePre * call mkdir(expand("<afile>:h"), "p")
   autocmd TextYankPost * silent! lua vim.highlight.on_yank {timeout = 200}
   autocmd FileType c,cpp setlocal commentstring=//\ %s
-  autocmd FileType go setlocal tabstop=4
+  autocmd FileType go setlocal tabstop=4 shiftwidth=4 noexpandtab
   autocmd FileType python setlocal makeprg=python\ %
   autocmd FileType rust compiler cargo
 augroup END
