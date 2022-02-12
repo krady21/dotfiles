@@ -74,6 +74,11 @@ cnoreabbrev Qa qa
 command! Whitespace let b:save = winsaveview() | keeppatterns %s/\s\+$//e | call winrestview(b:save)
 command! Sbd b#|bd#
 
+let g:netrw_bufsettings = "noma nomod nu rnu nowrap ro nobl"
+let g:netrw_banner = 0
+let g:netrw_altfile = 1
+let g:netrw_fastbrowse = 0
+
 augroup Personal
   autocmd!
   autocmd QuickFixCmdPost [^l]* cwindow
@@ -82,7 +87,7 @@ augroup Personal
   autocmd FileType c,cpp setlocal commentstring=//\ %s
   autocmd FileType go setlocal tabstop=4 shiftwidth=4 noexpandtab
   autocmd FileType python setlocal makeprg=python\ %
-  autocmd FileType rust compiler cargo
+  autocmd FileType gitcommit setlocal spell spelllang=en
 augroup END
 
 lua << EOF
@@ -93,22 +98,20 @@ if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
 end
 
 require("paq") {
+  "savq/paq-nvim",
+
   "ibhagwan/fzf-lua",
-  "justinmk/vim-dirvish",
   "leoluz/nvim-dap-go",
+  "lewis6991/gitsigns.nvim",
   "mfussenegger/nvim-dap",
   "neovim/nvim-lspconfig",
   "nvim-lua/plenary.nvim",
-  "savq/paq-nvim",
   "sindrets/diffview.nvim",
+
   "tpope/vim-commentary",
   "tpope/vim-repeat",
   "tpope/vim-sleuth",
   "tpope/vim-surround",
-}
-
-require("diffview").setup {
-  use_icons = false,
 }
 
 -- FZF
@@ -159,7 +162,23 @@ dap.configurations.c = lldb
 dap.configurations.cpp = lldb
 dap.configurations.rust = lldb
 
-require('dap-go').setup()
+require("dap-go").setup()
+
+-- Diffview
+require("diffview").setup {
+  use_icons = false
+}
+
+-- Gitsigns
+require("gitsigns").setup {
+  signcolumn = false
+}
+
+vim.diagnostic.config {
+  signs = false,
+  underline = false,
+  virtual_text = true,
+}
 
 -- LSP
 local on_attach = function(client, bufnr)
@@ -171,7 +190,7 @@ local on_attach = function(client, bufnr)
 
   buf_nnoremap("<space>gd", "<cmd>lua vim.lsp.buf.definition()<CR>")
   buf_nnoremap("<space>gi", "<cmd>lua vim.lsp.buf.implementation()<CR>")
-  buf_nnoremap("<space>gy", "<cmd>lua vim.lsp.buf.type_definition()<CR>")
+  buf_nnoremap("<space>gt", "<cmd>lua vim.lsp.buf.type_definition()<CR>")
   buf_nnoremap("<space>gr", "<cmd>lua vim.lsp.buf.references()<CR>")
   buf_nnoremap("<space>gR", "<cmd>lua vim.lsp.buf.rename()<CR>")
   buf_nnoremap("<space>ga", "<cmd>lua vim.lsp.buf.code_action()<CR>")
@@ -186,28 +205,14 @@ local on_attach = function(client, bufnr)
   buf_nnoremap("]g",        "<cmd>lua vim.diagnostic.goto_next({float = {border = 'single'}})<CR>")
 end
 
-vim.diagnostic.config {
-  signs = false,
-  underline = false,
-  virtual_text = true,
-}
-
 local defaults = {
   on_attach = on_attach,
   flags = {
     debounce_text_changes = 200
   },
   handlers = {
-    ["textDocument/hover"] = vim.lsp.with(
-      vim.lsp.handlers.hover, {
-        border = "single"
-      }
-    ),
-    ["textDocument/signatureHelp"] = vim.lsp.with(
-      vim.lsp.handlers.signature_help, {
-        border = "single"
-      }
-    )
+    ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "single" }),
+    ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "single"})
   }
 }
 
@@ -218,7 +223,7 @@ local gopls = {
       analyses = {
         unusedparams = true,
       },
-      staticcheck = true,
+      staticcheck = true
     }
   }
 }
@@ -227,10 +232,7 @@ local rust_analyzer = {
   settings = {
     ["rust-analyzer"] = {
       cargo = {
-        allFeatures = true,
-      },
-      rustfmt = {
-        enableRangeFormatting = true,
+        allFeatures = true
       }
     }
   }
@@ -240,10 +242,8 @@ local servers = {
   ["bashls"] = {},
   ["clangd"] = {},
   ["gopls"] = gopls,
-  ["hls"] = {},
   ["pyright"] = {},
   ["rust_analyzer"] = rust_analyzer,
-  ["texlab"] = {},
 }
 
 local lspconfig = require("lspconfig")
