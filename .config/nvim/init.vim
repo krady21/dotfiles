@@ -1,4 +1,4 @@
-colorscheme paper
+colorscheme nordfox
 
 set breakindent
 set clipboard=unnamedplus
@@ -66,6 +66,9 @@ nnoremap <space>b <cmd>lua require("dap").toggle_breakpoint()<CR>
 nnoremap <space>c <cmd>lua require("dap").continue()<CR>
 nnoremap <space>r <cmd>lua require("dap").repl.toggle()<CR>
 
+nnoremap ]c <cmd>lua require("gitsigns").next_hunk()<CR>
+nnoremap [c <cmd>lua require("gitsigns").prev_hunk()<CR>
+
 cnoreabbrev Q q
 cnoreabbrev W w
 cnoreabbrev Wq wq
@@ -74,9 +77,9 @@ cnoreabbrev Qa qa
 command! Whitespace let b:save = winsaveview() | keeppatterns %s/\s\+$//e | call winrestview(b:save)
 command! Sbd b#|bd#
 
-let g:netrw_bufsettings = "noma nomod nu rnu nowrap ro nobl"
-let g:netrw_banner = 0
 let g:netrw_altfile = 1
+let g:netrw_banner = 0
+let g:netrw_bufsettings = "noma nomod nu rnu nowrap ro nobl"
 let g:netrw_fastbrowse = 0
 
 augroup Personal
@@ -100,6 +103,7 @@ end
 require("paq") {
   "savq/paq-nvim",
 
+  "EdenEast/nightfox.nvim",
   "ibhagwan/fzf-lua",
   "leoluz/nvim-dap-go",
   "lewis6991/gitsigns.nvim",
@@ -170,9 +174,7 @@ require("diffview").setup {
 }
 
 -- Gitsigns
-require("gitsigns").setup {
-  signcolumn = false
-}
+require("gitsigns").setup()
 
 vim.diagnostic.config {
   signs = false,
@@ -200,19 +202,15 @@ local on_attach = function(client, bufnr)
   buf_nnoremap("<space>w",  "<cmd>lua vim.lsp.buf.workspace_symbol()<CR>")
 
   buf_nnoremap("<space>q",  "<cmd>lua vim.diagnostic.setqflist()<CR>")
-  buf_nnoremap("<space>e",  "<cmd>lua vim.diagnostic.open_float(bufnr, {scope = 'line', border = 'single'})<CR>")
-  buf_nnoremap("[g",        "<cmd>lua vim.diagnostic.goto_prev({float = {border = 'single'}})<CR>")
-  buf_nnoremap("]g",        "<cmd>lua vim.diagnostic.goto_next({float = {border = 'single'}})<CR>")
+  buf_nnoremap("<space>e",  "<cmd>lua vim.diagnostic.open_float()<CR>")
+  buf_nnoremap("[g",        "<cmd>lua vim.diagnostic.goto_prev()<CR>")
+  buf_nnoremap("]g",        "<cmd>lua vim.diagnostic.goto_next()<CR>")
 end
 
 local defaults = {
   on_attach = on_attach,
   flags = {
     debounce_text_changes = 200
-  },
-  handlers = {
-    ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "single" }),
-    ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "single"})
   }
 }
 
