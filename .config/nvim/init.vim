@@ -77,11 +77,6 @@ cnoreabbrev Qa qa
 command! Whitespace let b:save = winsaveview() | keeppatterns %s/\s\+$//e | call winrestview(b:save)
 command! Sbd b#|bd#
 
-let g:netrw_altfile = 1
-let g:netrw_banner = 0
-let g:netrw_bufsettings = "noma nomod nu rnu nowrap ro nobl"
-let g:netrw_fastbrowse = 0
-
 augroup Personal
   autocmd!
   autocmd QuickFixCmdPost [^l]* cwindow
@@ -94,7 +89,6 @@ augroup Personal
 augroup END
 
 lua << EOF
--- Plugins
 local install_path = vim.fn.stdpath("data") .. "/site/pack/paqs/start/paq-nvim"
 if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
   vim.fn.system({"git", "clone", "https://github.com/savq/paq-nvim.git", install_path})
@@ -112,69 +106,12 @@ require("paq") {
   "nvim-lua/plenary.nvim",
   "sindrets/diffview.nvim",
 
+  "justinmk/vim-dirvish",
   "tpope/vim-commentary",
   "tpope/vim-repeat",
   "tpope/vim-sleuth",
   "tpope/vim-surround",
 }
-
--- FZF
-require("fzf-lua").setup {
-  winopts = {
-    hl_border = "VertSplit",
-  },
-  fzf_colors = {
-    ["fg"] = { "fg", "Normal" },
-    ["bg"] = { "bg", "Normal" },
-    ["hl"] = { "fg", "Comment" },
-    ["fg+"] = { "fg", "Normal" },
-    ["bg+"] = { "bg", "CursorLine" },
-    ["hl+"] = { "fg", "Statement" },
-    ["info"] = { "fg", "PreProc" },
-    ["prompt"] = { "fg", "Conditional" },
-    ["pointer"] = { "fg", "Exception" },
-    ["marker"] = { "fg", "Keyword" },
-    ["spinner"] = { "fg", "Label" },
-    ["header"] = { "fg", "Comment" },
-    ["gutter"] = { "bg", "Normal" },
-  }
-}
-
--- DAP
-local dap = require("dap")
-dap.adapters.lldb = {
-  type = "executable",
-  command = "/usr/bin/lldb-vscode-10",
-  name = "lldb",
-}
-
-local lldb = {
-  {
-    name = "Launch",
-    type = "lldb",
-    request = "launch",
-    program = function()
-      return vim.fn.input("Path: ", vim.fn.getcwd() .. "/", "file")
-    end,
-    stopOnEntry = false,
-    args = {},
-    runInTerminal = false,
-  },
-}
-
-dap.configurations.c = lldb
-dap.configurations.cpp = lldb
-dap.configurations.rust = lldb
-
-require("dap-go").setup()
-
--- Diffview
-require("diffview").setup {
-  use_icons = false
-}
-
--- Gitsigns
-require("gitsigns").setup()
 
 vim.diagnostic.config {
   signs = false,
@@ -248,4 +185,62 @@ local lspconfig = require("lspconfig")
 for server, config in pairs(servers) do
   lspconfig[server].setup(vim.tbl_deep_extend("force", defaults, config))
 end
+
+-- FZF
+require("fzf-lua").setup {
+  winopts = {
+    hl_border = "VertSplit",
+  },
+  fzf_colors = {
+    ["fg"] = { "fg", "Normal" },
+    ["bg"] = { "bg", "Normal" },
+    ["hl"] = { "fg", "Comment" },
+    ["fg+"] = { "fg", "Normal" },
+    ["bg+"] = { "bg", "CursorLine" },
+    ["hl+"] = { "fg", "Statement" },
+    ["info"] = { "fg", "PreProc" },
+    ["prompt"] = { "fg", "Conditional" },
+    ["pointer"] = { "fg", "Exception" },
+    ["marker"] = { "fg", "Keyword" },
+    ["spinner"] = { "fg", "Label" },
+    ["header"] = { "fg", "Comment" },
+    ["gutter"] = { "bg", "Normal" },
+  }
+}
+
+-- DAP
+local dap = require("dap")
+dap.adapters.lldb = {
+  type = "executable",
+  command = "/usr/bin/lldb-vscode-10",
+  name = "lldb",
+}
+
+local lldb = {
+  {
+    name = "Launch",
+    type = "lldb",
+    request = "launch",
+    program = function()
+      return vim.fn.input("Path: ", vim.fn.getcwd() .. "/", "file")
+    end,
+    stopOnEntry = false,
+    args = {},
+    runInTerminal = false,
+  },
+}
+
+dap.configurations.c = lldb
+dap.configurations.cpp = lldb
+dap.configurations.rust = lldb
+
+require("dap-go").setup()
+
+-- Diffview
+require("diffview").setup {
+  use_icons = false
+}
+
+-- Gitsigns
+require("gitsigns").setup()
 EOF
