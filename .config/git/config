@@ -7,9 +7,6 @@
     editor = nvim
     pager = delta
 
-[advice]
-    statusHints = false
-
 [diff]
     tool = vimdiff3
     algorithm = histogram

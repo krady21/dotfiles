@@ -62,13 +62,6 @@ nnoremap <space>G <cmd>lua require("fzf-lua").git_status()<CR>
 nnoremap <space>h <cmd>lua require("fzf-lua").oldfiles()<CR>
 nnoremap <space>s <cmd>lua require("fzf-lua").live_grep()<CR>
 
-nnoremap <space>b <cmd>lua require("dap").toggle_breakpoint()<CR>
-nnoremap <space>c <cmd>lua require("dap").continue()<CR>
-nnoremap <space>r <cmd>lua require("dap").repl.toggle()<CR>
-
-nnoremap ]c <cmd>lua require("gitsigns").next_hunk()<CR>
-nnoremap [c <cmd>lua require("gitsigns").prev_hunk()<CR>
-
 cnoreabbrev Q q
 cnoreabbrev W w
 cnoreabbrev Wq wq
@@ -105,6 +98,7 @@ require("paq") {
   "neovim/nvim-lspconfig",
   "nvim-lua/plenary.nvim",
   "sindrets/diffview.nvim",
+  "nvim-treesitter/nvim-treesitter",
 
   "justinmk/vim-dirvish",
   "tpope/vim-commentary",
@@ -113,41 +107,46 @@ require("paq") {
   "tpope/vim-surround",
 }
 
+local border_opts = { border = "rounded" }
+
 vim.diagnostic.config {
   signs = false,
   underline = false,
   virtual_text = true,
+  float = border_opts,
 }
 
 -- LSP
 local on_attach = function(client, bufnr)
-  local function buf_nnoremap(lhs, rhs) vim.api.nvim_buf_set_keymap(bufnr, "n", lhs, rhs, { noremap = true }) end
-  local function buf_inoremap(lhs, rhs) vim.api.nvim_buf_set_keymap(bufnr, "i", lhs, rhs, { noremap = true }) end
-  local function buf_option(...)        vim.api.nvim_buf_set_option(bufnr, ...) end
+  local opts = { silent = true, buffer = bufnr }
 
-  buf_option("omnifunc", "v:lua.vim.lsp.omnifunc")
+  vim.bo.omnifunc =  "v:lua.vim.lsp.omnifunc"
 
-  buf_nnoremap("<space>gd", "<cmd>lua vim.lsp.buf.definition()<CR>")
-  buf_nnoremap("<space>gi", "<cmd>lua vim.lsp.buf.implementation()<CR>")
-  buf_nnoremap("<space>gt", "<cmd>lua vim.lsp.buf.type_definition()<CR>")
-  buf_nnoremap("<space>gr", "<cmd>lua vim.lsp.buf.references()<CR>")
-  buf_nnoremap("<space>gR", "<cmd>lua vim.lsp.buf.rename()<CR>")
-  buf_nnoremap("<space>ga", "<cmd>lua vim.lsp.buf.code_action()<CR>")
-  buf_nnoremap("K",         "<cmd>lua vim.lsp.buf.hover()<CR>")
-  buf_inoremap("<C-k>",     "<cmd>lua vim.lsp.buf.signature_help()<CR>")
-  buf_nnoremap("<space>=",  "<cmd>lua vim.lsp.buf.formatting()<CR>")
-  buf_nnoremap("<space>w",  "<cmd>lua vim.lsp.buf.workspace_symbol()<CR>")
+  vim.keymap.set("n", "<space>gd", vim.lsp.buf.definition, opts)
+  vim.keymap.set("n", "<space>gi", vim.lsp.buf.implementation, opts)
+  vim.keymap.set("n", "<space>gt", vim.lsp.buf.type_definition, opts)
+  vim.keymap.set("n", "<space>gr", vim.lsp.buf.references, opts)
+  vim.keymap.set("n", "<space>gn", vim.lsp.buf.rename, opts)
+  vim.keymap.set("n", "<space>ga", vim.lsp.buf.code_action, opts)
+  vim.keymap.set("n", "K",         vim.lsp.buf.hover, opts)
+  vim.keymap.set("i", "<C-k>",     vim.lsp.buf.signature_help, opts)
+  vim.keymap.set("n", "<space>=",  vim.lsp.buf.formatting, opts)
+  vim.keymap.set("n", "<space>w",  vim.lsp.buf.workspace_symbol, opts)
 
-  buf_nnoremap("<space>q",  "<cmd>lua vim.diagnostic.setqflist()<CR>")
-  buf_nnoremap("<space>e",  "<cmd>lua vim.diagnostic.open_float()<CR>")
-  buf_nnoremap("[g",        "<cmd>lua vim.diagnostic.goto_prev()<CR>")
-  buf_nnoremap("]g",        "<cmd>lua vim.diagnostic.goto_next()<CR>")
+  vim.keymap.set("n", "<space>q",  vim.diagnostic.setqflist, opts)
+  vim.keymap.set("n", "<space>e",  vim.diagnostic.open_float, opts)
+  vim.keymap.set("n", "[g",        vim.diagnostic.goto_prev, opts)
+  vim.keymap.set("n", "]g",        vim.diagnostic.goto_next, opts)
 end
 
 local defaults = {
   on_attach = on_attach,
   flags = {
     debounce_text_changes = 200
+  },
+  handlers = {
+    ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, border_opts),
+    ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, border_opts)
   }
 }
 
@@ -182,14 +181,25 @@ local servers = {
 }
 
 local lspconfig = require("lspconfig")
-for server, config in pairs(servers) do
-  lspconfig[server].setup(vim.tbl_deep_extend("force", defaults, config))
+for server, server_config in pairs(servers) do
+  config = vim.tbl_deep_extend("force", defaults, server_config)
+  lspconfig[server].setup(config)
 end
+
+-- Treesitter
+require('nvim-treesitter.configs').setup {
+  highlight = {
+    enable = true
+  }
+}
 
 -- FZF
 require("fzf-lua").setup {
   winopts = {
     hl_border = "VertSplit",
+    preview = {
+      layout = "vertical",
+    },
   },
   fzf_colors = {
     ["fg"] = { "fg", "Normal" },
@@ -238,9 +248,22 @@ require("dap-go").setup()
 
 -- Diffview
 require("diffview").setup {
-  use_icons = false
+  use_icons = false,
+  file_panel = {
+    listing_style = "list"
+  }
 }
 
 -- Gitsigns
-require("gitsigns").setup()
+require("gitsigns").setup {
+  on_attach = function(bufnr)
+    local gs = require("gitsigns")
+    local opts = { buffer = bufnr }
+
+    vim.keymap.set("n", "]c", gs.next_hunk, opts)
+    vim.keymap.set("n", "[c", gs.prev_hunk, opts)
+    vim.keymap.set("n", "<space>p", gs.preview_hunk, opts)
+    vim.keymap.set("n", "<space>P", gs.stage_hunk, opts)
+  end
+}
 EOF
