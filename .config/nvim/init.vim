@@ -178,6 +178,8 @@ local servers = {
   ["gopls"] = gopls,
   ["pyright"] = {},
   ["rust_analyzer"] = rust_analyzer,
+  ["texlab"] = {},
+  ["tsserver"] = {},
 }
 
 local lspconfig = require("lspconfig")

@@ -42,8 +42,6 @@ export RIPGREP_CONFIG_PATH=~/.config/rg/ripgreprc
 export GCC_ARM_FOLDER=/home/boco/gcc-arm-none-eabi-9-2020-q2-update/bin
 
 export PATH=$PATH:/usr/local/go/bin
-export GOPATH=$HOME/go
-export PATH=$PATH:$GOPATH/bin
 
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'
@@ -56,3 +54,11 @@ alias ....='cd ../../../'
 
 alias vim='nvim'
 alias open='xdg-open'
+
+alias rust-analyzer='rustup run nightly rust-analyzer'
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+[ -f "/home/boco/.ghcup/env" ] && source "/home/boco/.ghcup/env" # ghcup-env

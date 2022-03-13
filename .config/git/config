@@ -15,16 +15,17 @@
     path = nvim
 
 [merge]
-    tool = vimdiff3
+    tool = vimdiff
+    conflictstyle = diff3
 
-[mergetool.vimdiff3]
+[mergetool.vimdiff]
     path = nvim
 
 [commit]
     verbose = true
 
 [pull]
-    ff = only
+    rebase = true
 
 [rebase]
     autoSquash = true
