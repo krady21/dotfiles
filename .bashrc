@@ -42,6 +42,8 @@ export RIPGREP_CONFIG_PATH=~/.config/rg/ripgreprc
 export GCC_ARM_FOLDER=/home/boco/gcc-arm-none-eabi-9-2020-q2-update/bin
 
 export PATH=$PATH:/usr/local/go/bin
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOPATH/bin
 
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'

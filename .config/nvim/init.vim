@@ -1,3 +1,8 @@
+lua require("impatient")
+
+let g:do_filetype_lua = 1
+let g:did_load_filetypes = 0
+
 colorscheme nordfox
 
 set breakindent
@@ -89,16 +94,17 @@ end
 
 require("paq") {
   "savq/paq-nvim",
-
+  "lewis6991/impatient.nvim",
   "EdenEast/nightfox.nvim",
+
+  "neovim/nvim-lspconfig",
+  "nvim-treesitter/nvim-treesitter",
   "ibhagwan/fzf-lua",
+  "mfussenegger/nvim-dap",
   "leoluz/nvim-dap-go",
   "lewis6991/gitsigns.nvim",
-  "mfussenegger/nvim-dap",
-  "neovim/nvim-lspconfig",
-  "nvim-lua/plenary.nvim",
   "sindrets/diffview.nvim",
-  "nvim-treesitter/nvim-treesitter",
+  "nvim-lua/plenary.nvim",
 
   "justinmk/vim-dirvish",
   "tpope/vim-commentary",
@@ -107,14 +113,14 @@ require("paq") {
   "tpope/vim-surround",
 }
 
-local border_opts = { border = "rounded" }
-
-vim.diagnostic.config {
-  signs = false,
-  underline = false,
-  virtual_text = true,
-  float = border_opts,
+require("nightfox").setup { 
+  groups = {
+    NormalFloat = { 
+      link = "Normal" 
+    } 
+  }
 }
+
 
 -- LSP
 local on_attach = function(client, bufnr)
@@ -139,14 +145,23 @@ local on_attach = function(client, bufnr)
   vim.keymap.set("n", "]g",        vim.diagnostic.goto_next, opts)
 end
 
+local border_opts = { border = "rounded" }
+
+vim.diagnostic.config {
+  signs = false,
+  underline = false,
+  virtual_text = true,
+  float = border_opts,
+}
+
 local defaults = {
   on_attach = on_attach,
   flags = {
-    debounce_text_changes = 200
+    debounce_text_changes = 200,
   },
   handlers = {
     ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, border_opts),
-    ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, border_opts)
+    ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, border_opts),
   }
 }
 
@@ -157,7 +172,7 @@ local gopls = {
       analyses = {
         unusedparams = true,
       },
-      staticcheck = true
+      staticcheck = true,
     }
   }
 }
@@ -166,7 +181,31 @@ local rust_analyzer = {
   settings = {
     ["rust-analyzer"] = {
       cargo = {
-        allFeatures = true
+        allFeatures = true,
+      }
+    }
+  }
+}
+
+local runtime_path = vim.split(package.path, ';')
+table.insert(runtime_path, "lua/?.lua")
+table.insert(runtime_path, "lua/?/init.lua")
+
+local sumneko_lua = {
+  settings = {
+    Lua = {
+      runtime = {
+        version = 'LuaJIT',
+        path = runtime_path,
+      },
+      diagnostics = {
+        globals = {'vim'},
+      },
+      workspace = {
+        library = vim.api.nvim_get_runtime_file("", true),
+      },
+      telemetry = {
+        enable = false,
       }
     }
   }
@@ -178,6 +217,7 @@ local servers = {
   ["gopls"] = gopls,
   ["pyright"] = {},
   ["rust_analyzer"] = rust_analyzer,
+  ["sumneko_lua"] = sumneko_lua,
   ["texlab"] = {},
   ["tsserver"] = {},
 }
@@ -191,7 +231,8 @@ end
 -- Treesitter
 require('nvim-treesitter.configs').setup {
   highlight = {
-    enable = true
+    enable = true,
+    additional_vim_regex_highlighting = false,
   }
 }
 
@@ -252,7 +293,7 @@ require("dap-go").setup()
 require("diffview").setup {
   use_icons = false,
   file_panel = {
-    listing_style = "list"
+    listing_style = "list",
   }
 }
 
@@ -265,7 +306,8 @@ require("gitsigns").setup {
     vim.keymap.set("n", "]c", gs.next_hunk, opts)
     vim.keymap.set("n", "[c", gs.prev_hunk, opts)
     vim.keymap.set("n", "<space>p", gs.preview_hunk, opts)
-    vim.keymap.set("n", "<space>P", gs.stage_hunk, opts)
+    vim.keymap.set("n", "<space>[", gs.stage_hunk, opts)
+    vim.keymap.set("n", "<space>]", gs.undo_stage_hunk, opts)
   end
 }
 EOF
