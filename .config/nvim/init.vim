@@ -41,6 +41,8 @@ if executable("rg")
   set grepformat=%f:%l:%c:%m
 endif
 
+tnoremap <Esc> <C-\><C-n>
+
 noremap H ^
 noremap L $
 
@@ -61,12 +63,6 @@ nnoremap <F2> <cmd>set invspell<CR>
 nnoremap <F3> <cmd>set invwrap<CR>
 nnoremap <F4> <cmd>set invlist<CR>
 
-nnoremap <space>f <cmd>lua require("fzf-lua").files()<CR>
-nnoremap <space>F <cmd>lua require("fzf-lua").git_files()<CR>
-nnoremap <space>G <cmd>lua require("fzf-lua").git_status()<CR>
-nnoremap <space>h <cmd>lua require("fzf-lua").oldfiles()<CR>
-nnoremap <space>s <cmd>lua require("fzf-lua").live_grep()<CR>
-
 cnoreabbrev Q q
 cnoreabbrev W w
 cnoreabbrev Wq wq
@@ -77,12 +73,13 @@ command! Sbd b#|bd#
 
 augroup Personal
   autocmd!
+  autocmd TermOpen * startinsert
   autocmd QuickFixCmdPost [^l]* cwindow
   autocmd BufWritePre * call mkdir(expand("<afile>:h"), "p")
   autocmd TextYankPost * silent! lua vim.highlight.on_yank {timeout = 200}
   autocmd FileType c,cpp setlocal commentstring=//\ %s
   autocmd FileType go setlocal tabstop=4 shiftwidth=4 noexpandtab
-  autocmd FileType python setlocal makeprg=python\ %
+  autocmd FileType python setlocal makeprg=python%\ %
   autocmd FileType gitcommit setlocal spell spelllang=en
 augroup END
 
@@ -102,25 +99,25 @@ require("paq") {
   "ibhagwan/fzf-lua",
   "mfussenegger/nvim-dap",
   "leoluz/nvim-dap-go",
+  "nvim-lua/plenary.nvim",
   "lewis6991/gitsigns.nvim",
   "sindrets/diffview.nvim",
-  "nvim-lua/plenary.nvim",
 
   "justinmk/vim-dirvish",
+  "tommcdo/vim-exchange",
   "tpope/vim-commentary",
   "tpope/vim-repeat",
   "tpope/vim-sleuth",
   "tpope/vim-surround",
 }
 
-require("nightfox").setup { 
+require("nightfox").setup {
   groups = {
-    NormalFloat = { 
-      link = "Normal" 
-    } 
+    NormalFloat = {
+      link = "Normal"
+    }
   }
 }
-
 
 -- LSP
 local on_attach = function(client, bufnr)
@@ -237,7 +234,8 @@ require('nvim-treesitter.configs').setup {
 }
 
 -- FZF
-require("fzf-lua").setup {
+local fzf = require("fzf-lua")
+fzf.setup {
   winopts = {
     hl_border = "VertSplit",
     preview = {
@@ -260,6 +258,13 @@ require("fzf-lua").setup {
     ["gutter"] = { "bg", "Normal" },
   }
 }
+
+vim.keymap.set("n", "<space>f", fzf.files)
+vim.keymap.set("n", "<space>F", fzf.git_files)
+vim.keymap.set("n", "<space>G", fzf.git_status)
+vim.keymap.set("n", "<space>h", fzf.oldfiles)
+vim.keymap.set("n", "<space>s", fzf.live_grep)
+vim.keymap.set("n", "<space>r", fzf.resume)
 
 -- DAP
 local dap = require("dap")
