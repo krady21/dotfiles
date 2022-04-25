@@ -28,7 +28,7 @@
     rebase = true
 
 [rebase]
-    autoSquash = true
+    autoStash = true
 
 [status]
     short = true
@@ -44,9 +44,10 @@
     co = checkout
     l = log --oneline --graph --decorate
     last = log -1 HEAD --stat
+    p = push origin HEAD
+    pf = push -f origin HEAD
     rh = reset --hard HEAD
     s = status
     su = submodule update --init --recursive
-    w = worktree
 
     fixup = "!git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -c -7 | xargs -o git commit --fixup"

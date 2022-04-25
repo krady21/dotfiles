@@ -1,88 +1,3 @@
-lua require("impatient")
-
-let g:do_filetype_lua = 1
-let g:did_load_filetypes = 0
-
-colorscheme nordfox
-
-set breakindent
-set clipboard=unnamedplus
-set completeopt=menuone,noselect
-set dictionary=/usr/share/dict/words
-set diffopt+=indent-heuristic,algorithm:histogram
-set expandtab
-set ignorecase
-set incsearch
-set lazyredraw
-set listchars=tab:\|\ ,trail:∙,nbsp:•
-set nohlsearch
-set noswapfile
-set nowrap
-set nrformats+=alpha
-set number
-set path=.,,**
-set relativenumber
-set report=0
-set shiftwidth=4
-set shortmess+=c
-set showbreak=↳
-set smartcase
-set softtabstop=4
-set splitbelow
-set splitright
-set statusline=%<\ %f\ %m%r%w%=%l\/%-6L\ %3c
-set termguicolors
-set undofile
-set virtualedit=block,insert
-set wildignore=*/.git/*,*/tmp/*,*.o,*.pyc
-
-if executable("rg")
-  set grepprg=rg\ --no-heading\ --vimgrep
-  set grepformat=%f:%l:%c:%m
-endif
-
-tnoremap <Esc> <C-\><C-n>
-
-noremap H ^
-noremap L $
-
-inoremap {<CR> {<CR>}<C-o>O
-inoremap [<CR> [<CR>]<C-o>O
-
-nnoremap gp `[v`]
-nnoremap <space><space> <C-^>
-
-nnoremap <C-j> <cmd>cnext<CR>
-nnoremap <C-k> <cmd>cprev<CR>
-
-nnoremap <space>dt <cmd>windo diffthis<CR>
-nnoremap <space>do <cmd>windo diffoff<CR>
-
-nnoremap <F1> <cmd>set invrnu<CR>
-nnoremap <F2> <cmd>set invspell<CR>
-nnoremap <F3> <cmd>set invwrap<CR>
-nnoremap <F4> <cmd>set invlist<CR>
-
-cnoreabbrev Q q
-cnoreabbrev W w
-cnoreabbrev Wq wq
-cnoreabbrev Qa qa
-
-command! Whitespace let b:save = winsaveview() | keeppatterns %s/\s\+$//e | call winrestview(b:save)
-command! Sbd b#|bd#
-
-augroup Personal
-  autocmd!
-  autocmd TermOpen * startinsert
-  autocmd QuickFixCmdPost [^l]* cwindow
-  autocmd BufWritePre * call mkdir(expand("<afile>:h"), "p")
-  autocmd TextYankPost * silent! lua vim.highlight.on_yank {timeout = 200}
-  autocmd FileType c,cpp setlocal commentstring=//\ %s
-  autocmd FileType go setlocal tabstop=4 shiftwidth=4 noexpandtab
-  autocmd FileType python setlocal makeprg=python%\ %
-  autocmd FileType gitcommit setlocal spell spelllang=en
-augroup END
-
 lua << EOF
 local install_path = vim.fn.stdpath("data") .. "/site/pack/paqs/start/paq-nvim"
 if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
@@ -110,6 +25,8 @@ require("paq") {
   "tpope/vim-sleuth",
   "tpope/vim-surround",
 }
+
+require("impatient")
 
 require("nightfox").setup {
   groups = {
@@ -304,6 +221,7 @@ require("diffview").setup {
 
 -- Gitsigns
 require("gitsigns").setup {
+  attach_to_untracked = false,
   on_attach = function(bufnr)
     local gs = require("gitsigns")
     local opts = { buffer = bufnr }
@@ -316,3 +234,87 @@ require("gitsigns").setup {
   end
 }
 EOF
+
+let g:do_filetype_lua = 1
+let g:did_load_filetypes = 0
+
+colorscheme nordfox
+
+set breakindent
+set clipboard=unnamedplus
+set completeopt=menuone,noselect
+set dictionary=/usr/share/dict/words
+set diffopt+=indent-heuristic,algorithm:histogram
+set expandtab
+set ignorecase
+set incsearch
+set lazyredraw
+set listchars=tab:\|\ ,trail:∙,nbsp:•
+set nohlsearch
+set noswapfile
+set nowrap
+set nrformats+=alpha
+set number
+set path=.,,**
+set relativenumber
+set report=0
+set shiftwidth=4
+set shortmess+=c
+set showbreak=↳
+set smartcase
+set softtabstop=4
+set splitbelow
+set splitright
+set statusline=%<\ %f\ %m%r%w%=%l\/%-6L\ %3c
+set termguicolors
+set undofile
+set virtualedit=block,insert
+set wildignore=*/.git/*,*/tmp/*,*.o,*.pyc
+set wildignorecase
+
+if executable("rg")
+  set grepprg=rg\ --no-heading\ --vimgrep
+  set grepformat=%f:%l:%c:%m
+endif
+
+tnoremap <Esc> <C-\><C-n>
+
+noremap H ^
+noremap L $
+
+inoremap {<CR> {<CR>}<C-o>O
+inoremap [<CR> [<CR>]<C-o>O
+
+nnoremap gp `[v`]
+nnoremap <space><space> <C-^>
+
+nnoremap <C-j> <cmd>cnext<CR>
+nnoremap <C-k> <cmd>cprev<CR>
+
+nnoremap <space>dt <cmd>windo diffthis<CR>
+nnoremap <space>do <cmd>windo diffoff<CR>
+
+nnoremap <F1> <cmd>set invrnu<CR>
+nnoremap <F2> <cmd>set invspell<CR>
+nnoremap <F3> <cmd>set invwrap<CR>
+nnoremap <F4> <cmd>set invlist<CR>
+
+cnoreabbrev Q q
+cnoreabbrev W w
+cnoreabbrev Wq wq
+cnoreabbrev Qa qa
+
+command! Whitespace let b:save = winsaveview() | keeppatterns %s/\s\+$//e | call winrestview(b:save)
+command! Sbd b#|bd#
+
+augroup Personal
+  autocmd!
+  autocmd TermOpen * startinsert
+  autocmd QuickFixCmdPost [^l]* cwindow
+  autocmd BufWritePre * call mkdir(expand("<afile>:h"), "p")
+  autocmd TextYankPost * silent! lua vim.highlight.on_yank {timeout = 200}
+  autocmd FileType c,cpp setlocal commentstring=//\ %s
+  autocmd FileType go setlocal tabstop=4 shiftwidth=4 noexpandtab
+  autocmd FileType python setlocal makeprg=python%\ %
+  autocmd FileType gitcommit setlocal spell spelllang=en
+augroup END
