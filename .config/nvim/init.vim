@@ -9,6 +9,8 @@ require("paq") {
   "lewis6991/impatient.nvim",
   "EdenEast/nightfox.nvim",
 
+  "hrsh7th/nvim-cmp",
+  "hrsh7th/cmp-nvim-lsp",
   "neovim/nvim-lspconfig",
   "nvim-treesitter/nvim-treesitter",
   "ibhagwan/fzf-lua",
@@ -29,10 +31,23 @@ require("paq") {
 require("impatient")
 
 require("nightfox").setup {
-  groups = {
+  all = {
     NormalFloat = {
       link = "Normal"
     }
+  }
+}
+
+local cmp = require("cmp")
+cmp.setup {
+  preselect = cmp.PreselectMode.None,
+  mapping = cmp.mapping.preset.insert({
+    ["<C-n>"] = cmp.mapping.select_next_item { behavior = cmp.SelectBehavior.Insert },
+    ["<C-p>"] = cmp.mapping.select_prev_item { behavior = cmp.SelectBehavior.Insert },
+    ["<C-y>"] = cmp.mapping.confirm({ select = true }),
+  }),
+  sources = {
+    { name = "nvim_lsp" },
   }
 }
 
