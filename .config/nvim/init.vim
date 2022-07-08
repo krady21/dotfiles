@@ -18,7 +18,7 @@ require("paq") {
   "leoluz/nvim-dap-go",
   "nvim-lua/plenary.nvim",
   "lewis6991/gitsigns.nvim",
-  "sindrets/diffview.nvim",
+  "TimUntersberger/neogit",
 
   "justinmk/vim-dirvish",
   "tommcdo/vim-exchange",
@@ -53,7 +53,7 @@ cmp.setup {
 
 -- LSP
 local on_attach = function(client, bufnr)
-  local opts = { silent = true, buffer = bufnr }
+  local opts = { noremap = true, silent = true, buffer = bufnr }
 
   vim.bo.omnifunc =  "v:lua.vim.lsp.omnifunc"
 
@@ -226,26 +226,27 @@ dap.configurations.rust = lldb
 
 require("dap-go").setup()
 
--- Diffview
-require("diffview").setup {
-  use_icons = false,
-  file_panel = {
-    listing_style = "list",
-  }
-}
+vim.keymap.set("n", "<space>c", dap.continue)
+vim.keymap.set("n", "<space>x", dap.terminate)
+vim.keymap.set("n", "<space>l", dap.run_last)
+vim.keymap.set("n", "<space>R", dap.repl.toggle)
+vim.keymap.set("n", "<space>b", dap.toggle_breakpoint)
+vim.keymap.set("n", "<space>B", function() dap.set_breakpoint(fn.input('Breakpoint condition: ')) end)
+vim.keymap.set("n", "<down>", dap.step_over)
+vim.keymap.set("n", "<up>", dap.step_back)
+vim.keymap.set("n", "<right>", dap.step_into)
+vim.keymap.set("n", "<left>", dap.step_out)
 
 -- Gitsigns
 require("gitsigns").setup {
   attach_to_untracked = false,
   on_attach = function(bufnr)
     local gs = require("gitsigns")
-    local opts = { buffer = bufnr }
+    local opts = { noremap = true, buffer = bufnr }
 
     vim.keymap.set("n", "]c", gs.next_hunk, opts)
     vim.keymap.set("n", "[c", gs.prev_hunk, opts)
     vim.keymap.set("n", "<space>p", gs.preview_hunk, opts)
-    vim.keymap.set("n", "<space>[", gs.stage_hunk, opts)
-    vim.keymap.set("n", "<space>]", gs.undo_stage_hunk, opts)
   end
 }
 EOF
