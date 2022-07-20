@@ -1,7 +1,7 @@
 lua << EOF
 local install_path = vim.fn.stdpath("data") .. "/site/pack/paqs/start/paq-nvim"
 if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
-  vim.fn.system({"git", "clone", "https://github.com/savq/paq-nvim.git", install_path})
+  vim.fn.system({"git", "clone", "--depth", "1", "https://github.com/savq/paq-nvim.git", install_path})
 end
 
 require("paq") {
@@ -65,7 +65,7 @@ local on_attach = function(client, bufnr)
   vim.keymap.set("n", "<space>ga", vim.lsp.buf.code_action, opts)
   vim.keymap.set("n", "K",         vim.lsp.buf.hover, opts)
   vim.keymap.set("i", "<C-k>",     vim.lsp.buf.signature_help, opts)
-  vim.keymap.set("n", "<space>=",  vim.lsp.buf.formatting, opts)
+  vim.keymap.set("n", "<space>=",  vim.lsp.buf.format, opts)
   vim.keymap.set("n", "<space>w",  vim.lsp.buf.workspace_symbol, opts)
 
   vim.keymap.set("n", "<space>q",  vim.diagnostic.setqflist, opts)
