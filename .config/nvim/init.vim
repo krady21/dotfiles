@@ -5,35 +5,43 @@ if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
 end
 
 require("paq") {
-  "savq/paq-nvim",
-  "lewis6991/impatient.nvim",
-  "EdenEast/nightfox.nvim",
+  {"savq/paq-nvim"};
+  {"lewis6991/impatient.nvim"};
+  {"EdenEast/nightfox.nvim"};
 
-  "hrsh7th/nvim-cmp",
-  "hrsh7th/cmp-nvim-lsp",
-  "neovim/nvim-lspconfig",
-  "nvim-treesitter/nvim-treesitter",
-  "ibhagwan/fzf-lua",
-  "mfussenegger/nvim-dap",
-  "leoluz/nvim-dap-go",
-  "nvim-lua/plenary.nvim",
-  "lewis6991/gitsigns.nvim",
-  "TimUntersberger/neogit",
+  {"ibhagwan/fzf-lua"};
+  {"hrsh7th/nvim-cmp"};
+  {"hrsh7th/cmp-nvim-lsp"};
+  {"neovim/nvim-lspconfig"};
+  {"nvim-treesitter/nvim-treesitter"};
+  {"nvim-treesitter/nvim-treesitter-context"};
+  {"mfussenegger/nvim-dap"};
+  {"leoluz/nvim-dap-go"};
+  {"nvim-lua/plenary.nvim"};
+  {"lewis6991/gitsigns.nvim"};
+  {"sindrets/diffview.nvim"};
 
-  "justinmk/vim-dirvish",
-  "tommcdo/vim-exchange",
-  "tpope/vim-commentary",
-  "tpope/vim-repeat",
-  "tpope/vim-sleuth",
-  "tpope/vim-surround",
+  {"justinmk/vim-dirvish"};
+  {"tommcdo/vim-exchange"};
+  {"tpope/vim-commentary"};
+  {"tpope/vim-repeat"};
+  {"tpope/vim-sleuth"};
+  {"tpope/vim-surround"};
+
+  {"nanotee/luv-vimdocs"};
 }
 
 require("impatient")
 
 require("nightfox").setup {
-  all = {
-    NormalFloat = {
-      link = "Normal"
+  groups = {
+    all = {
+      NormalFloat = {
+        link = "Normal"
+      },
+      TreesitterContext = {
+        bg = "palette.bg2"
+      }
     }
   }
 }
@@ -167,6 +175,7 @@ require('nvim-treesitter.configs').setup {
 
 -- FZF
 local fzf = require("fzf-lua")
+fzf.register_ui_select()
 fzf.setup {
   winopts = {
     hl_border = "VertSplit",
@@ -250,9 +259,6 @@ require("gitsigns").setup {
   end
 }
 EOF
-
-let g:do_filetype_lua = 1
-let g:did_load_filetypes = 0
 
 colorscheme nordfox
 
