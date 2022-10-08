@@ -12,8 +12,10 @@ require("paq") {
   {"ibhagwan/fzf-lua"};
   {"hrsh7th/nvim-cmp"};
   {"hrsh7th/cmp-nvim-lsp"};
+  {"hrsh7th/cmp-path"};
   {"neovim/nvim-lspconfig"};
   {"nvim-treesitter/nvim-treesitter"};
+  {"nvim-treesitter/playground", opt=true};
   {"nvim-treesitter/nvim-treesitter-context"};
   {"mfussenegger/nvim-dap"};
   {"leoluz/nvim-dap-go"};
@@ -29,6 +31,7 @@ require("paq") {
   {"tpope/vim-surround"};
 
   {"nanotee/luv-vimdocs"};
+  {"folke/lua-dev.nvim"};
 }
 
 require("impatient")
@@ -56,6 +59,7 @@ cmp.setup {
   }),
   sources = {
     { name = "nvim_lsp" },
+    { name = "path" },
   }
 }
 
@@ -124,29 +128,7 @@ local rust_analyzer = {
   }
 }
 
-local runtime_path = vim.split(package.path, ';')
-table.insert(runtime_path, "lua/?.lua")
-table.insert(runtime_path, "lua/?/init.lua")
-
-local sumneko_lua = {
-  settings = {
-    Lua = {
-      runtime = {
-        version = 'LuaJIT',
-        path = runtime_path,
-      },
-      diagnostics = {
-        globals = {'vim'},
-      },
-      workspace = {
-        library = vim.api.nvim_get_runtime_file("", true),
-      },
-      telemetry = {
-        enable = false,
-      }
-    }
-  }
-}
+require("lua-dev").setup()
 
 local servers = {
   ["bashls"] = {},
@@ -154,7 +136,7 @@ local servers = {
   ["gopls"] = gopls,
   ["pyright"] = {},
   ["rust_analyzer"] = rust_analyzer,
-  ["sumneko_lua"] = sumneko_lua,
+  ["sumneko_lua"] = {},
   ["texlab"] = {},
   ["tsserver"] = {},
 }
