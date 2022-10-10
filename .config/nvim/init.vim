@@ -17,6 +17,7 @@ require("paq") {
   {"nvim-treesitter/nvim-treesitter"};
   {"nvim-treesitter/playground", opt=true};
   {"nvim-treesitter/nvim-treesitter-context"};
+  {"nvim-treesitter/nvim-treesitter-textobjects"};
   {"mfussenegger/nvim-dap"};
   {"leoluz/nvim-dap-go"};
   {"nvim-lua/plenary.nvim"};
@@ -152,6 +153,26 @@ require('nvim-treesitter.configs').setup {
   highlight = {
     enable = true,
     additional_vim_regex_highlighting = false,
+  },
+  incremental_selection = {
+    enable = true,
+    keymaps = {
+      init_selection = '<Tab>',
+      node_incremental = '<Tab>',
+      node_decremental = '<S-Tab>',
+      -- scope_incremental = '<CR>',
+    },
+  },
+  textobjects = {
+    select = {
+      enable  = true,
+      keymaps = {
+        ["ac"] = "@class.outer",
+        ["ic"] = "@class.inner",
+        ["af"] = "@function.outer",
+        ["if"] = "@function.inner",
+      },
+    },
   }
 }
 
@@ -163,6 +184,12 @@ fzf.setup {
     hl_border = "VertSplit",
     preview = {
       layout = "vertical",
+    },
+  },
+  keymap = {
+    fzf = {
+      ["ctrl-a"] = "toggle-all",
+      ["ctrl-b"] = "beginning-of-line",
     },
   },
   fzf_colors = {
@@ -182,12 +209,16 @@ fzf.setup {
   }
 }
 
-vim.keymap.set("n", "<space>f", fzf.files)
-vim.keymap.set("n", "<space>F", fzf.git_files)
-vim.keymap.set("n", "<space>G", fzf.git_status)
-vim.keymap.set("n", "<space>h", fzf.oldfiles)
-vim.keymap.set("n", "<space>s", fzf.live_grep)
-vim.keymap.set("n", "<space>r", fzf.resume)
+local fd_opts = "--color=never --no-ignore --type f --hidden --follow --exclude .git"
+local rg_opts = "--no-ignore --hidden --column --line-number --no-heading --color=always --smart-case --max-columns=512"
+
+vim.keymap.set("n", "<space>f", function() fzf.files() end)
+vim.keymap.set("n", "<space>F", function() fzf.files({ fd_opts = fd_opts }) end)
+vim.keymap.set("n", "<space>G", function() fzf.git_status() end)
+vim.keymap.set("n", "<space>h", function() fzf.oldfiles() end)
+vim.keymap.set("n", "<space>s", function() fzf.live_grep() end)
+vim.keymap.set("n", "<space>S", function() fzf.live_grep({ rg_opts = rg_opts}) end)
+vim.keymap.set("n", "<space>r", function() fzf.resume() end)
 
 -- DAP
 local dap = require("dap")
