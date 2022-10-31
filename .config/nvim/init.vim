@@ -7,7 +7,7 @@ end
 require("paq") {
   {"savq/paq-nvim"};
   {"lewis6991/impatient.nvim"};
-  {"EdenEast/nightfox.nvim"};
+  -- {"EdenEast/nightfox.nvim"};
 
   {"ibhagwan/fzf-lua"};
   {"hrsh7th/nvim-cmp"};
@@ -18,6 +18,8 @@ require("paq") {
   {"nvim-treesitter/playground", opt=true};
   {"nvim-treesitter/nvim-treesitter-context"};
   {"nvim-treesitter/nvim-treesitter-textobjects"};
+  {"JoosepAlviste/nvim-ts-context-commentstring"};
+  {"drybalka/tree-climber.nvim"};
   {"mfussenegger/nvim-dap"};
   {"leoluz/nvim-dap-go"};
   {"nvim-lua/plenary.nvim"};
@@ -32,23 +34,23 @@ require("paq") {
   {"tpope/vim-surround"};
 
   {"nanotee/luv-vimdocs"};
-  {"folke/lua-dev.nvim"};
+  {"folke/neodev.nvim"};
 }
 
 require("impatient")
 
-require("nightfox").setup {
-  groups = {
-    all = {
-      NormalFloat = {
-        link = "Normal"
-      },
-      TreesitterContext = {
-        bg = "palette.bg2"
-      }
-    }
-  }
-}
+-- require("nightfox").setup {
+--   groups = {
+--     all = {
+--       NormalFloat = {
+--         link = "Normal"
+--       },
+--       TreesitterContext = {
+--         bg = "palette.bg2"
+--       }
+--     }
+--   }
+-- }
 
 local cmp = require("cmp")
 cmp.setup {
@@ -129,7 +131,7 @@ local rust_analyzer = {
   }
 }
 
-require("lua-dev").setup()
+require("neodev").setup()
 
 local servers = {
   ["bashls"] = {},
@@ -138,6 +140,7 @@ local servers = {
   ["pyright"] = {},
   ["rust_analyzer"] = rust_analyzer,
   ["sumneko_lua"] = {},
+  ["graphql"] = {},
   ["texlab"] = {},
   ["tsserver"] = {},
 }
@@ -157,10 +160,9 @@ require('nvim-treesitter.configs').setup {
   incremental_selection = {
     enable = true,
     keymaps = {
-      init_selection = '<Tab>',
-      node_incremental = '<Tab>',
-      node_decremental = '<S-Tab>',
-      -- scope_incremental = '<CR>',
+      init_selection = '+',
+      node_incremental = '+',
+      node_decremental = '_',
     },
   },
   textobjects = {
@@ -173,12 +175,18 @@ require('nvim-treesitter.configs').setup {
         ["if"] = "@function.inner",
       },
     },
-  }
+  },
+   context_commentstring = {
+    enable = true,
+  },
 }
+
+vim.keymap.set('n', '<M-j>', require('tree-climber').swap_next)
+vim.keymap.set('n', '<M-k>', require('tree-climber').swap_prev)
 
 -- FZF
 local fzf = require("fzf-lua")
-fzf.register_ui_select()
+-- fzf.register_ui_select()
 fzf.setup {
   winopts = {
     hl_border = "VertSplit",
@@ -253,7 +261,7 @@ vim.keymap.set("n", "<space>x", dap.terminate)
 vim.keymap.set("n", "<space>l", dap.run_last)
 vim.keymap.set("n", "<space>R", dap.repl.toggle)
 vim.keymap.set("n", "<space>b", dap.toggle_breakpoint)
-vim.keymap.set("n", "<space>B", function() dap.set_breakpoint(fn.input('Breakpoint condition: ')) end)
+vim.keymap.set("n", "<space>B", function() dap.set_breakpoint(vim.fn.input('Breakpoint condition: ')) end)
 vim.keymap.set("n", "<down>", dap.step_over)
 vim.keymap.set("n", "<up>", dap.step_back)
 vim.keymap.set("n", "<right>", dap.step_into)
@@ -273,7 +281,7 @@ require("gitsigns").setup {
 }
 EOF
 
-colorscheme nordfox
+colorscheme paper
 
 set breakindent
 set clipboard=unnamedplus
