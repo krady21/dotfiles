@@ -7,27 +7,28 @@ end
 require("paq") {
   {"savq/paq-nvim"};
   {"lewis6991/impatient.nvim"};
-  -- {"EdenEast/nightfox.nvim"};
+  {"EdenEast/nightfox.nvim"};
 
   {"ibhagwan/fzf-lua"};
+  {"neovim/nvim-lspconfig"};
+
   {"hrsh7th/nvim-cmp"};
   {"hrsh7th/cmp-nvim-lsp"};
   {"hrsh7th/cmp-path"};
-  {"neovim/nvim-lspconfig"};
+
   {"nvim-treesitter/nvim-treesitter"};
   {"nvim-treesitter/playground", opt=true};
   {"nvim-treesitter/nvim-treesitter-context"};
   {"nvim-treesitter/nvim-treesitter-textobjects"};
   {"JoosepAlviste/nvim-ts-context-commentstring"};
   {"drybalka/tree-climber.nvim"};
+
   {"mfussenegger/nvim-dap"};
   {"leoluz/nvim-dap-go"};
-  {"nvim-lua/plenary.nvim"};
+
   {"lewis6991/gitsigns.nvim"};
-  {"sindrets/diffview.nvim"};
 
   {"justinmk/vim-dirvish"};
-  {"tommcdo/vim-exchange"};
   {"tpope/vim-commentary"};
   {"tpope/vim-repeat"};
   {"tpope/vim-sleuth"};
@@ -39,18 +40,18 @@ require("paq") {
 
 require("impatient")
 
--- require("nightfox").setup {
---   groups = {
---     all = {
---       NormalFloat = {
---         link = "Normal"
---       },
---       TreesitterContext = {
---         bg = "palette.bg2"
---       }
---     }
---   }
--- }
+require("nightfox").setup {
+  groups = {
+    all = {
+      NormalFloat = {
+        link = "Normal"
+      },
+      TreesitterContext = {
+        bg = "palette.bg2"
+      }
+    }
+  }
+}
 
 local cmp = require("cmp")
 cmp.setup {
@@ -67,47 +68,42 @@ cmp.setup {
 }
 
 -- LSP
-local on_attach = function(client, bufnr)
-  local opts = { noremap = true, silent = true, buffer = bufnr }
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    vim.bo[args.buf].omnifunc =  "v:lua.vim.lsp.omnifunc"
 
-  vim.bo.omnifunc =  "v:lua.vim.lsp.omnifunc"
+    local opts = { noremap = true, silent = true, buffer = args.buf }
 
-  vim.keymap.set("n", "<space>gd", vim.lsp.buf.definition, opts)
-  vim.keymap.set("n", "<space>gi", vim.lsp.buf.implementation, opts)
-  vim.keymap.set("n", "<space>gt", vim.lsp.buf.type_definition, opts)
-  vim.keymap.set("n", "<space>gr", vim.lsp.buf.references, opts)
-  vim.keymap.set("n", "<space>gn", vim.lsp.buf.rename, opts)
-  vim.keymap.set("n", "<space>ga", vim.lsp.buf.code_action, opts)
-  vim.keymap.set("n", "K",         vim.lsp.buf.hover, opts)
-  vim.keymap.set("i", "<C-k>",     vim.lsp.buf.signature_help, opts)
-  vim.keymap.set("n", "<space>=",  vim.lsp.buf.format, opts)
-  vim.keymap.set("n", "<space>w",  vim.lsp.buf.workspace_symbol, opts)
+    vim.keymap.set("n", "<space>gd", vim.lsp.buf.definition, opts)
+    vim.keymap.set("n", "<space>gd", vim.lsp.buf.definition, opts)
+    vim.keymap.set("n", "<space>gi", vim.lsp.buf.implementation, opts)
+    vim.keymap.set("n", "<space>gt", vim.lsp.buf.type_definition, opts)
+    vim.keymap.set("n", "<space>gr", vim.lsp.buf.references, opts)
+    vim.keymap.set("n", "<space>gn", vim.lsp.buf.rename, opts)
+    vim.keymap.set("n", "<space>ga", vim.lsp.buf.code_action, opts)
+    vim.keymap.set("n", "K",         vim.lsp.buf.hover, opts)
+    vim.keymap.set("i", "<C-k>",     vim.lsp.buf.signature_help, opts)
+    vim.keymap.set("n", "<space>=",  vim.lsp.buf.format, opts)
+    vim.keymap.set("n", "<space>w",  vim.lsp.buf.workspace_symbol, opts)
+  end
+})
 
-  vim.keymap.set("n", "<space>q",  vim.diagnostic.setqflist, opts)
-  vim.keymap.set("n", "<space>e",  vim.diagnostic.open_float, opts)
-  vim.keymap.set("n", "[g",        vim.diagnostic.goto_prev, opts)
-  vim.keymap.set("n", "]g",        vim.diagnostic.goto_next, opts)
-end
+vim.keymap.set("n", "<space>q",  vim.diagnostic.setqflist, opts)
+vim.keymap.set("n", "<space>e",  vim.diagnostic.open_float, opts)
+vim.keymap.set("n", "[g",        vim.diagnostic.goto_prev, opts)
+vim.keymap.set("n", "]g",        vim.diagnostic.goto_next, opts)
 
 local border_opts = { border = "rounded" }
 
-vim.diagnostic.config {
+vim.diagnostic.config({
   signs = false,
   underline = false,
   virtual_text = true,
   float = border_opts,
-}
+})
 
-local defaults = {
-  on_attach = on_attach,
-  flags = {
-    debounce_text_changes = 200,
-  },
-  handlers = {
-    ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, border_opts),
-    ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, border_opts),
-  }
-}
+vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, border_opts)
+vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, border_opts)
 
 local gopls = {
   cmd = {"gopls", "serve"},
@@ -146,8 +142,7 @@ local servers = {
 }
 
 local lspconfig = require("lspconfig")
-for server, server_config in pairs(servers) do
-  config = vim.tbl_deep_extend("force", defaults, server_config)
+for server, config in pairs(servers) do
   lspconfig[server].setup(config)
 end
 
@@ -186,7 +181,6 @@ vim.keymap.set('n', '<M-k>', require('tree-climber').swap_prev)
 
 -- FZF
 local fzf = require("fzf-lua")
--- fzf.register_ui_select()
 fzf.setup {
   winopts = {
     hl_border = "VertSplit",
@@ -271,7 +265,7 @@ vim.keymap.set("n", "<left>", dap.step_out)
 require("gitsigns").setup {
   attach_to_untracked = false,
   on_attach = function(bufnr)
-    local gs = require("gitsigns")
+    local gs = package.loaded.gitsigns
     local opts = { noremap = true, buffer = bufnr }
 
     vim.keymap.set("n", "]c", gs.next_hunk, opts)
@@ -281,7 +275,7 @@ require("gitsigns").setup {
 }
 EOF
 
-colorscheme paper
+colorscheme nordfox
 
 set breakindent
 set clipboard=unnamedplus
@@ -314,6 +308,7 @@ set undofile
 set virtualedit=block,insert
 set wildignore=*/.git/*,*/tmp/*,*.o,*.pyc
 set wildignorecase
+set mouse=
 
 if executable("rg")
   set grepprg=rg\ --no-heading\ --vimgrep
@@ -346,6 +341,7 @@ cnoreabbrev Q q
 cnoreabbrev W w
 cnoreabbrev Wq wq
 cnoreabbrev Qa qa
+cnoreabbrev fd Fd
 
 command! Whitespace let b:save = winsaveview() | keeppatterns %s/\s\+$//e | call winrestview(b:save)
 command! Sbd b#|bd#
@@ -357,7 +353,7 @@ augroup Personal
   autocmd BufWritePre * call mkdir(expand("<afile>:h"), "p")
   autocmd TextYankPost * silent! lua vim.highlight.on_yank {timeout = 200}
   autocmd FileType c,cpp setlocal commentstring=//\ %s
-  autocmd FileType go setlocal tabstop=4 shiftwidth=4 noexpandtab
+  autocmd FileType go setlocal tabstop=2 shiftwidth=2 noexpandtab
   autocmd FileType python setlocal makeprg=python%\ %
   autocmd FileType gitcommit setlocal spell spelllang=en
 augroup END
