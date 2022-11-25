@@ -6,39 +6,41 @@ end
 
 require("paq") {
   {"savq/paq-nvim"};
-  {"lewis6991/impatient.nvim"};
   {"EdenEast/nightfox.nvim"};
 
   {"ibhagwan/fzf-lua"};
   {"neovim/nvim-lspconfig"};
+  {"folke/neodev.nvim"};
 
   {"hrsh7th/nvim-cmp"};
   {"hrsh7th/cmp-nvim-lsp"};
   {"hrsh7th/cmp-path"};
+  {"dcampos/nvim-snippy"};
+  {"dcampos/cmp-snippy"};
 
   {"nvim-treesitter/nvim-treesitter"};
   {"nvim-treesitter/playground", opt=true};
   {"nvim-treesitter/nvim-treesitter-context"};
   {"nvim-treesitter/nvim-treesitter-textobjects"};
   {"JoosepAlviste/nvim-ts-context-commentstring"};
+  {"windwp/nvim-ts-autotag"};
   {"drybalka/tree-climber.nvim"};
+  {"Wansmer/treesj"};
 
   {"mfussenegger/nvim-dap"};
   {"leoluz/nvim-dap-go"};
 
   {"lewis6991/gitsigns.nvim"};
 
+  {"andymass/vim-matchup"};
   {"justinmk/vim-dirvish"};
+  {"svermeulen/vim-subversive"};
+  {"tommcdo/vim-exchange"};
   {"tpope/vim-commentary"};
   {"tpope/vim-repeat"};
   {"tpope/vim-sleuth"};
   {"tpope/vim-surround"};
-
-  {"nanotee/luv-vimdocs"};
-  {"folke/neodev.nvim"};
 }
-
-require("impatient")
 
 require("nightfox").setup {
   groups = {
@@ -55,6 +57,11 @@ require("nightfox").setup {
 
 local cmp = require("cmp")
 cmp.setup {
+  snippet = {
+    expand = function(args)
+      require('snippy').expand_snippet(args.body)
+    end,
+  },
   preselect = cmp.PreselectMode.None,
   mapping = cmp.mapping.preset.insert({
     ["<C-n>"] = cmp.mapping.select_next_item { behavior = cmp.SelectBehavior.Insert },
@@ -64,6 +71,7 @@ cmp.setup {
   sources = {
     { name = "nvim_lsp" },
     { name = "path" },
+    { name = "snippy" },
   }
 }
 
@@ -88,10 +96,10 @@ vim.api.nvim_create_autocmd("LspAttach", {
   end
 })
 
-vim.keymap.set("n", "<space>q",  vim.diagnostic.setqflist, opts)
-vim.keymap.set("n", "<space>e",  vim.diagnostic.open_float, opts)
-vim.keymap.set("n", "[g",        vim.diagnostic.goto_prev, opts)
-vim.keymap.set("n", "]g",        vim.diagnostic.goto_next, opts)
+vim.keymap.set("n", "<space>q", vim.diagnostic.setqflist, opts)
+vim.keymap.set("n", "<space>e", vim.diagnostic.open_float, opts)
+vim.keymap.set("n", "[g",       vim.diagnostic.goto_prev, opts)
+vim.keymap.set("n", "]g",       vim.diagnostic.goto_next, opts)
 
 local border_opts = { border = "rounded" }
 
@@ -105,7 +113,14 @@ vim.diagnostic.config({
 vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, border_opts)
 vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, border_opts)
 
-local gopls = {
+local lspconfig = require("lspconfig")
+local servers = { "bashls", "clangd", "pyright", "graphql", "texlab", "tsserver" }
+
+for _, server in pairs(servers) do
+  lspconfig[server].setup{}
+end
+
+lspconfig.gopls.setup {
   cmd = {"gopls", "serve"},
   settings = {
     gopls = {
@@ -117,7 +132,7 @@ local gopls = {
   }
 }
 
-local rust_analyzer = {
+lspconfig.rust_analyzer.setup {
   settings = {
     ["rust-analyzer"] = {
       cargo = {
@@ -127,24 +142,16 @@ local rust_analyzer = {
   }
 }
 
-require("neodev").setup()
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities.textDocument.completion.completionItem.snippetSupport = true
 
-local servers = {
-  ["bashls"] = {},
-  ["clangd"] = {},
-  ["gopls"] = gopls,
-  ["pyright"] = {},
-  ["rust_analyzer"] = rust_analyzer,
-  ["sumneko_lua"] = {},
-  ["graphql"] = {},
-  ["texlab"] = {},
-  ["tsserver"] = {},
+lspconfig.cssls.setup {
+  capabilities = capabilities,
 }
 
-local lspconfig = require("lspconfig")
-for server, config in pairs(servers) do
-  lspconfig[server].setup(config)
-end
+lspconfig.html.setup {
+  capabilities = capabilities,
+}
 
 -- Treesitter
 require('nvim-treesitter.configs').setup {
@@ -162,19 +169,35 @@ require('nvim-treesitter.configs').setup {
   },
   textobjects = {
     select = {
+      lookahead = true,
       enable  = true,
       keymaps = {
         ["ac"] = "@class.outer",
         ["ic"] = "@class.inner",
         ["af"] = "@function.outer",
         ["if"] = "@function.inner",
+        ["aa"] = "@parameter.outer",
+        ["ia"] = "@parameter.inner",
       },
     },
   },
-   context_commentstring = {
+  context_commentstring = {
+    enable = true,
+  },  
+  matchup = {
+    enable = true,
+  },
+  autotag = {
     enable = true,
   },
 }
+
+vim.g.matchup_matchparen_offscreen = {}
+
+require('treesj').setup({})
+
+vim.keymap.set('n', '<space>gj', "<cmd>TSJJoin<CR>")
+vim.keymap.set('n', '<space>gk', "<cmd>TSJSplit<CR>")
 
 vim.keymap.set('n', '<M-j>', require('tree-climber').swap_next)
 vim.keymap.set('n', '<M-k>', require('tree-climber').swap_prev)
@@ -289,7 +312,7 @@ set lazyredraw
 set listchars=tab:\|\ ,trail:∙,nbsp:•
 set nohlsearch
 set noswapfile
-set nowrap
+set signcolumn=yes
 set nrformats+=alpha
 set number
 set path=.,,**
@@ -310,6 +333,9 @@ set wildignore=*/.git/*,*/tmp/*,*.o,*.pyc
 set wildignorecase
 set mouse=
 
+" set foldmethod=expr
+" set foldexpr=nvim_treesitter#foldexpr()
+
 if executable("rg")
   set grepprg=rg\ --no-heading\ --vimgrep
   set grepformat=%f:%l:%c:%m
@@ -322,6 +348,13 @@ noremap L $
 
 inoremap {<CR> {<CR>}<C-o>O
 inoremap [<CR> [<CR>]<C-o>O
+inoremap (<CR> (<CR>)<C-o>O
+
+nmap R  <Plug>(SubversiveSubstitute)
+nmap RR <Plug>(SubversiveSubstituteLine)
+
+nnoremap <expr> j v:count ? 'j' : 'gj'
+nnoremap <expr> k v:count ? 'k' : 'gk'
 
 nnoremap gp `[v`]
 nnoremap <space><space> <C-^>
