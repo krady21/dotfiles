@@ -1,3 +1,5 @@
+require("impatient")
+
 local fn, api, cmd = vim.fn, vim.api, vim.cmd
 local opt, optl = vim.opt, vim.opt_local
 local map = vim.keymap.set
@@ -39,9 +41,11 @@ require("paq") {
   { "leoluz/nvim-dap-go" },
 
   { "lewis6991/gitsigns.nvim" },
+  { "klen/nvim-test" },
 
   { "andymass/vim-matchup" },
   { "justinmk/vim-dirvish" },
+  { "tommcdo/vim-exchange" },
   { "tpope/vim-commentary" },
   { "tpope/vim-repeat" },
   { "tpope/vim-sleuth" },
@@ -49,8 +53,6 @@ require("paq") {
 }
 
 cmd.colorscheme("nordfox")
-
-require("impatient")
 
 opt.breakindent = true
 opt.clipboard = "unnamedplus"
@@ -65,13 +67,14 @@ opt.lazyredraw = true
 opt.listchars = "tab:> ,trail:∙,nbsp:•"
 opt.mouse = ""
 opt.nrformats:append("alpha")
-opt.number = true
+opt.number = false
 opt.path = ".,,**"
-opt.relativenumber = true
+opt.relativenumber = false
 opt.report = 0
 opt.shiftwidth = 4
 opt.shortmess:append("c")
 opt.showbreak = "↳"
+opt.signcolumn = "yes"
 opt.smartcase = true
 opt.softtabstop = 4
 opt.splitbelow = true
@@ -83,6 +86,10 @@ opt.undofile = true
 opt.virtualedit = "block,insert"
 opt.wildignore = "*/.git/*,*/tmp/*,*.swp,*.o,*.pyc"
 opt.wildignorecase = true
+
+opt.foldmethod = "expr"
+opt.foldenable = false
+opt.foldexpr = "nvim_treesitter#foldexpr()"
 
 if fn.executable("rg") then
   opt.grepprg = "rg --no-heading --vimgrep"
@@ -107,13 +114,24 @@ map("n", "<C-k>", "<cmd>cprev<CR>")
 map("n", "<space>dt", "<cmd>windo diffthis<CR>")
 map("n", "<space>do", "<cmd>windo diffoff<CR>")
 
-map("n", "<F1>", "<cmd>set invrnu<CR>")
+map("n", "<F1>", "<cmd>set invnumber<CR>")
 map("n", "<F2>", "<cmd>set invspell<CR>")
 map("n", "<F3>", "<cmd>set invwrap<CR>")
 map("n", "<F4>", "<cmd>set invlist<CR>")
 
 map("n", "j", "v:count ? 'j' : 'gj'", { expr = true })
 map("n", "k", "v:count ? 'k' : 'gk'", { expr = true })
+
+map({ "n", "x" }, "c", [["_c]])
+map({ "n", "x" }, "C", [["_C]])
+
+map("n", "dd", function()
+  if api.nvim_get_current_line():match("^%s*$") then
+    return '"_dd'
+  else
+    return "dd"
+  end
+end, { expr = true })
 
 cmd.cnoreabbrev("Q q")
 cmd.cnoreabbrev("W w")
@@ -254,10 +272,16 @@ lsp.handlers["textDocument/hover"] = lsp.with(lsp.handlers.hover, border_opts)
 lsp.handlers["textDocument/signatureHelp"] = lsp.with(lsp.handlers.signature_help, border_opts)
 
 local lspconfig = require("lspconfig")
-local servers = { "bashls", "clangd", "pyright", "graphql", "texlab", "tsserver", "sumneko_lua" }
+local servers =
+  { "bashls", "clangd", "pyright", "graphql", "texlab", "tsserver", "sumneko_lua", "html", "cssls" }
+
+local capabilities = lsp.protocol.make_client_capabilities()
+capabilities.textDocument.completion.completionItem.snippetSupport = true
 
 for _, server in pairs(servers) do
-  lspconfig[server].setup {}
+  lspconfig[server].setup {
+    capabilities = capabilities,
+  }
 end
 
 lspconfig.gopls.setup {
@@ -280,17 +304,6 @@ lspconfig.rust_analyzer.setup {
       },
     },
   },
-}
-
-local capabilities = lsp.protocol.make_client_capabilities()
-capabilities.textDocument.completion.completionItem.snippetSupport = true
-
-lspconfig.cssls.setup {
-  capabilities = capabilities,
-}
-
-lspconfig.html.setup {
-  capabilities = capabilities,
 }
 
 -- Treesitter
@@ -337,8 +350,7 @@ vim.g.matchup_matchparen_offscreen = {}
 
 require("treesj").setup {}
 
-map("n", "<space>gj", "<cmd>TSJJoin<CR>")
-map("n", "<space>gk", "<cmd>TSJSplit<CR>")
+map("n", "<space>gj", "<cmd>TSJToggle<CR>")
 
 map("n", "<M-j>", require("tree-climber").swap_next)
 map("n", "<M-k>", require("tree-climber").swap_prev)
@@ -354,8 +366,10 @@ fzf.setup {
   },
   keymap = {
     fzf = {
-      ["ctrl-a"] = "toggle-all",
-      ["ctrl-b"] = "beginning-of-line",
+      ["ctrl-q"] = "toggle-all",
+      ["ctrl-a"] = "select-all",
+      ["ctrl-f"] = "half-page-down",
+      ["ctrl-b"] = "half-page-up",
     },
   },
   fzf_colors = {
@@ -436,3 +450,9 @@ require("gitsigns").setup {
     map("n", "<space>p", gs.preview_hunk, opts)
   end,
 }
+
+require("nvim-test").setup()
+
+map("n", "<F5>", "<cmd>TestNearest<CR>")
+map("n", "<F6>", "<cmd>TestFile<CR>")
+map("n", "<F6>", "<cmd>TestSuite<CR>")
