@@ -1,7 +1,7 @@
 require("impatient")
 
 local fn, api, cmd = vim.fn, vim.api, vim.cmd
-local opt, optl = vim.opt, vim.opt_local
+local g, opt, optl = vim.g, vim.opt, vim.opt_local
 local map = vim.keymap.set
 local lsp, diagnostic = vim.lsp, vim.diagnostic
 
@@ -20,13 +20,10 @@ require("paq") {
 
   { "ibhagwan/fzf-lua" },
   { "neovim/nvim-lspconfig" },
-  { "folke/neodev.nvim" },
 
   { "hrsh7th/nvim-cmp" },
   { "hrsh7th/cmp-nvim-lsp" },
   { "hrsh7th/cmp-path" },
-  { "dcampos/nvim-snippy" },
-  { "dcampos/cmp-snippy" },
 
   { "nvim-treesitter/nvim-treesitter" },
   { "nvim-treesitter/playground", opt = true },
@@ -44,7 +41,9 @@ require("paq") {
   { "klen/nvim-test" },
 
   { "andymass/vim-matchup" },
+  { "junegunn/vim-peekaboo" },
   { "justinmk/vim-dirvish" },
+  { "mattn/emmet-vim" },
   { "tommcdo/vim-exchange" },
   { "tpope/vim-commentary" },
   { "tpope/vim-repeat" },
@@ -190,7 +189,7 @@ autocmd("FileType", {
 autocmd("FileType", {
   group = gid,
   pattern = "python",
-  callback = function() optl.makeprg = "python3% %" end,
+  callback = function() optl.makeprg = [[python3 %]] end,
 })
 
 autocmd("FileType", {
@@ -217,9 +216,6 @@ require("nightfox").setup {
 
 local cmp = require("cmp")
 cmp.setup {
-  snippet = {
-    expand = function(args) require("snippy").expand_snippet(args.body) end,
-  },
   preselect = cmp.PreselectMode.None,
   mapping = cmp.mapping.preset.insert {
     ["<C-n>"] = cmp.mapping.select_next_item { behavior = cmp.SelectBehavior.Insert },
@@ -229,7 +225,6 @@ cmp.setup {
   sources = {
     { name = "nvim_lsp" },
     { name = "path" },
-    { name = "snippy" },
   },
 }
 
@@ -312,14 +307,6 @@ require("nvim-treesitter.configs").setup {
     enable = true,
     additional_vim_regex_highlighting = false,
   },
-  incremental_selection = {
-    enable = true,
-    keymaps = {
-      init_selection = "+",
-      node_incremental = "+",
-      node_decremental = "_",
-    },
-  },
   textobjects = {
     select = {
       lookahead = true,
@@ -346,11 +333,9 @@ require("nvim-treesitter.configs").setup {
 }
 
 -- matchup
-vim.g.matchup_matchparen_offscreen = {}
+g.matchup_matchparen_offscreen = {}
 
-require("treesj").setup {}
-
-map("n", "<space>gj", "<cmd>TSJToggle<CR>")
+map("n", "<space>gj", require("treesj").toggle)
 
 map("n", "<M-j>", require("tree-climber").swap_next)
 map("n", "<M-k>", require("tree-climber").swap_prev)
@@ -438,7 +423,7 @@ map("n", "<up>", dap.step_back)
 map("n", "<right>", dap.step_into)
 map("n", "<left>", dap.step_out)
 
--- Gitsigns
+-- gitsigns
 require("gitsigns").setup {
   attach_to_untracked = false,
   on_attach = function(bufnr)
@@ -451,6 +436,7 @@ require("gitsigns").setup {
   end,
 }
 
+-- nvim-test
 require("nvim-test").setup()
 
 map("n", "<F5>", "<cmd>TestNearest<CR>")
