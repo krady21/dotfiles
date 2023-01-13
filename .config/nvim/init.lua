@@ -1,4 +1,3 @@
-require("impatient")
 
 local fn, api, cmd = vim.fn, vim.api, vim.cmd
 local g, opt, optl = vim.g, vim.opt, vim.opt_local
@@ -16,10 +15,11 @@ end
 require("paq") {
   { "savq/paq-nvim" },
   { "EdenEast/nightfox.nvim" },
-  { "lewis6991/impatient.nvim" },
+  { "https://gitlab.com/yorickpeterse/nvim-grey" },
 
   { "ibhagwan/fzf-lua" },
   { "neovim/nvim-lspconfig" },
+  { "elihunter173/dirbuf.nvim" },
 
   { "hrsh7th/nvim-cmp" },
   { "hrsh7th/cmp-nvim-lsp" },
@@ -30,9 +30,9 @@ require("paq") {
   { "nvim-treesitter/nvim-treesitter-context" },
   { "nvim-treesitter/nvim-treesitter-textobjects" },
   { "JoosepAlviste/nvim-ts-context-commentstring" },
+  { "RRethy/nvim-treesitter-endwise" },
   { "windwp/nvim-ts-autotag" },
   { "drybalka/tree-climber.nvim" },
-  { "Wansmer/treesj" },
 
   { "mfussenegger/nvim-dap" },
   { "leoluz/nvim-dap-go" },
@@ -42,16 +42,16 @@ require("paq") {
 
   { "andymass/vim-matchup" },
   { "junegunn/vim-peekaboo" },
-  { "justinmk/vim-dirvish" },
   { "mattn/emmet-vim" },
   { "tommcdo/vim-exchange" },
+  { "svermeulen/vim-subversive" },
   { "tpope/vim-commentary" },
   { "tpope/vim-repeat" },
   { "tpope/vim-sleuth" },
   { "tpope/vim-surround" },
 }
 
-cmd.colorscheme("nordfox")
+cmd.colorscheme("grey")
 
 opt.breakindent = true
 opt.clipboard = "unnamedplus"
@@ -123,6 +123,8 @@ map("n", "k", "v:count ? 'k' : 'gk'", { expr = true })
 
 map({ "n", "x" }, "c", [["_c]])
 map({ "n", "x" }, "C", [["_C]])
+
+map("x", "p", [["_dP]])
 
 map("n", "dd", function()
   if api.nvim_get_current_line():match("^%s*$") then
@@ -198,6 +200,15 @@ autocmd("FileType", {
   callback = function()
     optl.spell = true
     optl.spelllang = "en"
+  end,
+})
+
+autocmd("FileType", {
+  group = gid,
+  pattern = "dirbuf",
+  callback = function()
+    -- muscle memory from dirvish
+    map("n", "gq", "<cmd>DirbufQuit<cr>")
   end,
 })
 
@@ -330,12 +341,13 @@ require("nvim-treesitter.configs").setup {
   autotag = {
     enable = true,
   },
+  endwise = {
+    enable = true,
+  },
 }
 
 -- matchup
 g.matchup_matchparen_offscreen = {}
-
-map("n", "<space>gj", require("treesj").toggle)
 
 map("n", "<M-j>", require("tree-climber").swap_next)
 map("n", "<M-k>", require("tree-climber").swap_prev)
@@ -362,7 +374,7 @@ fzf.setup {
     ["bg"] = { "bg", "Normal" },
     ["hl"] = { "fg", "Comment" },
     ["fg+"] = { "fg", "Normal" },
-    ["bg+"] = { "bg", "CursorLine" },
+    ["bg+"] = { "bg", "Normal" },
     ["hl+"] = { "fg", "Statement" },
     ["info"] = { "fg", "PreProc" },
     ["prompt"] = { "fg", "Conditional" },
@@ -442,3 +454,5 @@ require("nvim-test").setup()
 map("n", "<F5>", "<cmd>TestNearest<CR>")
 map("n", "<F6>", "<cmd>TestFile<CR>")
 map("n", "<F6>", "<cmd>TestSuite<CR>")
+
+map("n", "x", "<plug>(SubversiveSubstitute)")

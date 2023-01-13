@@ -7,6 +7,9 @@
     editor = nvim
     pager = delta
 
+[delta]
+    light = true
+
 [diff]
     tool = vimdiff3
     algorithm = histogram
@@ -25,7 +28,8 @@
     verbose = true
 
 [pull]
-    ff = only
+    rebase = true
+    ; ff = only
 
 [push]
     default = simple
@@ -45,10 +49,15 @@
     c = commit 
     ca = commit --amend
     co = checkout
+    d = diff
+    f = push -u origin HEAD --force-with-lease
     l = log --oneline --graph --decorate
     last = log -1 HEAD --stat
-    p = push -u
-    f = push --force-with-lease
+    p = push -u origin HEAD
+    pom = pull origin master
+    pum = pull upstream master
+    ra = rebase --abort
+    rc = rebase --continue
     rh = reset --hard HEAD
     s = status
     su = submodule update --init --recursive
