@@ -8,7 +8,7 @@
     pager = delta
 
 [delta]
-    light = true
+    light = false
 
 [diff]
     tool = vimdiff3
@@ -50,16 +50,22 @@
     ca = commit --amend
     co = checkout
     d = diff
-    f = push -u origin HEAD --force-with-lease
+    s = status
+
     l = log --oneline --graph --decorate
     last = log -1 HEAD --stat
+
     p = push -u origin HEAD
+    f = push -u origin HEAD --force-with-lease
+
     pom = pull origin master
     pum = pull upstream master
+
     ra = rebase --abort
     rc = rebase --continue
+    ri = rebase --interactive
+
     rh = reset --hard HEAD
-    s = status
     su = submodule update --init --recursive
 
     fixup = "!git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -c -7 | xargs -o git commit --fixup"

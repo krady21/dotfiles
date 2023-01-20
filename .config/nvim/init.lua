@@ -1,3 +1,4 @@
+require('impatient')
 
 local fn, api, cmd = vim.fn, vim.api, vim.cmd
 local g, opt, optl = vim.g, vim.opt, vim.opt_local
@@ -15,7 +16,6 @@ end
 require("paq") {
   { "savq/paq-nvim" },
   { "EdenEast/nightfox.nvim" },
-  { "https://gitlab.com/yorickpeterse/nvim-grey" },
 
   { "ibhagwan/fzf-lua" },
   { "neovim/nvim-lspconfig" },
@@ -37,8 +37,11 @@ require("paq") {
   { "mfussenegger/nvim-dap" },
   { "leoluz/nvim-dap-go" },
 
+  { "nvim-lua/plenary.nvim" },
+  { "sindrets/diffview.nvim" },
+
   { "lewis6991/gitsigns.nvim" },
-  { "klen/nvim-test" },
+  { "lewis6991/impatient.nvim" },
 
   { "andymass/vim-matchup" },
   { "junegunn/vim-peekaboo" },
@@ -51,7 +54,7 @@ require("paq") {
   { "tpope/vim-surround" },
 }
 
-cmd.colorscheme("grey")
+cmd.colorscheme("nordfox")
 
 opt.breakindent = true
 opt.clipboard = "unnamedplus"
@@ -208,6 +211,7 @@ autocmd("FileType", {
   pattern = "dirbuf",
   callback = function()
     -- muscle memory from dirvish
+    optl.cursorline = true
     map("n", "gq", "<cmd>DirbufQuit<cr>")
   end,
 })
@@ -354,6 +358,7 @@ map("n", "<M-k>", require("tree-climber").swap_prev)
 
 -- FZF
 local fzf = require("fzf-lua")
+-- fzf.register_ui_select()
 fzf.setup {
   winopts = {
     hl_border = "VertSplit",
@@ -374,7 +379,7 @@ fzf.setup {
     ["bg"] = { "bg", "Normal" },
     ["hl"] = { "fg", "Comment" },
     ["fg+"] = { "fg", "Normal" },
-    ["bg+"] = { "bg", "Normal" },
+    ["bg+"] = { "bg", "CursorLine" },
     ["hl+"] = { "fg", "Statement" },
     ["info"] = { "fg", "PreProc" },
     ["prompt"] = { "fg", "Conditional" },
@@ -448,11 +453,4 @@ require("gitsigns").setup {
   end,
 }
 
--- nvim-test
-require("nvim-test").setup()
-
-map("n", "<F5>", "<cmd>TestNearest<CR>")
-map("n", "<F6>", "<cmd>TestFile<CR>")
-map("n", "<F6>", "<cmd>TestSuite<CR>")
-
-map("n", "x", "<plug>(SubversiveSubstitute)")
+map("n", "<space>x", "<plug>(SubversiveSubstitute)")
