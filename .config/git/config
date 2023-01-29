@@ -46,8 +46,12 @@
 [alias]
     a = add
     aa = add -A
+
     c = commit 
     ca = commit --amend
+    can = commit --amend --no-edit
+    todo = commit -m "TODO"
+
     co = checkout
     d = diff
     s = status
@@ -55,8 +59,8 @@
     l = log --oneline --graph --decorate
     last = log -1 HEAD --stat
 
-    p = push -u origin HEAD
-    f = push -u origin HEAD --force-with-lease
+    p = push origin HEAD
+    f = push origin HEAD --force-with-lease
 
     pom = pull origin master
     pum = pull upstream master

@@ -333,6 +333,7 @@ require("nvim-treesitter.configs").setup {
         ["if"] = "@function.inner",
         ["aa"] = "@parameter.outer",
         ["ia"] = "@parameter.inner",
+        ["iC"] = "@conditional.inner",
       },
     },
   },
@@ -353,8 +354,8 @@ require("nvim-treesitter.configs").setup {
 -- matchup
 g.matchup_matchparen_offscreen = {}
 
-map("n", "<M-j>", require("tree-climber").swap_next)
-map("n", "<M-k>", require("tree-climber").swap_prev)
+map("n", "<M-j>", function() require("tree-climber").swap_next() end)
+map("n", "<M-k>", function() require("tree-climber").swap_prev() end)
 
 -- FZF
 local fzf = require("fzf-lua")
@@ -429,16 +430,16 @@ dap.configurations.rust = lldb
 
 require("dap-go").setup()
 
-map("n", "<space>c", dap.continue)
-map("n", "<space>x", dap.terminate)
-map("n", "<space>l", dap.run_last)
-map("n", "<space>R", dap.repl.toggle)
-map("n", "<space>b", dap.toggle_breakpoint)
+map("n", "<space>c", function() dap.continue() end)
+map("n", "<space>x", function() dap.terminate() end)
+map("n", "<space>l", function() dap.run_last() end)
+map("n", "<space>R", function() dap.repl.toggle() end)
+map("n", "<space>b", function() dap.toggle_breakpoint() end)
 map("n", "<space>B", function() dap.set_breakpoint(fn.input("Condition: ")) end)
-map("n", "<down>", dap.step_over)
-map("n", "<up>", dap.step_back)
-map("n", "<right>", dap.step_into)
-map("n", "<left>", dap.step_out)
+map("n", "<down>", function() dap.step_over() end)
+map("n", "<up>", function() dap.step_back() end)
+map("n", "<right>", function() dap.step_into() end)
+map("n", "<left>", function() dap.step_out() end)
 
 -- gitsigns
 require("gitsigns").setup {
