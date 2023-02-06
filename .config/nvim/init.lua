@@ -1,5 +1,3 @@
-require('impatient')
-
 local fn, api, cmd = vim.fn, vim.api, vim.cmd
 local g, opt, optl = vim.g, vim.opt, vim.opt_local
 local map = vim.keymap.set
@@ -20,6 +18,8 @@ require("paq") {
   { "ibhagwan/fzf-lua" },
   { "neovim/nvim-lspconfig" },
   { "elihunter173/dirbuf.nvim" },
+  { "gbprod/substitute.nvim" },
+  { "milisims/nvim-luaref" },
 
   { "hrsh7th/nvim-cmp" },
   { "hrsh7th/cmp-nvim-lsp" },
@@ -41,13 +41,9 @@ require("paq") {
   { "sindrets/diffview.nvim" },
 
   { "lewis6991/gitsigns.nvim" },
-  { "lewis6991/impatient.nvim" },
 
   { "andymass/vim-matchup" },
   { "junegunn/vim-peekaboo" },
-  { "mattn/emmet-vim" },
-  { "tommcdo/vim-exchange" },
-  { "svermeulen/vim-subversive" },
   { "tpope/vim-commentary" },
   { "tpope/vim-repeat" },
   { "tpope/vim-sleuth" },
@@ -62,6 +58,7 @@ opt.completeopt = "menuone,noselect"
 opt.dictionary = "/usr/share/dict/words"
 opt.diffopt:append("indent-heuristic,algorithm:histogram")
 opt.expandtab = true
+opt.gdefault = true
 opt.hlsearch = false
 opt.ignorecase = true
 opt.incsearch = true
@@ -130,11 +127,7 @@ map({ "n", "x" }, "C", [["_C]])
 map("x", "p", [["_dP]])
 
 map("n", "dd", function()
-  if api.nvim_get_current_line():match("^%s*$") then
-    return '"_dd'
-  else
-    return "dd"
-  end
+  return api.nvim_get_current_line():match("^%s*$") and '"_dd' or "dd"
 end, { expr = true })
 
 cmd.cnoreabbrev("Q q")
@@ -398,6 +391,7 @@ local rg_opts =
 
 map("n", "<space>f", function() fzf.files() end)
 map("n", "<space>F", function() fzf.files { fd_opts = fd_opts } end)
+map("n", "<space>t", function() fzf.buffers() end)
 map("n", "<space>G", function() fzf.git_status() end)
 map("n", "<space>h", function() fzf.oldfiles() end)
 map("n", "<space>s", function() fzf.live_grep() end)
@@ -430,10 +424,9 @@ dap.configurations.rust = lldb
 
 require("dap-go").setup()
 
-map("n", "<space>c", function() dap.continue() end)
-map("n", "<space>x", function() dap.terminate() end)
-map("n", "<space>l", function() dap.run_last() end)
-map("n", "<space>R", function() dap.repl.toggle() end)
+map("n", "<F5>", function() dap.continue() end)
+map("n", "<F6>", function() dap.run_last() end)
+map("n", "<F7>", function() dap.terminate() end)
 map("n", "<space>b", function() dap.toggle_breakpoint() end)
 map("n", "<space>B", function() dap.set_breakpoint(fn.input("Condition: ")) end)
 map("n", "<down>", function() dap.step_over() end)
@@ -454,4 +447,9 @@ require("gitsigns").setup {
   end,
 }
 
-map("n", "<space>x", "<plug>(SubversiveSubstitute)")
+-- substitute
+require("substitute").setup()
+
+map("n", "<space>x", function() require('substitute').operator() end)
+map("n", "cx", function() require('substitute.exchange').operator() end)
+map("n", "cxc", function() require('substitute.exchange').cancel() end)
