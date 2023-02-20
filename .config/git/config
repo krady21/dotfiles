@@ -57,7 +57,7 @@
     s = status
 
     l = log --oneline --graph --decorate
-    last = log -1 HEAD --stat
+    last = "!git log -1 HEAD --stat; echo -n $(git rev-parse HEAD) | xsel -ib"
 
     p = push origin HEAD
     f = push origin HEAD --force-with-lease

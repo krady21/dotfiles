@@ -6,9 +6,9 @@ local lsp, diagnostic = vim.lsp, vim.diagnostic
 local command = vim.api.nvim_create_user_command
 local autocmd = vim.api.nvim_create_autocmd
 
-local install_path = fn.stdpath("data") .. "/site/pack/paqs/start/paq-nvim"
-if fn.empty(fn.glob(install_path)) > 0 then
-  fn.system { "git", "clone", "--depth", "1", "https://github.com/savq/paq-nvim.git", install_path }
+local paq_path = fn.stdpath("data") .. "/site/pack/paqs/start/paq-nvim"
+if fn.empty(fn.glob(paq_path)) > 0 then
+  fn.system { "git", "clone", "--depth", "1", "https://github.com/savq/paq-nvim.git", paq_path }
 end
 
 require("paq") {
@@ -24,6 +24,8 @@ require("paq") {
   { "hrsh7th/nvim-cmp" },
   { "hrsh7th/cmp-nvim-lsp" },
   { "hrsh7th/cmp-path" },
+  { "dcampos/cmp-snippy" },
+  { "dcampos/nvim-snippy" },
 
   { "nvim-treesitter/nvim-treesitter" },
   { "nvim-treesitter/playground", opt = true },
@@ -41,6 +43,7 @@ require("paq") {
   { "sindrets/diffview.nvim" },
 
   { "lewis6991/gitsigns.nvim" },
+  { "rhysd/conflict-marker.vim" },
 
   { "andymass/vim-matchup" },
   { "junegunn/vim-peekaboo" },
@@ -48,6 +51,21 @@ require("paq") {
   { "tpope/vim-repeat" },
   { "tpope/vim-sleuth" },
   { "tpope/vim-surround" },
+
+  { "dstein64/vim-startuptime", opt = true },
+}
+
+require("nightfox").setup {
+  groups = {
+    all = {
+      NormalFloat = {
+        link = "Normal",
+      },
+      TreesitterContext = {
+        bg = "palette.bg2",
+      },
+    },
+  },
 }
 
 cmd.colorscheme("nordfox")
@@ -95,8 +113,6 @@ if fn.executable("rg") then
   opt.grepformat = "%f:%l:%c:%m"
 end
 
-map("t", "<Esc>", [[<C-\><C-n>]])
-
 map({ "v", "n" }, "H", "^")
 map({ "v", "n" }, "L", "$")
 
@@ -134,6 +150,8 @@ cmd.cnoreabbrev("Q q")
 cmd.cnoreabbrev("W w")
 cmd.cnoreabbrev("Wq wq")
 cmd.cnoreabbrev("Qa qa")
+
+cmd.cnoreabbrev("git Git")
 
 command("Whitespace", function()
   local save = fn.winsaveview()
@@ -209,30 +227,21 @@ autocmd("FileType", {
   end,
 })
 
-require("nightfox").setup {
-  groups = {
-    all = {
-      NormalFloat = {
-        link = "Normal",
-      },
-      TreesitterContext = {
-        bg = "palette.bg2",
-      },
-    },
-  },
-}
-
 local cmp = require("cmp")
 cmp.setup {
+  snippet = {
+    expand = function(args) require("snippy").expand_snippet(args.body) end,
+  },
   preselect = cmp.PreselectMode.None,
   mapping = cmp.mapping.preset.insert {
     ["<C-n>"] = cmp.mapping.select_next_item { behavior = cmp.SelectBehavior.Insert },
     ["<C-p>"] = cmp.mapping.select_prev_item { behavior = cmp.SelectBehavior.Insert },
-    ["<C-y>"] = cmp.mapping.confirm { select = false },
+    ["<C-y>"] = cmp.mapping.confirm { select = true },
   },
   sources = {
-    { name = "nvim_lsp" },
     { name = "path" },
+    { name = "nvim_lsp" },
+    { name = "snippy" },
   },
 }
 
@@ -254,6 +263,9 @@ autocmd("LspAttach", {
     map("i", "<C-k>", lsp.buf.signature_help, opts)
     map("n", "<space>=", lsp.buf.format, opts)
     map("n", "<space>w", lsp.buf.workspace_symbol, opts)
+
+    local client = lsp.get_client_by_id(args.data.client_id)
+    client.server_capabilities.semanticTokensProvider = nil
   end,
 })
 
@@ -275,8 +287,18 @@ lsp.handlers["textDocument/hover"] = lsp.with(lsp.handlers.hover, border_opts)
 lsp.handlers["textDocument/signatureHelp"] = lsp.with(lsp.handlers.signature_help, border_opts)
 
 local lspconfig = require("lspconfig")
-local servers =
-  { "bashls", "clangd", "pyright", "graphql", "texlab", "tsserver", "sumneko_lua", "html", "cssls" }
+local servers = {
+  "bashls",
+  "clangd",
+  "pyright",
+  "graphql",
+  "texlab",
+  "tsserver",
+  "lua_ls",
+  "html",
+  "cssls",
+  "emmet_ls",
+}
 
 local capabilities = lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
@@ -293,6 +315,7 @@ lspconfig.gopls.setup {
     gopls = {
       analyses = {
         unusedparams = true,
+        nilness = true,
       },
       staticcheck = true,
     },
@@ -300,10 +323,11 @@ lspconfig.gopls.setup {
 }
 
 lspconfig.rust_analyzer.setup {
+  cmd = { "rustup", "run", "nightly", "rust-analyzer" },
   settings = {
     ["rust-analyzer"] = {
       cargo = {
-        allFeatures = true,
+        features = "all",
       },
     },
   },
@@ -450,6 +474,6 @@ require("gitsigns").setup {
 -- substitute
 require("substitute").setup()
 
-map("n", "<space>x", function() require('substitute').operator() end)
-map("n", "cx", function() require('substitute.exchange').operator() end)
-map("n", "cxc", function() require('substitute.exchange').cancel() end)
+map("n", "<space>x", function() require("substitute").operator() end)
+map("n", "cx", function() require("substitute.exchange").operator() end)
+map("n", "cxc", function() require("substitute.exchange").cancel() end)
