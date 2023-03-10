@@ -2,6 +2,7 @@ local fn, api, cmd = vim.fn, vim.api, vim.cmd
 local g, opt, optl = vim.g, vim.opt, vim.opt_local
 local map = vim.keymap.set
 local lsp, diagnostic = vim.lsp, vim.diagnostic
+local fs = vim.fs
 
 local command = vim.api.nvim_create_user_command
 local autocmd = vim.api.nvim_create_autocmd
@@ -17,6 +18,7 @@ require("paq") {
 
   { "ibhagwan/fzf-lua" },
   { "neovim/nvim-lspconfig" },
+  { "mfussenegger/nvim-jdtls" },
   { "elihunter173/dirbuf.nvim" },
   { "gbprod/substitute.nvim" },
   { "milisims/nvim-luaref" },
@@ -51,8 +53,6 @@ require("paq") {
   { "tpope/vim-repeat" },
   { "tpope/vim-sleuth" },
   { "tpope/vim-surround" },
-
-  { "dstein64/vim-startuptime", opt = true },
 }
 
 require("nightfox").setup {
@@ -146,12 +146,12 @@ map("n", "dd", function()
   return api.nvim_get_current_line():match("^%s*$") and '"_dd' or "dd"
 end, { expr = true })
 
+map({"o", "x"}, "ae", function() cmd.normal("ggVG") end, { silent = true })
+
 cmd.cnoreabbrev("Q q")
 cmd.cnoreabbrev("W w")
 cmd.cnoreabbrev("Wq wq")
 cmd.cnoreabbrev("Qa qa")
-
-cmd.cnoreabbrev("git Git")
 
 command("Whitespace", function()
   local save = fn.winsaveview()
@@ -177,7 +177,7 @@ autocmd("QuickFixCmdPost", {
 autocmd("BufWritePre", {
   group = gid,
   pattern = "*",
-  command = [[call mkdir(expand("<afile>:h"), "p")]],
+  callback = function () pcall(fn.mkdir, fn.expand("<afile>:h", "p")) end
 })
 
 autocmd("TextYankPost", {
@@ -205,7 +205,7 @@ autocmd("FileType", {
 autocmd("FileType", {
   group = gid,
   pattern = "python",
-  callback = function() optl.makeprg = [[python3 %]] end,
+  callback = function() optl.makeprg = "python3 %" end,
 })
 
 autocmd("FileType", {
@@ -223,7 +223,7 @@ autocmd("FileType", {
   callback = function()
     -- muscle memory from dirvish
     optl.cursorline = true
-    map("n", "gq", "<cmd>DirbufQuit<cr>")
+    map("n", "gq", cmd.DirbufQuit, { buffer = 0 })
   end,
 })
 
@@ -333,6 +333,21 @@ lspconfig.rust_analyzer.setup {
   },
 }
 
+autocmd("FileType", {
+  group = gid,
+  pattern = "java",
+  callback = function()
+    local jdtls_path = fn.exepath("jdtls")
+    if jdtls_path == "" then
+        return
+    end
+
+    require('jdtls').start_or_attach({
+      cmd = jdtls_path,
+      root_dir = fs.dirname(fs.find({'gradlew', '.git', 'mvnw'}, { upward = true })[1]),
+    })
+  end,
+})
 -- Treesitter
 require("nvim-treesitter.configs").setup {
   highlight = {
@@ -418,6 +433,7 @@ map("n", "<space>F", function() fzf.files { fd_opts = fd_opts } end)
 map("n", "<space>t", function() fzf.buffers() end)
 map("n", "<space>G", function() fzf.git_status() end)
 map("n", "<space>h", function() fzf.oldfiles() end)
+map("n", "<space>H", function() fzf.help_tags() end)
 map("n", "<space>s", function() fzf.live_grep() end)
 map("n", "<space>S", function() fzf.live_grep { rg_opts = rg_opts } end)
 map("n", "<space>r", function() fzf.resume() end)
@@ -462,12 +478,11 @@ map("n", "<left>", function() dap.step_out() end)
 require("gitsigns").setup {
   attach_to_untracked = false,
   on_attach = function(bufnr)
-    local gs = package.loaded.gitsigns
     local opts = { noremap = true, buffer = bufnr }
 
-    map("n", "]c", gs.next_hunk, opts)
-    map("n", "[c", gs.prev_hunk, opts)
-    map("n", "<space>p", gs.preview_hunk, opts)
+    map("n", "]c", require("gitsigns").next_hunk, opts)
+    map("n", "[c", require("gitsigns").prev_hunk, opts)
+    map("n", "<space>p", require("gitsigns").preview_hunk, opts)
   end,
 }
 
