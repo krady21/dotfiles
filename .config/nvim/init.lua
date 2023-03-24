@@ -108,7 +108,7 @@ opt.foldmethod = "expr"
 opt.foldenable = false
 opt.foldexpr = "nvim_treesitter#foldexpr()"
 
-if fn.executable("rg") then
+if fn.executable("rg") == 1 then
   opt.grepprg = "rg --no-heading --vimgrep"
   opt.grepformat = "%f:%l:%c:%m"
 end
@@ -348,6 +348,7 @@ autocmd("FileType", {
     })
   end,
 })
+
 -- Treesitter
 require("nvim-treesitter.configs").setup {
   highlight = {
@@ -404,7 +405,6 @@ fzf.setup {
       ["ctrl-q"] = "toggle-all",
       ["ctrl-a"] = "select-all",
       ["ctrl-f"] = "half-page-down",
-      ["ctrl-b"] = "half-page-up",
     },
   },
   fzf_colors = {
@@ -424,18 +424,14 @@ fzf.setup {
   },
 }
 
-local fd_opts = "--color=never --no-ignore --type f --hidden --follow --exclude .git"
-local rg_opts =
-  "--no-ignore --hidden --column --line-number --no-heading --color=always --smart-case --max-columns=512"
-
 map("n", "<space>f", function() fzf.files() end)
-map("n", "<space>F", function() fzf.files { fd_opts = fd_opts } end)
+map("n", "<space>F", function() fzf.files { fd_opts = "--color=never --no-ignore --type f --hidden --follow --exclude .git" } end)
 map("n", "<space>t", function() fzf.buffers() end)
 map("n", "<space>G", function() fzf.git_status() end)
 map("n", "<space>h", function() fzf.oldfiles() end)
 map("n", "<space>H", function() fzf.help_tags() end)
 map("n", "<space>s", function() fzf.live_grep() end)
-map("n", "<space>S", function() fzf.live_grep { rg_opts = rg_opts } end)
+map("n", "<space>S", function() fzf.live_grep { rg_opts = "--no-ignore --hidden --column --line-number --no-heading --color=always --smart-case --max-columns=512" } end)
 map("n", "<space>r", function() fzf.resume() end)
 
 -- DAP
