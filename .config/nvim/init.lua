@@ -177,7 +177,7 @@ autocmd("QuickFixCmdPost", {
 autocmd("BufWritePre", {
   group = gid,
   pattern = "*",
-  callback = function () pcall(fn.mkdir, fn.expand("<afile>:h", "p")) end
+  callback = function () pcall(fn.mkdir, fn.expand("<afile>:h"), "p") end
 })
 
 autocmd("TextYankPost", {
@@ -263,9 +263,6 @@ autocmd("LspAttach", {
     map("i", "<C-k>", lsp.buf.signature_help, opts)
     map("n", "<space>=", lsp.buf.format, opts)
     map("n", "<space>w", lsp.buf.workspace_symbol, opts)
-
-    local client = lsp.get_client_by_id(args.data.client_id)
-    client.server_capabilities.semanticTokensProvider = nil
   end,
 })
 
@@ -302,6 +299,7 @@ local servers = {
 
 local capabilities = lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
+capabilities.textDocument.semanticTokens = nil
 
 for _, server in pairs(servers) do
   lspconfig[server].setup {

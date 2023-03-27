@@ -37,7 +37,7 @@ export EDITOR="$VISUAL"
 
 export LESSHISTFILE=-
 
-export RIPGREP_CONFIG_PATH=~/.config/rg/ripgreprc
+[ -f ~/.config/rg/ripgreprc ] && export RIPGREP_CONFIG_PATH=~/.config/rg/ripgreprc
 
 export GCC_ARM_FOLDER=/home/boco/gcc-arm-none-eabi-9-2020-q2-update/bin
 
