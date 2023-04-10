@@ -1,3 +1,5 @@
+vim.loader.enable()
+
 local fn, api, cmd = vim.fn, vim.api, vim.cmd
 local g, opt, optl = vim.g, vim.opt, vim.opt_local
 local map = vim.keymap.set
@@ -72,16 +74,16 @@ cmd.colorscheme("nordfox")
 
 opt.breakindent = true
 opt.clipboard = "unnamedplus"
-opt.completeopt = "menuone,noselect"
+opt.completeopt = { "menuone", "noselect" }
 opt.dictionary = "/usr/share/dict/words"
-opt.diffopt:append("indent-heuristic,algorithm:histogram")
+opt.diffopt:append { "indent-heuristic" , "algorithm:histogram", "linematch:60" }
 opt.expandtab = true
 opt.gdefault = true
 opt.hlsearch = false
 opt.ignorecase = true
 opt.incsearch = true
 opt.lazyredraw = true
-opt.listchars = "tab:> ,trail:∙,nbsp:•"
+opt.listchars = { tab = "> ", trail = "∙", nbsp ="•" }
 opt.mouse = ""
 opt.nrformats:append("alpha")
 opt.number = false
@@ -100,7 +102,7 @@ opt.statusline = "%< %f %m%r%w%=%l/%-6L %3c "
 opt.swapfile = false
 opt.termguicolors = true
 opt.undofile = true
-opt.virtualedit = "block,insert"
+opt.virtualedit = { "block", "insert" }
 opt.wildignore = "*/.git/*,*/tmp/*,*.swp,*.o,*.pyc"
 opt.wildignorecase = true
 
@@ -108,7 +110,7 @@ opt.foldmethod = "expr"
 opt.foldenable = false
 opt.foldexpr = "nvim_treesitter#foldexpr()"
 
-if fn.executable("rg") == 1 then
+if fn.executable("rg") > 0 then
   opt.grepprg = "rg --no-heading --vimgrep"
   opt.grepformat = "%f:%l:%c:%m"
 end
@@ -335,13 +337,8 @@ autocmd("FileType", {
   group = gid,
   pattern = "java",
   callback = function()
-    local jdtls_path = fn.exepath("jdtls")
-    if jdtls_path == "" then
-        return
-    end
-
     require('jdtls').start_or_attach({
-      cmd = jdtls_path,
+      cmd = fn.exepath("jdtls"),
       root_dir = fs.dirname(fs.find({'gradlew', '.git', 'mvnw'}, { upward = true })[1]),
     })
   end,
@@ -402,6 +399,7 @@ fzf.setup {
     fzf = {
       ["ctrl-q"] = "toggle-all",
       ["ctrl-a"] = "select-all",
+      ["ctrl-b"] = "half-page-up",
       ["ctrl-f"] = "half-page-down",
     },
   },
