@@ -20,8 +20,10 @@ require("paq") {
 
   { "ibhagwan/fzf-lua" },
   { "neovim/nvim-lspconfig" },
+  { "folke/neodev.nvim" },
   { "mfussenegger/nvim-jdtls" },
   { "elihunter173/dirbuf.nvim" },
+  { "yorickpeterse/nvim-pqf" },
   { "gbprod/substitute.nvim" },
   { "milisims/nvim-luaref" },
 
@@ -78,7 +80,6 @@ opt.completeopt = { "menuone", "noselect" }
 opt.dictionary = "/usr/share/dict/words"
 opt.diffopt:append { "indent-heuristic" , "algorithm:histogram", "linematch:60" }
 opt.expandtab = true
-opt.gdefault = true
 opt.hlsearch = false
 opt.ignorecase = true
 opt.incsearch = true
@@ -247,6 +248,21 @@ cmp.setup {
   },
 }
 
+map("i", "<Tab>", require("snippy.mapping").expand_or_advance("<Tab>"))
+map("s", "<Tab>", require("snippy.mapping").next("<Tab>"))
+map({ "i", "s" }, "<S-Tab>", require("snippy.mapping").previous("<S-Tab>"))
+
+-- vim.diagnostic
+local min_severity = { min = diagnostic.severity.WARN }
+local border_opts = { border = "rounded" }
+
+diagnostic.config {
+  signs = false,
+  underline = false,
+  virtual_text = { severity = min_severity },
+  float = border_opts,
+}
+
 -- LSP
 autocmd("LspAttach", {
   callback = function(args)
@@ -270,20 +286,13 @@ autocmd("LspAttach", {
 
 map("n", "<space>q", diagnostic.setqflist)
 map("n", "<space>e", diagnostic.open_float)
-map("n", "[g", diagnostic.goto_prev)
-map("n", "]g", diagnostic.goto_next)
-
-local border_opts = { border = "rounded" }
-
-diagnostic.config {
-  signs = false,
-  underline = false,
-  virtual_text = true,
-  float = border_opts,
-}
+map("n", "[g", function() diagnostic.goto_prev { severity = min_severity } end)
+map("n", "]g", function() diagnostic.goto_next { severity = min_severity } end)
 
 lsp.handlers["textDocument/hover"] = lsp.with(lsp.handlers.hover, border_opts)
 lsp.handlers["textDocument/signatureHelp"] = lsp.with(lsp.handlers.signature_help, border_opts)
+
+require("neodev").setup()
 
 local lspconfig = require("lspconfig")
 local servers = {
@@ -337,10 +346,10 @@ autocmd("FileType", {
   group = gid,
   pattern = "java",
   callback = function()
-    require('jdtls').start_or_attach({
+    require('jdtls').start_or_attach {
       cmd = fn.exepath("jdtls"),
       root_dir = fs.dirname(fs.find({'gradlew', '.git', 'mvnw'}, { upward = true })[1]),
-    })
+    }
   end,
 })
 
@@ -484,3 +493,5 @@ require("substitute").setup()
 map("n", "<space>x", function() require("substitute").operator() end)
 map("n", "cx", function() require("substitute.exchange").operator() end)
 map("n", "cxc", function() require("substitute.exchange").cancel() end)
+
+require("pqf").setup()
