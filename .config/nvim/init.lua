@@ -43,7 +43,6 @@ require("paq") {
   { "drybalka/tree-climber.nvim" },
 
   { "mfussenegger/nvim-dap" },
-  { "leoluz/nvim-dap-go" },
 
   { "nvim-lua/plenary.nvim" },
   { "sindrets/diffview.nvim" },
@@ -151,10 +150,13 @@ end, { expr = true })
 
 map({"o", "x"}, "ae", function() cmd.normal("ggVG") end, { silent = true })
 
-cmd.cnoreabbrev("Q q")
-cmd.cnoreabbrev("W w")
-cmd.cnoreabbrev("Wq wq")
-cmd.cnoreabbrev("Qa qa")
+cmd.cnoreabbrev { "Q", "q" }
+cmd.cnoreabbrev { "W", "w" }
+cmd.cnoreabbrev { "Wq", "wq" }
+cmd.cnoreabbrev { "Qa", "qa" }
+
+cmd.cnoreabbrev { "tq", "tabclose" }
+cmd.cnoreabbrev { "grep", "silent grep!" }
 
 command("Whitespace", function()
   local save = fn.winsaveview()
@@ -281,6 +283,9 @@ autocmd("LspAttach", {
     map("i", "<C-k>", lsp.buf.signature_help, opts)
     map("n", "<space>=", lsp.buf.format, opts)
     map("n", "<space>w", lsp.buf.workspace_symbol, opts)
+
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    client.server_capabilities.semanticTokensProvider = nil
   end,
 })
 
@@ -310,7 +315,6 @@ local servers = {
 
 local capabilities = lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
-capabilities.textDocument.semanticTokens = nil
 
 for _, server in pairs(servers) do
   lspconfig[server].setup {
@@ -346,9 +350,9 @@ autocmd("FileType", {
   group = gid,
   pattern = "java",
   callback = function()
-    require('jdtls').start_or_attach {
+    require("jdtls").start_or_attach {
       cmd = fn.exepath("jdtls"),
-      root_dir = fs.dirname(fs.find({'gradlew', '.git', 'mvnw'}, { upward = true })[1]),
+      root_dir = fs.dirname(fs.find({"gradlew", ".git", "mvnw"}, { upward = true })[1]),
     }
   end,
 })
@@ -447,6 +451,15 @@ dap.adapters.lldb = {
   name = "lldb",
 }
 
+dap.adapters.delve = {
+  type = 'server',
+  port = '${port}',
+  executable = {
+    command = 'dlv',
+    args = {'dap', '-l', '127.0.0.1:${port}'},
+  }
+}
+
 local lldb = {
   {
     name = "Launch",
@@ -459,11 +472,34 @@ local lldb = {
   },
 }
 
+local delve = {
+  {
+    type = "delve",
+    name = "Debug",
+    request = "launch",
+    program = "${file}"
+  },
+  {
+    type = "delve",
+    name = "Debug test",
+    request = "launch",
+    mode = "test",
+    program = "${file}"
+  },
+  {
+    type = "delve",
+    name = "Debug test (go.mod)",
+    request = "launch",
+    mode = "test",
+    program = "./${relativeFileDirname}"
+  }
+}
+
 dap.configurations.c = lldb
 dap.configurations.cpp = lldb
 dap.configurations.rust = lldb
+dap.configurations.go = delve
 
-require("dap-go").setup()
 
 map("n", "<F5>", function() dap.continue() end)
 map("n", "<F6>", function() dap.run_last() end)
@@ -495,3 +531,11 @@ map("n", "cx", function() require("substitute.exchange").operator() end)
 map("n", "cxc", function() require("substitute.exchange").cancel() end)
 
 require("pqf").setup()
+
+require("diffview").setup {
+  use_icons = false,
+  show_help_hints = false,
+  file_panel = {
+    listing_style = "list",
+  },
+}
