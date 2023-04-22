@@ -5,6 +5,7 @@ local g, opt, optl = vim.g, vim.opt, vim.opt_local
 local map = vim.keymap.set
 local lsp, diagnostic = vim.lsp, vim.diagnostic
 local fs = vim.fs
+local uv = vim.loop
 
 local command = vim.api.nvim_create_user_command
 local autocmd = vim.api.nvim_create_autocmd
@@ -23,7 +24,6 @@ require("paq") {
   { "folke/neodev.nvim" },
   { "mfussenegger/nvim-jdtls" },
   { "elihunter173/dirbuf.nvim" },
-  { "yorickpeterse/nvim-pqf" },
   { "gbprod/substitute.nvim" },
   { "milisims/nvim-luaref" },
 
@@ -41,6 +41,7 @@ require("paq") {
   { "RRethy/nvim-treesitter-endwise" },
   { "windwp/nvim-ts-autotag" },
   { "drybalka/tree-climber.nvim" },
+  { "andymass/vim-matchup" },
 
   { "mfussenegger/nvim-dap" },
 
@@ -50,7 +51,6 @@ require("paq") {
   { "lewis6991/gitsigns.nvim" },
   { "rhysd/conflict-marker.vim" },
 
-  { "andymass/vim-matchup" },
   { "junegunn/vim-peekaboo" },
   { "tpope/vim-commentary" },
   { "tpope/vim-repeat" },
@@ -77,13 +77,13 @@ opt.breakindent = true
 opt.clipboard = "unnamedplus"
 opt.completeopt = { "menuone", "noselect" }
 opt.dictionary = "/usr/share/dict/words"
-opt.diffopt:append { "indent-heuristic" , "algorithm:histogram", "linematch:60" }
+opt.diffopt:append { "indent-heuristic", "algorithm:histogram", "linematch:60" }
 opt.expandtab = true
 opt.hlsearch = false
 opt.ignorecase = true
 opt.incsearch = true
 opt.lazyredraw = true
-opt.listchars = { tab = "> ", trail = "∙", nbsp ="•" }
+opt.listchars = { tab = "> ", trail = "∙", nbsp = "•" }
 opt.mouse = ""
 opt.nrformats:append("alpha")
 opt.number = false
@@ -106,17 +106,13 @@ opt.virtualedit = { "block", "insert" }
 opt.wildignore = "*/.git/*,*/tmp/*,*.swp,*.o,*.pyc"
 opt.wildignorecase = true
 
-opt.foldmethod = "expr"
-opt.foldenable = false
-opt.foldexpr = "nvim_treesitter#foldexpr()"
-
 if fn.executable("rg") > 0 then
   opt.grepprg = "rg --no-heading --vimgrep"
   opt.grepformat = "%f:%l:%c:%m"
 end
 
-map({ "v", "n" }, "H", "^")
-map({ "v", "n" }, "L", "$")
+map({ "n", "x", "o" }, "H", "^")
+map({ "n", "x", "o" }, "L", "$")
 
 map("i", "{<CR>", "{<CR>}<C-o>O")
 map("i", "[<CR>", "[<CR>]<C-o>O")
@@ -144,11 +140,9 @@ map({ "n", "x" }, "C", [["_C]])
 
 map("x", "p", [["_dP]])
 
-map("n", "dd", function()
-  return api.nvim_get_current_line():match("^%s*$") and '"_dd' or "dd"
-end, { expr = true })
+map("n", "dd", function() return api.nvim_get_current_line():match("^%s*$") and '"_dd' or "dd" end, { expr = true })
 
-map({"o", "x"}, "ae", function() cmd.normal("ggVG") end, { silent = true })
+map({ "o", "x" }, "ae", function() cmd.normal("ggVG") end, { silent = true })
 
 cmd.cnoreabbrev { "Q", "q" }
 cmd.cnoreabbrev { "W", "w" }
@@ -182,7 +176,7 @@ autocmd("QuickFixCmdPost", {
 autocmd("BufWritePre", {
   group = gid,
   pattern = "*",
-  callback = function () pcall(fn.mkdir, fn.expand("<afile>:h"), "p") end
+  callback = function() pcall(fn.mkdir, fn.expand("<afile>:h"), "p") end,
 })
 
 autocmd("TextYankPost", {
@@ -299,7 +293,9 @@ lsp.handlers["textDocument/signatureHelp"] = lsp.with(lsp.handlers.signature_hel
 
 require("neodev").setup()
 
-local lspconfig = require("lspconfig")
+local capabilities = lsp.protocol.make_client_capabilities()
+capabilities.textDocument.completion.completionItem.snippetSupport = true
+
 local servers = {
   "bashls",
   "clangd",
@@ -313,9 +309,7 @@ local servers = {
   "emmet_ls",
 }
 
-local capabilities = lsp.protocol.make_client_capabilities()
-capabilities.textDocument.completion.completionItem.snippetSupport = true
-
+local lspconfig = require("lspconfig")
 for _, server in pairs(servers) do
   lspconfig[server].setup {
     capabilities = capabilities,
@@ -351,8 +345,8 @@ autocmd("FileType", {
   pattern = "java",
   callback = function()
     require("jdtls").start_or_attach {
-      cmd = fn.exepath("jdtls"),
-      root_dir = fs.dirname(fs.find({"gradlew", ".git", "mvnw"}, { upward = true })[1]),
+      cmd = { fn.exepath("jdtls") },
+      root_dir = fs.dirname(fs.find({ "gradlew", ".git", "mvnw" }, { upward = true })[1]),
     }
   end,
 })
@@ -362,6 +356,11 @@ require("nvim-treesitter.configs").setup {
   highlight = {
     enable = true,
     additional_vim_regex_highlighting = false,
+    disable = function(lang, buf)
+      local max_filesize_KB = 200 * 1024
+      local ok, stats = pcall(uv.fs_stat, api.nvim_buf_get_name(buf))
+      return ok and stats and stats.size > max_filesize_KB
+    end,
   },
   textobjects = {
     select = {
@@ -375,6 +374,16 @@ require("nvim-treesitter.configs").setup {
         ["aa"] = "@parameter.outer",
         ["ia"] = "@parameter.inner",
         ["iC"] = "@conditional.inner",
+      },
+    },
+    move = {
+      enable = true,
+      set_jumps = true,
+      goto_next_start = {
+        ["]f"] = "@function.outer",
+      },
+      goto_previous_start = {
+        ["[f"] = "@function.outer",
       },
     },
   },
@@ -402,6 +411,12 @@ map("n", "<M-k>", function() require("tree-climber").swap_prev() end)
 local fzf = require("fzf-lua")
 -- fzf.register_ui_select()
 fzf.setup {
+  fzf_opts = {
+    ["--history"] = fn.stdpath("data") .. "/fzf-lua-history",
+  },
+  grep = {
+    rg_glob = true,
+  },
   winopts = {
     hl_border = "VertSplit",
     preview = {
@@ -452,12 +467,12 @@ dap.adapters.lldb = {
 }
 
 dap.adapters.delve = {
-  type = 'server',
-  port = '${port}',
+  type = "server",
+  port = "${port}",
   executable = {
-    command = 'dlv',
-    args = {'dap', '-l', '127.0.0.1:${port}'},
-  }
+    command = "dlv",
+    args = { "dap", "-l", "127.0.0.1:${port}" },
+  },
 }
 
 local lldb = {
@@ -465,7 +480,7 @@ local lldb = {
     name = "Launch",
     type = "lldb",
     request = "launch",
-    program = function() return fn.input("Path: ", fn.getcwd() .. "/", "file") end,
+    program = function() return fn.input("Path: ", uv.cwd() .. "/", "file") end,
     stopOnEntry = false,
     args = {},
     runInTerminal = false,
@@ -477,29 +492,28 @@ local delve = {
     type = "delve",
     name = "Debug",
     request = "launch",
-    program = "${file}"
+    program = "${file}",
   },
   {
     type = "delve",
     name = "Debug test",
     request = "launch",
     mode = "test",
-    program = "${file}"
+    program = "${file}",
   },
   {
     type = "delve",
     name = "Debug test (go.mod)",
     request = "launch",
     mode = "test",
-    program = "./${relativeFileDirname}"
-  }
+    program = "./${relativeFileDirname}",
+  },
 }
 
 dap.configurations.c = lldb
 dap.configurations.cpp = lldb
 dap.configurations.rust = lldb
 dap.configurations.go = delve
-
 
 map("n", "<F5>", function() dap.continue() end)
 map("n", "<F6>", function() dap.run_last() end)
@@ -517,21 +531,13 @@ require("gitsigns").setup {
   on_attach = function(bufnr)
     local opts = { noremap = true, buffer = bufnr }
 
-    map("n", "]c", require("gitsigns").next_hunk, opts)
-    map("n", "[c", require("gitsigns").prev_hunk, opts)
-    map("n", "<space>p", require("gitsigns").preview_hunk, opts)
+    map("n", "]c", function() require("gitsigns").next_hunk() end, opts)
+    map("n", "[c", function() require("gitsigns").prev_hunk() end, opts)
+    map("n", "<space>p", function() require("gitsigns").preview_hunk() end, opts)
   end,
 }
 
--- substitute
-require("substitute").setup()
-
-map("n", "<space>x", function() require("substitute").operator() end)
-map("n", "cx", function() require("substitute.exchange").operator() end)
-map("n", "cxc", function() require("substitute.exchange").cancel() end)
-
-require("pqf").setup()
-
+-- diffview
 require("diffview").setup {
   use_icons = false,
   show_help_hints = false,
@@ -539,3 +545,10 @@ require("diffview").setup {
     listing_style = "list",
   },
 }
+
+-- substitute
+require("substitute").setup()
+
+map("n", "s", function() require("substitute").operator() end)
+map("n", "cx", function() require("substitute.exchange").operator() end)
+map("n", "cxc", function() require("substitute.exchange").cancel() end)
