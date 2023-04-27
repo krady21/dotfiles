@@ -282,14 +282,19 @@ local servers = {
         staticcheck = true,
       },
     },
+    libs = { "/usr/local/go", vim.env.GOPATH },
   },
   ["pyright-langserver"] = {
     filetypes = "python",
     opts = { "--stdio" },
     root_dir = { "setup.py", "requirements.txt", ".git" },
     settings = {
-      bashIde = {
-        globPattern = vim.env.GLOB_PATTERN or "*@(.sh|.inc|.bash|.command)",
+      python = {
+        analysis = {
+          autoSearchPaths = true,
+          useLibraryCodeForTypes = true,
+          diagnosticMode = 'workspace',
+        },
       },
     },
   },
@@ -315,6 +320,7 @@ local servers = {
     filetypes = "javascript,typescript",
     opts = { "--stdio" },
     root_dir = { "tsconfig.json", "package.json", ".git" },
+    libs = { "node_modules" },
   },
   ["vscode-html-language-server"] = {
     filetypes = "html",
@@ -350,6 +356,7 @@ local servers = {
         cargo = { features = "all" },
       },
     },
+    libs = { ".cargo", ".rustup" },
   },
 }
 
@@ -374,7 +381,8 @@ for cmd, config in pairs(servers) do
       else
         root_dir = uv.cwd()
       end
-      vim.print(root_dir)
+
+      local bufname = api.nvim_buf_get_name(0)
 
       lsp.start({
         name = cmd,
@@ -383,6 +391,20 @@ for cmd, config in pairs(servers) do
         capabilities = vim.tbl_deep_extend("force", capabilities, config.capabilities or {}),
         before_init = config.before_init,
         settings = config.settings,
+      }, {
+        reuse_client = function(client, conf)
+          if client.name ~= conf.name then
+            return false
+          end
+
+          if client.config.root_dir == conf.root_dir then
+            return true
+          end
+
+          return vim.tbl_contains(config.libs or {}, function(lib_path)
+            return string.match(bufname, lib_path) 
+          end, { predicate = true })
+        end
       })
     end,
   })
