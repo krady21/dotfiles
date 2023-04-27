@@ -18,14 +18,15 @@ end
 require("paq") {
   { "savq/paq-nvim" },
   { "EdenEast/nightfox.nvim" },
+  { "arzg/vim-colors-xcode" },
 
   { "ibhagwan/fzf-lua" },
   { "neovim/nvim-lspconfig" },
   { "folke/neodev.nvim" },
-  { "mfussenegger/nvim-jdtls" },
   { "elihunter173/dirbuf.nvim" },
   { "gbprod/substitute.nvim" },
   { "milisims/nvim-luaref" },
+  { "j-hui/fidget.nvim" },
 
   { "hrsh7th/nvim-cmp" },
   { "hrsh7th/cmp-nvim-lsp" },
@@ -37,11 +38,9 @@ require("paq") {
   { "nvim-treesitter/playground", opt = true },
   { "nvim-treesitter/nvim-treesitter-context" },
   { "nvim-treesitter/nvim-treesitter-textobjects" },
-  { "JoosepAlviste/nvim-ts-context-commentstring" },
   { "RRethy/nvim-treesitter-endwise" },
   { "windwp/nvim-ts-autotag" },
   { "drybalka/tree-climber.nvim" },
-  { "andymass/vim-matchup" },
 
   { "mfussenegger/nvim-dap" },
 
@@ -166,12 +165,6 @@ command("Sbd", "b#|bd#", {})
 
 local gid = api.nvim_create_augroup("Personal", {})
 
-autocmd("TermOpen", {
-  group = gid,
-  pattern = "*",
-  command = "startinsert",
-})
-
 autocmd("QuickFixCmdPost", {
   group = gid,
   pattern = "[^l]*",
@@ -184,46 +177,10 @@ autocmd("TextYankPost", {
   callback = function() vim.highlight.on_yank { timeout = 200 } end,
 })
 
-local capabilities = lsp.protocol.make_client_capabilities()
-capabilities.textDocument.completion.completionItem.snippetSupport = true
-
-local find_up = function(names)
-  return fs.find(names, {
-    upward = true,
-    stop = uv.os_homedir(),
-    path = fs.dirname(api.nvim_buf_get_name(0)),
-  })[1]
-end
-
 autocmd("FileType", {
   group = gid,
   pattern = "c,cpp",
-  callback = function()
-    optl.commentstring = "// %s"
-
-    lsp.start {
-      name = "clangd",
-      cmd = { "clangd" },
-      single_file_support = true,
-      capabilities = vim.tbl_deep_extend("force", capabilities, {
-        textDocument = {
-          completion = {
-            editsNearCursor = true,
-          },
-        },
-        offsetEncoding = { "utf-8", "utf-16" },
-      }),
-      root_dir = fs.dirname(find_up {
-        ".clangd",
-        ".clang-tidy",
-        ".clang-format",
-        "compile_commands.json",
-        "compile_flags.txt",
-        "configure.ac", -- AutoTools
-        ".git",
-      }),
-    }
-  end,
+  callback = function() optl.commentstring = "// %s" end,
 })
 
 autocmd("FileType", {
@@ -233,201 +190,13 @@ autocmd("FileType", {
     optl.tabstop = 2
     optl.shiftwidth = 2
     optl.expandtab = false
-
-    lsp.start {
-      name = "gopls",
-      cmd = { "gopls", "serve" },
-      capabilities = capabilities,
-      settings = {
-        gopls = {
-          analyses = {
-            unusedparams = true,
-            nilness = true,
-          },
-          staticcheck = true,
-        },
-      },
-      root_dir = fs.dirname(find_up { "go.work", "go.mod", ".git" }),
-    }
   end,
 })
 
 autocmd("FileType", {
   group = gid,
   pattern = "python",
-  callback = function()
-    optl.makeprg = "python3 %"
-
-    lsp.start {
-      name = "pyright",
-      cmd = { "pyright-langserver", "--stdio" },
-      capabilities = capabilities,
-      settings = {
-        bashIde = {
-          globPattern = vim.env.GLOB_PATTERN or "*@(.sh|.inc|.bash|.command)",
-        },
-      },
-      root_dir = fs.dirname(find_up {
-        "pyproject.toml",
-        "setup.py",
-        "setup.cfg",
-        "requirements.txt",
-        "Pipfile",
-        "pyrightconfig.json",
-        ".git",
-      }),
-    }
-  end,
-})
-
-autocmd("FileType", {
-  group = gid,
-  pattern = "java",
-  callback = function()
-    require("jdtls").start_or_attach {
-      cmd = { fn.exepath("jdtls") },
-      root_dir = fs.dirname(find_up { "gradlew", ".git", "mvnw" }),
-    }
-  end,
-})
-
-require("neodev").setup()
-
-autocmd("FileType", {
-  group = gid,
-  pattern = "lua",
-  callback = function()
-    lsp.start {
-      name = "luals",
-      cmd = { "lua-language-server" },
-      single_file_support = true,
-      capabilities = capabilities,
-      before_init = require("neodev.lsp").before_init,
-      root_dir = fs.dirname(find_up {
-        ".luarc.json",
-        ".luacheckrc",
-        ".stylua.toml",
-        "stylua.toml",
-        "selene.toml",
-        "lua/",
-      }) or uv.cwd(),
-      settings = {
-        Lua = {
-          telemetry = {
-            enable = false,
-          },
-        },
-      },
-    }
-  end,
-})
-
-autocmd("FileType", {
-  group = gid,
-  pattern = "sh,bash",
-  callback = function()
-    lsp.start {
-      name = "bashls",
-      cmd = { "bash-language-server", "start" },
-      capabilities = capabilities,
-      single_file_support = true,
-    }
-  end,
-})
-
-autocmd("FileType", {
-  group = gid,
-  pattern = "javascript,javascriptreact,typescript,typescriptreact",
-  callback = function()
-    lsp.start {
-      name = "tsserver",
-      cmd = { "typescript-language-server", "--stdio" },
-      capabilities = capabilities,
-      root_dir = fs.dirname(find_up {
-        "tsconfig.json",
-        "package.json",
-        "jsconfig.json",
-        ".git",
-      }),
-      single_file_support = true,
-      init_options = { hostInfo = "neovim" },
-    }
-  end,
-})
-
-autocmd("FileType", {
-  group = gid,
-  pattern = "html",
-  callback = function()
-    lsp.start {
-      name = "htmlls",
-      cmd = { "vscode-html-language-server", "--stdio" },
-      capabilities = capabilities,
-      root_dir = fs.dirname(find_up { "package.json", ".git" }),
-      single_file_support = true,
-      init_options = {
-        provideFormatter = true,
-        embeddedLanguages = { css = true, javascript = true },
-        configurationSection = { "html", "css", "javascript" },
-      },
-    }
-
-    lsp.start {
-      name = "emmet-ls",
-      cmd = { "emmet-ls", "--stdio" },
-      capabilities = capabilities,
-      root_dir = fs.dirname(find_up { "package.json", ".git" }),
-      single_file_support = true,
-    }
-  end,
-})
-
-autocmd("FileType", {
-  group = gid,
-  pattern = "css,scss,less",
-  callback = function()
-    lsp.start {
-      name = "cssls",
-      cmd = { "vscode-css-language-server", "--stdio" },
-      capabilities = capabilities,
-      root_dir = fs.dirname(find_up { "package.json", ".git" }),
-      single_file_support = true,
-      settings = {
-        css = { validate = true },
-        scss = { validate = true },
-        less = { validate = true },
-      },
-    }
-  end,
-})
-
-autocmd("FileType", {
-  group = gid,
-  pattern = "rust",
-  callback = function()
-    local manifest = find_up("Cargo.toml")
-
-    fn.jobstart({ "cargo", "locate-project", "--quiet", "--workspace", "--manifest-path", manifest }, {
-      stdout_buffered = true,
-      on_stdout = vim.schedule_wrap(
-        function(_, data, _)
-          lsp.start {
-            name = "rust-analyzer",
-            cmd = { "rustup", "run", "nightly", "rust-analyzer" },
-            capabilities = capabilities,
-            root_dir = fs.dirname(json.decode(data[1])["root"]),
-            settings = {
-              ["rust-analyzer"] = {
-                cargo = {
-                  features = "all",
-                },
-              },
-            },
-          }
-        end
-      ),
-    })
-  end,
+  callback = function() optl.makeprg = "python3 %" end,
 })
 
 autocmd("FileType", {
@@ -443,7 +212,6 @@ autocmd("FileType", {
   group = gid,
   pattern = "dirbuf",
   callback = function()
-    -- muscle memory from dirvish
     optl.cursorline = true
     map("n", "gq", cmd.DirbufQuit, { buffer = 0 })
   end,
@@ -483,7 +251,145 @@ diagnostic.config {
 }
 
 -- LSP
+local capabilities = lsp.protocol.make_client_capabilities()
+capabilities.textDocument.completion.completionItem.snippetSupport = true
+
+require("neodev").setup()
+
+local servers = {
+  ["clangd"] = {
+    filetypes = "c,cpp",
+    root_dir = { ".clang-format", "compile_commands.json", ".git" },
+    capabilities = {
+      textDocument = {
+        completion = {
+          editsNearCursor = true,
+        },
+      },
+      offsetEncoding = { "utf-8", "utf-16" },
+    },
+  },
+  ["gopls"] = {
+    filetypes = "go",
+    opts = { "serve" },
+    root_dir = { "go.mod", ".git" },
+    settings = {
+      gopls = {
+        analyses = {
+          unusedparams = true,
+          nilness = true,
+        },
+        staticcheck = true,
+      },
+    },
+  },
+  ["pyright-langserver"] = {
+    filetypes = "python",
+    opts = { "--stdio" },
+    root_dir = { "setup.py", "requirements.txt", ".git" },
+    settings = {
+      bashIde = {
+        globPattern = vim.env.GLOB_PATTERN or "*@(.sh|.inc|.bash|.command)",
+      },
+    },
+  },
+  ["jdtls"] = {
+    filetypes = "java",
+    root_dir = { "gradlew", ".git", "mvnw" },
+  },
+  ["lua-language-server"] = {
+    filetypes = "lua",
+    before_init = require("neodev.lsp").before_init,
+    settings = {
+      Lua = {
+        telemetry = { enable = false },
+        workspace = { checkThirdParty = false },
+      },
+    },
+  },
+  ["bash-language-server"] = {
+    filetypes = "sh,bash",
+    opts = { "start" },
+  },
+  ["typescript-language-server"] = {
+    filetypes = "javascript,typescript",
+    opts = { "--stdio" },
+    root_dir = { "tsconfig.json", "package.json", ".git" },
+  },
+  ["vscode-html-language-server"] = {
+    filetypes = "html",
+    opts = { "--stdio" },
+    root_dir = { "package.json", ".git" },
+    init_options = {
+      provideFormatter = true,
+      embeddedLanguages = { css = true, javascript = true },
+      configurationSection = { "html", "css", "javascript" },
+    },
+  },
+  ["emmet-ls"] = {
+    filetypes = "html",
+    opts = { "--stdio" },
+    root_dir = { "package.json", ".git" },
+  },
+  ["vscode-css-language-server"] = {
+    filetypes = "css,scss,less",
+    opts = { "--stdio" },
+    root_dir = { "package.json", ".git" },
+    settings = {
+      css = { validate = true },
+      scss = { validate = true },
+      less = { validate = true },
+    },
+  },
+  ["rust-analyzer"] = {
+    filetypes = "rust",
+    root_dir = { "Cargo.toml", ".git" },
+    settings = {
+      ["rust-analyzer"] = {
+        cachePriming = { enable = false },
+        cargo = { features = "all" },
+      },
+    },
+  },
+}
+
+local lsp_group = api.nvim_create_augroup("Lsp", {})
+
+for cmd, config in pairs(servers) do
+  autocmd("FileType", {
+    group = lsp_group,
+    pattern = config.filetypes,
+    callback = function()
+      if optl.buftype:get() ~= "" or fn.executable(cmd) ~= 1 then
+        return
+      end
+
+      local root_dir
+      if config.root_dir then
+        root_dir = fs.dirname(fs.find(config.root_dir or {}, {
+          upward = true,
+          stop = uv.os_homedir(),
+          path = fs.dirname(),
+        })[1])
+      else
+        root_dir = uv.cwd()
+      end
+      vim.print(root_dir)
+
+      lsp.start({
+        name = cmd,
+        cmd = { cmd, unpack(config.opts or {}) },
+        root_dir = root_dir,
+        capabilities = vim.tbl_deep_extend("force", capabilities, config.capabilities or {}),
+        before_init = config.before_init,
+        settings = config.settings,
+      })
+    end,
+  })
+end
+
 autocmd("LspAttach", {
+  group = lsp_group,
   callback = function(args)
     optl.omnifunc = "v:lua.vim.lsp.omnifunc"
 
@@ -550,22 +456,10 @@ require("nvim-treesitter.configs").setup {
       },
     },
   },
-  context_commentstring = {
-    enable = true,
-  },
-  matchup = {
-    enable = true,
-  },
   autotag = {
     enable = true,
   },
-  endwise = {
-    enable = true,
-  },
 }
-
--- matchup
-g.matchup_matchparen_offscreen = {}
 
 map("n", "<M-j>", function() require("tree-climber").swap_next() end)
 map("n", "<M-k>", function() require("tree-climber").swap_prev() end)
@@ -727,3 +621,5 @@ require("substitute").setup()
 map("n", "s", function() require("substitute").operator() end)
 map("n", "cx", function() require("substitute.exchange").operator() end)
 map("n", "cxc", function() require("substitute.exchange").cancel() end)
+
+require("fidget").setup()
