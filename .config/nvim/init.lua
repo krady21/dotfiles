@@ -4,7 +4,7 @@ local fn, api, cmd = vim.fn, vim.api, vim.cmd
 local g, opt, optl = vim.g, vim.opt, vim.opt_local
 local map = vim.keymap.set
 local lsp, diagnostic = vim.lsp, vim.diagnostic
-local fs, json = vim.fs, vim.json
+local fs = vim.fs
 local uv = vim.loop
 
 local command = vim.api.nvim_create_user_command
@@ -37,7 +37,6 @@ require("paq") {
   { "nvim-treesitter/playground", opt = true },
   { "nvim-treesitter/nvim-treesitter-context" },
   { "nvim-treesitter/nvim-treesitter-textobjects" },
-  { "RRethy/nvim-treesitter-endwise" },
   { "windwp/nvim-ts-autotag" },
   { "drybalka/tree-climber.nvim" },
 
@@ -108,6 +107,8 @@ if fn.executable("rg") > 0 then
   opt.grepprg = "rg --no-heading --vimgrep"
   opt.grepformat = "%f:%l:%c:%m"
 end
+
+g.peekaboo_window = "vert bo 40new"
 
 map({ "n", "x", "o" }, "H", "^")
 map({ "n", "x", "o" }, "L", "$")
@@ -239,14 +240,27 @@ map("s", "<Tab>", require("snippy.mapping").next("<Tab>"))
 map({ "i", "s" }, "<S-Tab>", require("snippy.mapping").previous("<S-Tab>"))
 
 -- vim.diagnostic
-local min_severity = { min = diagnostic.severity.WARN }
 local border_opts = { border = "rounded" }
 
+api.nvim_set_hl(0, "DiagnosticVirtualTextWarn", { link = "Comment" })
+api.nvim_set_hl(0, "DiagnosticVirtualTextError", { link = "Comment" })
+api.nvim_set_hl(0, "DiagnosticVirtualTextInfo", { link = "Comment" })
+api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { link = "Comment" })
+
+local diagnostic_icons = {
+  [diagnostic.severity.ERROR] = "",
+  [diagnostic.severity.WARN] = "",
+  [diagnostic.severity.INFO] = "",
+  [diagnostic.severity.HINT] = "",
+}
+
 diagnostic.config {
+  float = border_opts,
   signs = false,
   underline = false,
-  virtual_text = { severity = min_severity },
-  float = border_opts,
+  virtual_text = {
+    prefix = function(d) return diagnostic_icons[d.severity] end,
+  },
 }
 
 -- LSP
@@ -354,48 +368,45 @@ local servers = {
 local lsp_group = api.nvim_create_augroup("Lsp", {})
 local homedir = uv.os_homedir()
 
-for cmd, config in pairs(servers) do
-  autocmd("FileType", {
-    group = lsp_group,
-    pattern = config.filetypes,
-    callback = function()
-      if fn.executable(cmd) ~= 1 then
-        return
-      end
+for c, config in pairs(servers) do
+  if fn.executable(c) == 1 then
+    autocmd("FileType", {
+      group = lsp_group,
+      pattern = config.filetypes,
+      callback = function()
+        local bufname = api.nvim_buf_get_name(0)
 
-      local bufname = api.nvim_buf_get_name(0)
-      local homedir = uv.os_homedir()
+        local root_dir = fs.dirname(fs.find(config.root_pattern or {}, {
+          upward = true,
+          stop = homedir,
+          path = fs.dirname(bufname),
+        })[1])
 
-      local root_dir = fs.dirname(fs.find(config.root_pattern or {}, {
-        upward = true,
-        stop = homedir,
-        path = fs.dirname(bufname),
-      })[1])
+        if root_dir == homedir then
+          root_dir = nil
+        end
 
-      if root_dir == homedir then
-        root_dir = nil
-      end
-
-      lsp.start({
-        name = cmd,
-        cmd = { cmd, unpack(config.opts or {}) },
-        root_dir = root_dir,
-        capabilities = capabilities,
-        before_init = config.before_init,
-        init_options = config.init_options or vim.empty_dict(),
-        settings = config.settings or vim.empty_dict(),
-      }, {
-        reuse_client = function(client, conf)
-          return ((client.name == conf.name) and (client.config.root_dir == conf.root_dir))
-            or vim.tbl_contains(
-              config.libs or {},
-              function(lib_path) return string.match(bufname, lib_path) end,
-              { predicate = true }
-            )
-        end,
-      })
-    end,
-  })
+        lsp.start({
+          name = c,
+          cmd = { c, unpack(config.opts or {}) },
+          root_dir = root_dir,
+          capabilities = capabilities,
+          before_init = config.before_init,
+          init_options = config.init_options or vim.empty_dict(),
+          settings = config.settings or vim.empty_dict(),
+        }, {
+          reuse_client = function(client, conf)
+            return ((client.name == conf.name) and (client.config.root_dir == conf.root_dir))
+              or vim.tbl_contains(
+                config.libs or {},
+                function(lib_path) return string.match(bufname, lib_path) end,
+                { predicate = true }
+              )
+          end,
+        })
+      end,
+    })
+  end
 end
 
 autocmd("LspAttach", {
@@ -422,10 +433,10 @@ autocmd("LspAttach", {
   end,
 })
 
-map("n", "<space>q", diagnostic.setqflist)
-map("n", "<space>e", diagnostic.open_float)
-map("n", "[g", function() diagnostic.goto_prev { severity = min_severity } end)
-map("n", "]g", function() diagnostic.goto_next { severity = min_severity } end)
+map("n", "<space>q", function() diagnostic.setqflist() end)
+map("n", "<space>e", function() diagnostic.open_float() end)
+map("n", "[g", function() diagnostic.goto_prev() end)
+map("n", "]g", function() diagnostic.goto_next() end)
 
 lsp.handlers["textDocument/hover"] = lsp.with(lsp.handlers.hover, border_opts)
 lsp.handlers["textDocument/signatureHelp"] = lsp.with(lsp.handlers.signature_help, border_opts)
@@ -435,7 +446,7 @@ require("nvim-treesitter.configs").setup {
   highlight = {
     enable = true,
     additional_vim_regex_highlighting = false,
-    disable = function(lang, buf)
+    disable = function(_, buf)
       local max_filesize_KB = 200 * 1024
       local ok, stats = pcall(uv.fs_stat, api.nvim_buf_get_name(buf))
       return ok and stats and stats.size > max_filesize_KB
@@ -475,7 +486,6 @@ fzf.setup {
     rg_glob = true,
   },
   winopts = {
-    hl_border = "VertSplit",
     preview = {
       layout = "vertical",
     },
