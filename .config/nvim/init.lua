@@ -68,7 +68,7 @@ require("nightfox").setup {
   },
 }
 
-cmd.colorscheme("nordfox")
+cmd.colorscheme("dawnfox")
 
 opt.breakindent = true
 opt.clipboard = "unnamedplus"
@@ -155,6 +155,7 @@ cmd.cnoreabbrev { "Qa", "qa" }
 
 cmd.cnoreabbrev { "tq", "tabclose" }
 cmd.cnoreabbrev { "grep", "silent grep!" }
+cmd.cnoreabbrev { "man", "Man" }
 
 command("Whitespace", function()
   local save = fn.winsaveview()
@@ -242,25 +243,11 @@ map({ "i", "s" }, "<S-Tab>", require("snippy.mapping").previous("<S-Tab>"))
 -- vim.diagnostic
 local border_opts = { border = "rounded" }
 
-api.nvim_set_hl(0, "DiagnosticVirtualTextWarn", { link = "Comment" })
-api.nvim_set_hl(0, "DiagnosticVirtualTextError", { link = "Comment" })
-api.nvim_set_hl(0, "DiagnosticVirtualTextInfo", { link = "Comment" })
-api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { link = "Comment" })
-
-local diagnostic_icons = {
-  [diagnostic.severity.ERROR] = "",
-  [diagnostic.severity.WARN] = "",
-  [diagnostic.severity.INFO] = "",
-  [diagnostic.severity.HINT] = "",
-}
-
 diagnostic.config {
   float = border_opts,
   signs = false,
   underline = false,
-  virtual_text = {
-    prefix = function(d) return diagnostic_icons[d.severity] end,
-  },
+  virtual_text = true,
 }
 
 -- LSP
@@ -271,12 +258,14 @@ require("neodev").setup()
 
 local servers = {
   ["clangd"] = {
+    cmd = { "clangd" },
     filetypes = "c,cpp",
-    root_pattern = { ".clang-format", "compile_commands.json", ".git" },
+    root_pattern = { "compile_commands.json", ".git" },
+    libs = { "/usr/" },
   },
   ["gopls"] = {
+    cmd = { "gopls", "serve" },
     filetypes = "go",
-    opts = { "serve" },
     root_pattern = { "go.mod", ".git" },
     settings = {
       gopls = {
@@ -290,6 +279,7 @@ local servers = {
     libs = { "/usr/local/go", vim.env.GOPATH },
   },
   ["pyright-langserver"] = {
+    cmd = { "pyright-langserver" },
     filetypes = "python",
     opts = { "--stdio" },
     root_pattern = { "setup.py", "requirements.txt", ".git" },
@@ -298,16 +288,18 @@ local servers = {
         analysis = {
           autoSearchPaths = true,
           useLibraryCodeForTypes = true,
-          diagnosticMode = "workspace",
+          diagnosticMode = "openFilesOnly",
         },
       },
     },
   },
   ["jdtls"] = {
+    cmd = { "jdtls" },
     filetypes = "java",
     root_pattern = { "gradlew", ".git", "mvnw" },
   },
   ["lua-language-server"] = {
+    cmd = { "lua-language-server" },
     filetypes = "lua",
     before_init = require("neodev.lsp").before_init,
     settings = {
@@ -318,18 +310,19 @@ local servers = {
     },
   },
   ["bash-language-server"] = {
+    cmd = { "bash-language-server" },
     filetypes = "sh,bash",
     opts = { "start" },
   },
   ["typescript-language-server"] = {
+    cmd = { "typescript-language-server", "--stdio" },
     filetypes = "javascript,typescript",
-    opts = { "--stdio" },
     root_pattern = { "tsconfig.json", "package.json", ".git" },
     libs = { "node_modules" },
   },
   ["vscode-html-language-server"] = {
+    cmd = { "vscode-html-language-server", "--stdio" },
     filetypes = "html",
-    opts = { "--stdio" },
     root_pattern = { "package.json", ".git" },
     init_options = {
       provideFormatter = true,
@@ -338,13 +331,13 @@ local servers = {
     },
   },
   ["emmet-ls"] = {
+    cmd = { "emmet-ls", "--stdio" },
     filetypes = "html",
-    opts = { "--stdio" },
     root_pattern = { "package.json", ".git" },
   },
   ["vscode-css-language-server"] = {
+    cmd = { "vscode-css-language-server", "--stdio" },
     filetypes = "css,scss,less",
-    opts = { "--stdio" },
     root_pattern = { "package.json", ".git" },
     settings = {
       css = { validate = true },
@@ -353,6 +346,7 @@ local servers = {
     },
   },
   ["rust-analyzer"] = {
+    cmd = { "rustup", "run", "nightly", "rust-analyzer" },
     filetypes = "rust",
     root_pattern = { ".git" },
     settings = {
@@ -369,7 +363,7 @@ local lsp_group = api.nvim_create_augroup("Lsp", {})
 local homedir = uv.os_homedir()
 
 for c, config in pairs(servers) do
-  if fn.executable(c) == 1 then
+  if fn.executable(config.cmd[1]) == 1 then
     autocmd("FileType", {
       group = lsp_group,
       pattern = config.filetypes,
@@ -386,23 +380,25 @@ for c, config in pairs(servers) do
           root_dir = nil
         end
 
+        local reuse_client = function(client, conf)
+          return ((client.name == conf.name) and (client.config.root_dir == conf.root_dir))
+            or vim.tbl_contains(
+              config.libs or {},
+              function(lib_path) return string.match(bufname, lib_path) end,
+              { predicate = true }
+            )
+        end
+
         lsp.start({
           name = c,
-          cmd = { c, unpack(config.opts or {}) },
+          cmd = config.cmd,
           root_dir = root_dir,
           capabilities = capabilities,
           before_init = config.before_init,
           init_options = config.init_options or vim.empty_dict(),
           settings = config.settings or vim.empty_dict(),
         }, {
-          reuse_client = function(client, conf)
-            return ((client.name == conf.name) and (client.config.root_dir == conf.root_dir))
-              or vim.tbl_contains(
-                config.libs or {},
-                function(lib_path) return string.match(bufname, lib_path) end,
-                { predicate = true }
-              )
-          end,
+          reuse_client = reuse_client,
         })
       end,
     })

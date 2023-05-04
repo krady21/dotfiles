@@ -5,34 +5,67 @@ font:
     family: Fira Code Nerd Font Mono
     style: Retina
 
-# Colors (Nord)
+env:
+  TERM: xterm-256color
+
+# # Colors (Nord)
+# colors:
+#   # Default colors
+#   primary:
+#     background: '0x2E3440'
+#     foreground: '0xD8DEE9'
+#   # Normal colors
+#   normal:
+#     black:   '0x3B4252'
+#     red:     '0xBF616A'
+#     green:   '0xA3BE8C'
+#     yellow:  '0xEBCB8B'
+#     blue:    '0x81A1C1'
+#     magenta: '0xB48EAD'
+#     cyan:    '0x88C0D0'
+#     white:   '0xE5E9F0'
+#   # Bright colors
+#   bright:
+#     black:   '0x4C566A'
+#     red:     '0xBF616A'
+#     green:   '0xA3BE8C'
+#     yellow:  '0xEBCB8B'
+#     blue:    '0x81A1C1'
+#     magenta: '0xB48EAD'
+#     cyan:    '0x8FBCBB'
+#     white:   '0xECEFF4'
+
+# Nightfox Alacritty Colors
+# Style: dawnfox
+# Upstream: https://github.com/edeneast/nightfox.nvim/raw/main/extra/dawnfox/nightfox_alacritty.yml
 colors:
   # Default colors
   primary:
-    background: '0x2E3440'
-    foreground: '0xD8DEE9'
-
+    background: '0xfaf4ed'
+    foreground: '0x575279'
   # Normal colors
   normal:
-    black:   '0x3B4252'
-    red:     '0xBF616A'
-    green:   '0xA3BE8C'
-    yellow:  '0xEBCB8B'
-    blue:    '0x81A1C1'
-    magenta: '0xB48EAD'
-    cyan:    '0x88C0D0'
-    white:   '0xE5E9F0'
-
+    black:   '0x575279'
+    red:     '0xb4637a'
+    green:   '0x618774'
+    yellow:  '0xea9d34'
+    blue:    '0x286983'
+    magenta: '0x907aa9'
+    cyan:    '0x56949f'
+    white:   '0xe5e9f0'
   # Bright colors
   bright:
-    black:   '0x4C566A'
-    red:     '0xBF616A'
-    green:   '0xA3BE8C'
-    yellow:  '0xEBCB8B'
-    blue:    '0x81A1C1'
-    magenta: '0xB48EAD'
-    cyan:    '0x8FBCBB'
-    white:   '0xECEFF4'
+    black:   '0x5f5695'
+    red:     '0xc26d85'
+    green:   '0x629f81'
+    yellow:  '0xeea846'
+    blue:    '0x2d81a3'
+    magenta: '0x9a80b9'
+    cyan:    '0x5ca7b4'
+    white:   '0xe6ebf3'
+  indexed_colors:
+    - { index: 16, color: '0xd7827e' }
+    - { index: 17, color: '0xd685af' }
 
 shell:
   program: /bin/bash
