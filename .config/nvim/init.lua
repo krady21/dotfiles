@@ -20,7 +20,6 @@ require("paq") {
   { "EdenEast/nightfox.nvim" },
 
   { "ibhagwan/fzf-lua" },
-  { "neovim/nvim-lspconfig" },
   { "folke/neodev.nvim" },
   { "elihunter173/dirbuf.nvim" },
   { "gbprod/substitute.nvim" },
@@ -85,6 +84,7 @@ opt.mouse = ""
 opt.nrformats:append("alpha")
 opt.number = false
 opt.path = ".,,**"
+opt.pumheight = 10
 opt.relativenumber = false
 opt.report = 0
 opt.shiftwidth = 4
@@ -120,8 +120,8 @@ map("i", "(<CR>", "(<CR>)<C-o>O")
 map("n", "gp", "`[v`]")
 map("n", "<space><space>", "<C-^>")
 
-map("n", "<C-j>", "<cmd>cnext<CR>")
-map("n", "<C-k>", "<cmd>cprev<CR>")
+map("n", "<C-j>", "<cmd>try | cnext | catch | silent! cfirst | endtry<CR>")
+map("n", "<C-k>", "<cmd>try | cprev | catch | silent! clast | endtry<CR>")
 
 map("n", "<space>dt", "<cmd>windo diffthis<CR>")
 map("n", "<space>do", "<cmd>windo diffoff<CR>")
@@ -254,7 +254,9 @@ diagnostic.config {
 local capabilities = lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 
-require("neodev").setup()
+require("neodev").setup {
+  lspconfig = false,
+}
 
 local servers = {
   ["clangd"] = {
@@ -351,11 +353,12 @@ local servers = {
     root_pattern = { ".git" },
     settings = {
       ["rust-analyzer"] = {
+        procMacro = { enable = false },
         cachePriming = { enable = false },
         cargo = { features = "all" },
       },
     },
-    libs = { ".cargo", ".rustup" },
+    libs = { ".cargo/", ".rustup/" },
   },
 }
 
@@ -369,6 +372,9 @@ for c, config in pairs(servers) do
       pattern = config.filetypes,
       callback = function()
         local bufname = api.nvim_buf_get_name(0)
+        if not uv.fs_stat(bufname) then
+          return
+        end
 
         local root_dir = fs.dirname(fs.find(config.root_pattern or {}, {
           upward = true,
@@ -444,8 +450,8 @@ require("nvim-treesitter.configs").setup {
     additional_vim_regex_highlighting = false,
     disable = function(_, buf)
       local max_filesize_KB = 200 * 1024
-      local ok, stats = pcall(uv.fs_stat, api.nvim_buf_get_name(buf))
-      return ok and stats and stats.size > max_filesize_KB
+      local stats = uv.fs_stat(api.nvim_buf_get_name(buf))
+      return stats and stats.size > max_filesize_KB
     end,
   },
   textobjects = {
@@ -614,7 +620,6 @@ require("gitsigns").setup {
 
 -- diffview
 require("diffview").setup {
-  use_icons = false,
   show_help_hints = false,
   file_panel = {
     listing_style = "list",
