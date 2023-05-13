@@ -24,7 +24,6 @@ require("paq") {
   { "elihunter173/dirbuf.nvim" },
   { "gbprod/substitute.nvim" },
   { "milisims/nvim-luaref" },
-  { "j-hui/fidget.nvim" },
 
   { "hrsh7th/nvim-cmp" },
   { "hrsh7th/cmp-nvim-lsp" },
@@ -33,17 +32,14 @@ require("paq") {
   { "dcampos/nvim-snippy" },
 
   { "nvim-treesitter/nvim-treesitter" },
-  { "nvim-treesitter/playground", opt = true },
   { "nvim-treesitter/nvim-treesitter-context" },
   { "nvim-treesitter/nvim-treesitter-textobjects" },
-  { "windwp/nvim-ts-autotag" },
   { "drybalka/tree-climber.nvim" },
 
   { "mfussenegger/nvim-dap" },
 
   { "nvim-lua/plenary.nvim" },
   { "sindrets/diffview.nvim" },
-
   { "lewis6991/gitsigns.nvim" },
   { "rhysd/conflict-marker.vim" },
 
@@ -236,9 +232,9 @@ cmp.setup {
   },
 }
 
-map("i", "<Tab>", require("snippy.mapping").expand_or_advance("<Tab>"))
-map("s", "<Tab>", require("snippy.mapping").next("<Tab>"))
-map({ "i", "s" }, "<S-Tab>", require("snippy.mapping").previous("<S-Tab>"))
+map("i", "<Tab>", function() require("snippy.mapping").expand_or_advance("<Tab>") end)
+map("s", "<Tab>", function() require("snippy.mapping").next("<Tab>") end)
+map({ "i", "s" }, "<S-Tab>", function() require("snippy.mapping").previous("<S-Tab>") end)
 
 -- vim.diagnostic
 local border_opts = { border = "rounded" }
@@ -353,7 +349,6 @@ local servers = {
     root_pattern = { ".git" },
     settings = {
       ["rust-analyzer"] = {
-        procMacro = { enable = false },
         cachePriming = { enable = false },
         cargo = { features = "all" },
       },
@@ -468,9 +463,6 @@ require("nvim-treesitter.configs").setup {
         ["iC"] = "@conditional.inner",
       },
     },
-  },
-  autotag = {
-    enable = true,
   },
 }
 
@@ -610,17 +602,28 @@ map("n", "<left>", function() dap.step_out() end)
 require("gitsigns").setup {
   attach_to_untracked = false,
   on_attach = function(bufnr)
-    local opts = { noremap = true, buffer = bufnr }
+    map("n", "]c", function()
+      if vim.wo.diff then
+        return "]c"
+      end
+      vim.schedule(function() require("gitsigns").next_hunk() end)
+      return "<Ignore>"
+    end, { buffer = bufnr, expr = true })
 
-    map("n", "]c", function() require("gitsigns").next_hunk() end, opts)
-    map("n", "[c", function() require("gitsigns").prev_hunk() end, opts)
-    map("n", "<space>p", function() require("gitsigns").preview_hunk() end, opts)
+    map("n", "[c", function()
+      if vim.wo.diff then
+        return "[c"
+      end
+      vim.schedule(function() require("gitsigns").prev_hunk() end)
+      return "<Ignore>"
+    end, { buffer = bufnr, expr = true })
+
+    map("n", "<space>p", function() require("gitsigns").preview_hunk() end, { buffer = bufnr })
   end,
 }
 
 -- diffview
 require("diffview").setup {
-  show_help_hints = false,
   file_panel = {
     listing_style = "list",
   },
@@ -632,5 +635,3 @@ require("substitute").setup()
 map("n", "s", function() require("substitute").operator() end)
 map("n", "cx", function() require("substitute.exchange").operator() end)
 map("n", "cxc", function() require("substitute.exchange").cancel() end)
-
-require("fidget").setup()
