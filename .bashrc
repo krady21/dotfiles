@@ -28,7 +28,7 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
 fi
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
-export FZF_DEFAULT_OPTS="--color=info:#c9709e,bg:#faf4ed,spinner:#816b9a,hl:#9893a5,fg:#575279,bg+:#ebdfe4,pointer:#907aa9,fg+:#575279,header:#9893a5,marker:#907aa9,gutter:#faf4ed,prompt:#816b9a,hl+:#907aa9"
+# export FZF_DEFAULT_OPTS="--color=info:#c9709e,bg:#faf4ed,spinner:#816b9a,hl:#9893a5,fg:#575279,bg+:#ebdfe4,pointer:#907aa9,fg+:#575279,header:#9893a5,marker:#907aa9,gutter:#faf4ed,prompt:#816b9a,hl+:#907aa9"
 
 export GIT_PS1_SHOWDIRTYSTATE=1
 export PS1='\[\033[01;32m\]\u@\h\[\033[00m\] \[\033[01;33m\]\w\[\033[00m\]\[\033[01;34m\]$(__git_ps1 " (%s)")\[\033[00m\] \n\\$ \[$(tput sgr0)\]'

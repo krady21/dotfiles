@@ -35,6 +35,7 @@ require("paq") {
   { "nvim-treesitter/nvim-treesitter-context" },
   { "nvim-treesitter/nvim-treesitter-textobjects" },
   { "drybalka/tree-climber.nvim" },
+  { "andymass/vim-matchup" },
 
   { "mfussenegger/nvim-dap" },
 
@@ -63,7 +64,7 @@ require("nightfox").setup {
   },
 }
 
-cmd.colorscheme("dawnfox")
+cmd.colorscheme("nordfox")
 
 opt.breakindent = true
 opt.clipboard = "unnamedplus"
@@ -203,6 +204,12 @@ autocmd("FileType", {
     optl.spell = true
     optl.spelllang = "en"
   end,
+})
+
+autocmd("FileType", {
+  group = gid,
+  pattern = "qf",
+  callback = function() optl.wrap = false end,
 })
 
 autocmd("FileType", {
@@ -430,7 +437,13 @@ autocmd("LspAttach", {
   end,
 })
 
-map("n", "<space>q", function() diagnostic.setqflist() end)
+map("n", "<space>q", function()
+  fn.setqflist({}, ' ', {
+    title = "Diagnostics",
+    items = diagnostic.toqflist(diagnostic.get(0, {})),
+  })
+  vim.cmd("rightbelow cwindow")
+end)
 map("n", "<space>e", function() diagnostic.open_float() end)
 map("n", "[g", function() diagnostic.goto_prev() end)
 map("n", "]g", function() diagnostic.goto_next() end)
@@ -440,6 +453,7 @@ lsp.handlers["textDocument/signatureHelp"] = lsp.with(lsp.handlers.signature_hel
 
 -- Treesitter
 require("nvim-treesitter.configs").setup {
+  ignore_install = { "comment" },
   highlight = {
     enable = true,
     additional_vim_regex_highlighting = false,
@@ -464,10 +478,20 @@ require("nvim-treesitter.configs").setup {
       },
     },
   },
+  matchup = {
+    enable = true,
+  }
 }
+
+g.matchup_matchparen_offscreen = {}
 
 map("n", "<M-j>", function() require("tree-climber").swap_next() end)
 map("n", "<M-k>", function() require("tree-climber").swap_prev() end)
+
+require("treesitter-context").setup {
+  max_lines = 2,
+  trim_scope = "inner",
+}
 
 -- FZF
 local fzf = require("fzf-lua")
