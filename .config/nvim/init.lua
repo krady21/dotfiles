@@ -16,39 +16,40 @@ if fn.empty(fn.glob(paq_path)) > 0 then
 end
 
 require("paq") {
-  { "savq/paq-nvim" },
-  { "EdenEast/nightfox.nvim" },
+   "savq/paq-nvim" ,
+   "EdenEast/nightfox.nvim" ,
 
-  { "ibhagwan/fzf-lua" },
-  { "folke/neodev.nvim" },
-  { "elihunter173/dirbuf.nvim" },
-  { "gbprod/substitute.nvim" },
-  { "milisims/nvim-luaref" },
+   "ibhagwan/fzf-lua" ,
+   "folke/neodev.nvim" ,
+   "elihunter173/dirbuf.nvim" ,
+   "gbprod/substitute.nvim" ,
+   "milisims/nvim-luaref" ,
+   "nvim-tree/nvim-web-devicons",
 
-  { "hrsh7th/nvim-cmp" },
-  { "hrsh7th/cmp-nvim-lsp" },
-  { "hrsh7th/cmp-path" },
-  { "dcampos/cmp-snippy" },
-  { "dcampos/nvim-snippy" },
+   "hrsh7th/nvim-cmp" ,
+   "hrsh7th/cmp-nvim-lsp" ,
+   "hrsh7th/cmp-path" ,
+   "dcampos/cmp-snippy" ,
+   "dcampos/nvim-snippy" ,
 
-  { "nvim-treesitter/nvim-treesitter" },
-  { "nvim-treesitter/nvim-treesitter-context" },
-  { "nvim-treesitter/nvim-treesitter-textobjects" },
-  { "drybalka/tree-climber.nvim" },
-  { "andymass/vim-matchup" },
+   "nvim-treesitter/nvim-treesitter" ,
+   "nvim-treesitter/nvim-treesitter-context" ,
+   "nvim-treesitter/nvim-treesitter-textobjects" ,
+   "drybalka/tree-climber.nvim" ,
+   "andymass/vim-matchup" ,
 
-  { "mfussenegger/nvim-dap" },
+   "mfussenegger/nvim-dap" ,
 
-  { "nvim-lua/plenary.nvim" },
-  { "sindrets/diffview.nvim" },
-  { "lewis6991/gitsigns.nvim" },
-  { "rhysd/conflict-marker.vim" },
+   "nvim-lua/plenary.nvim" ,
+   "sindrets/diffview.nvim" ,
+   "lewis6991/gitsigns.nvim" ,
+   "rhysd/conflict-marker.vim" ,
 
-  { "junegunn/vim-peekaboo" },
-  { "tpope/vim-commentary" },
-  { "tpope/vim-repeat" },
-  { "tpope/vim-sleuth" },
-  { "tpope/vim-surround" },
+   "junegunn/vim-peekaboo" ,
+   "tpope/vim-commentary" ,
+   "tpope/vim-repeat" ,
+   "tpope/vim-sleuth" ,
+   "tpope/vim-surround" ,
 }
 
 require("nightfox").setup {
@@ -239,9 +240,9 @@ cmp.setup {
   },
 }
 
-map("i", "<Tab>", function() require("snippy.mapping").expand_or_advance("<Tab>") end)
-map("s", "<Tab>", function() require("snippy.mapping").next("<Tab>") end)
-map({ "i", "s" }, "<S-Tab>", function() require("snippy.mapping").previous("<S-Tab>") end)
+map("i", "<Tab>", require("snippy.mapping").expand_or_advance("<Tab>"))
+map("s", "<Tab>", require("snippy.mapping").next("<Tab>"))
+map({ "i", "s" }, "<S-Tab>", require("snippy.mapping").previous("<S-Tab>"))
 
 -- vim.diagnostic
 local border_opts = { border = "rounded" }
@@ -323,14 +324,13 @@ local servers = {
     cmd = { "typescript-language-server", "--stdio" },
     filetypes = "javascript,typescript",
     root_pattern = { "tsconfig.json", "package.json", ".git" },
-    libs = { "node_modules" },
+    libs = { "node_modules/" },
   },
   ["vscode-html-language-server"] = {
     cmd = { "vscode-html-language-server", "--stdio" },
     filetypes = "html",
     root_pattern = { "package.json", ".git" },
     init_options = {
-      provideFormatter = true,
       embeddedLanguages = { css = true, javascript = true },
       configurationSection = { "html", "css", "javascript" },
     },
@@ -356,8 +356,10 @@ local servers = {
     root_pattern = { ".git" },
     settings = {
       ["rust-analyzer"] = {
-        cachePriming = { enable = false },
+        cachePriming = { numThreads = 1 },
+        buildScripts = { enable = false },
         cargo = { features = "all" },
+        checkOnSave = false,
       },
     },
     libs = { ".cargo/", ".rustup/" },
@@ -401,6 +403,7 @@ for c, config in pairs(servers) do
           name = c,
           cmd = config.cmd,
           root_dir = root_dir,
+          cmd_cwd = root_dir,
           capabilities = capabilities,
           before_init = config.before_init,
           init_options = config.init_options or vim.empty_dict(),
@@ -657,5 +660,6 @@ require("diffview").setup {
 require("substitute").setup()
 
 map("n", "s", function() require("substitute").operator() end)
+map("x", "s", function() require("substitute").visual() end)
 map("n", "cx", function() require("substitute.exchange").operator() end)
 map("n", "cxc", function() require("substitute.exchange").cancel() end)
