@@ -24,7 +24,7 @@ require("paq") {
    "elihunter173/dirbuf.nvim" ,
    "gbprod/substitute.nvim" ,
    "milisims/nvim-luaref" ,
-   "nvim-tree/nvim-web-devicons",
+   "j-hui/fidget.nvim",
 
    "hrsh7th/nvim-cmp" ,
    "hrsh7th/cmp-nvim-lsp" ,
@@ -73,6 +73,7 @@ opt.completeopt = { "menuone", "noselect" }
 opt.dictionary = "/usr/share/dict/words"
 opt.diffopt:append { "indent-heuristic", "algorithm:histogram", "linematch:60" }
 opt.expandtab = true
+opt.foldenable = false
 opt.hlsearch = false
 opt.ignorecase = true
 opt.incsearch = true
@@ -255,6 +256,15 @@ diagnostic.config {
 }
 
 -- LSP
+
+-- https://github.com/neovim/neovim/issues/23725
+local ok, wf = pcall(require, "vim.lsp._watchfiles")
+if ok then
+  wf._watchfunc = function()
+    return function() end
+  end
+end
+
 local capabilities = lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 
@@ -335,11 +345,11 @@ local servers = {
       configurationSection = { "html", "css", "javascript" },
     },
   },
-  ["emmet-ls"] = {
-    cmd = { "emmet-ls", "--stdio" },
-    filetypes = "html",
-    root_pattern = { "package.json", ".git" },
-  },
+  -- ["emmet-ls"] = {
+  --   cmd = { "emmet-ls", "--stdio" },
+  --   filetypes = "html",
+  --   root_pattern = { "package.json", ".git" },
+  -- },
   ["vscode-css-language-server"] = {
     cmd = { "vscode-css-language-server", "--stdio" },
     filetypes = "css,scss,less",
@@ -356,10 +366,10 @@ local servers = {
     root_pattern = { ".git" },
     settings = {
       ["rust-analyzer"] = {
-        cachePriming = { numThreads = 1 },
-        buildScripts = { enable = false },
+        -- cachePriming = { numThreads = 1 },
         cargo = { features = "all" },
         checkOnSave = false,
+        diagnostics = { experimental = { enable = true } },
       },
     },
     libs = { ".cargo/", ".rustup/" },
@@ -651,6 +661,7 @@ require("gitsigns").setup {
 
 -- diffview
 require("diffview").setup {
+  use_icons = false,
   file_panel = {
     listing_style = "list",
   },
@@ -663,3 +674,5 @@ map("n", "s", function() require("substitute").operator() end)
 map("x", "s", function() require("substitute").visual() end)
 map("n", "cx", function() require("substitute.exchange").operator() end)
 map("n", "cxc", function() require("substitute.exchange").cancel() end)
+
+require("fidget").setup()
