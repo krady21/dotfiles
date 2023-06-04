@@ -16,40 +16,40 @@ if fn.empty(fn.glob(paq_path)) > 0 then
 end
 
 require("paq") {
-   "savq/paq-nvim" ,
-   "EdenEast/nightfox.nvim" ,
+  "savq/paq-nvim",
+  "EdenEast/nightfox.nvim",
 
-   "ibhagwan/fzf-lua" ,
-   "folke/neodev.nvim" ,
-   "elihunter173/dirbuf.nvim" ,
-   "gbprod/substitute.nvim" ,
-   "milisims/nvim-luaref" ,
-   "j-hui/fidget.nvim",
+  "ibhagwan/fzf-lua",
+  "folke/neodev.nvim",
+  "elihunter173/dirbuf.nvim",
+  "gbprod/substitute.nvim",
+  "milisims/nvim-luaref",
+  "j-hui/fidget.nvim",
 
-   "hrsh7th/nvim-cmp" ,
-   "hrsh7th/cmp-nvim-lsp" ,
-   "hrsh7th/cmp-path" ,
-   "dcampos/cmp-snippy" ,
-   "dcampos/nvim-snippy" ,
+  "hrsh7th/nvim-cmp",
+  "hrsh7th/cmp-nvim-lsp",
+  "hrsh7th/cmp-path",
+  "dcampos/cmp-snippy",
+  "dcampos/nvim-snippy",
 
-   "nvim-treesitter/nvim-treesitter" ,
-   "nvim-treesitter/nvim-treesitter-context" ,
-   "nvim-treesitter/nvim-treesitter-textobjects" ,
-   "drybalka/tree-climber.nvim" ,
-   "andymass/vim-matchup" ,
+  "nvim-treesitter/nvim-treesitter",
+  "nvim-treesitter/nvim-treesitter-context",
+  "nvim-treesitter/nvim-treesitter-textobjects",
+  "drybalka/tree-climber.nvim",
+  "andymass/vim-matchup",
 
-   "mfussenegger/nvim-dap" ,
+  "mfussenegger/nvim-dap",
 
-   "nvim-lua/plenary.nvim" ,
-   "sindrets/diffview.nvim" ,
-   "lewis6991/gitsigns.nvim" ,
-   "rhysd/conflict-marker.vim" ,
+  "nvim-lua/plenary.nvim",
+  "sindrets/diffview.nvim",
+  "lewis6991/gitsigns.nvim",
+  "rhysd/conflict-marker.vim",
 
-   "junegunn/vim-peekaboo" ,
-   "tpope/vim-commentary" ,
-   "tpope/vim-repeat" ,
-   "tpope/vim-sleuth" ,
-   "tpope/vim-surround" ,
+  "junegunn/vim-peekaboo",
+  "tpope/vim-commentary",
+  "tpope/vim-repeat",
+  "tpope/vim-sleuth",
+  "tpope/vim-surround",
 }
 
 require("nightfox").setup {
@@ -108,6 +108,7 @@ if fn.executable("rg") > 0 then
 end
 
 g.peekaboo_window = "vert bo 40new"
+g.editorconfig = false
 
 map({ "n", "x", "o" }, "H", "^")
 map({ "n", "x", "o" }, "L", "$")
@@ -119,9 +120,6 @@ map("i", "(<CR>", "(<CR>)<C-o>O")
 map("n", "gp", "`[v`]")
 map("n", "<space><space>", "<C-^>")
 
-map("n", "<C-j>", "<cmd>try | cnext | catch | silent! cfirst | endtry<CR>")
-map("n", "<C-k>", "<cmd>try | cprev | catch | silent! clast | endtry<CR>")
-
 map("n", "<space>dt", "<cmd>windo diffthis<CR>")
 map("n", "<space>do", "<cmd>windo diffoff<CR>")
 
@@ -130,8 +128,11 @@ map("n", "<F2>", "<cmd>set invspell<CR>")
 map("n", "<F3>", "<cmd>set invwrap<CR>")
 map("n", "<F4>", "<cmd>set invlist<CR>")
 
-map("n", "j", "v:count ? 'j' : 'gj'", { expr = true })
-map("n", "k", "v:count ? 'k' : 'gk'", { expr = true })
+map("n", "<C-j>", function() local _ = pcall(cmd.cnext) or pcall(cmd.cfirst) end)
+map("n", "<C-k>", function() local _ = pcall(cmd.cprevious) or pcall(cmd.clast) end)
+
+map("n", "j", function() return vim.v.count == 0 and "gj" or "j" end, { expr = true })
+map("n", "k", function() return vim.v.count == 0 and "gk" or "k" end, { expr = true })
 
 map({ "n", "x" }, "c", [["_c]])
 map({ "n", "x" }, "C", [["_C]])
@@ -241,9 +242,8 @@ cmp.setup {
   },
 }
 
-map("i", "<Tab>", require("snippy.mapping").expand_or_advance("<Tab>"))
-map("s", "<Tab>", require("snippy.mapping").next("<Tab>"))
-map({ "i", "s" }, "<S-Tab>", require("snippy.mapping").previous("<S-Tab>"))
+map({ "i", "s" }, "<Tab>", function() require("snippy.mapping").expand_or_advance("<Tab>")() end)
+map({ "i", "s" }, "<S-Tab>", function() require("snippy.mapping").previous("<S-Tab>")() end)
 
 -- vim.diagnostic
 local border_opts = { border = "rounded" }
@@ -252,18 +252,16 @@ diagnostic.config {
   float = border_opts,
   signs = false,
   underline = false,
-  virtual_text = true,
+  virtual_text = false,
 }
 
 -- LSP
 
 -- https://github.com/neovim/neovim/issues/23725
 local ok, wf = pcall(require, "vim.lsp._watchfiles")
-if ok then
-  wf._watchfunc = function()
-    return function() end
-  end
-end
+if ok then wf._watchfunc = function()
+  return function() end
+end end
 
 local capabilities = lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
@@ -290,6 +288,7 @@ local servers = {
           nilness = true,
         },
         staticcheck = true,
+        semanticTokens = true,
       },
     },
     libs = { "/usr/local/go", vim.env.GOPATH },
@@ -333,7 +332,7 @@ local servers = {
   ["typescript-language-server"] = {
     cmd = { "typescript-language-server", "--stdio" },
     filetypes = "javascript,typescript",
-    root_pattern = { "tsconfig.json", "package.json", ".git" },
+    root_pattern = { "package.json", ".git" },
     libs = { "node_modules/" },
   },
   ["vscode-html-language-server"] = {
@@ -384,29 +383,25 @@ for c, config in pairs(servers) do
     autocmd("FileType", {
       group = lsp_group,
       pattern = config.filetypes,
-      callback = function()
-        local bufname = api.nvim_buf_get_name(0)
-        if not uv.fs_stat(bufname) then
-          return
-        end
+      callback = function(args)
+        local bufname = uv.fs_realpath(args.file)
+        if not uv.fs_stat(bufname) then return end
 
         local root_dir = fs.dirname(fs.find(config.root_pattern or {}, {
           upward = true,
           stop = homedir,
           path = fs.dirname(bufname),
         })[1])
-
-        if root_dir == homedir then
-          root_dir = nil
-        end
+        if root_dir == homedir then root_dir = nil end
 
         local reuse_client = function(client, conf)
-          return ((client.name == conf.name) and (client.config.root_dir == conf.root_dir))
-            or vim.tbl_contains(
-              config.libs or {},
-              function(lib_path) return string.match(bufname, lib_path) end,
-              { predicate = true }
-            )
+          if (client.name == conf.name) and (client.config.root_dir == conf.root_dir) then
+            return true
+          end
+          for _, lib_path in ipairs(servers[client.name].libs or {}) do
+            if string.match(bufname, lib_path) then return true end
+          end
+          return false
         end
 
         lsp.start({
@@ -451,11 +446,11 @@ autocmd("LspAttach", {
 })
 
 map("n", "<space>q", function()
-  fn.setqflist({}, ' ', {
+  fn.setqflist({}, " ", {
     title = "Diagnostics",
     items = diagnostic.toqflist(diagnostic.get(0, {})),
   })
-  vim.cmd("rightbelow cwindow")
+  cmd("rightbelow cwindow")
 end)
 map("n", "<space>e", function() diagnostic.open_float() end)
 map("n", "[g", function() diagnostic.goto_prev() end)
@@ -493,7 +488,7 @@ require("nvim-treesitter.configs").setup {
   },
   matchup = {
     enable = true,
-  }
+  },
 }
 
 g.matchup_matchparen_offscreen = {}
@@ -640,17 +635,13 @@ require("gitsigns").setup {
   attach_to_untracked = false,
   on_attach = function(bufnr)
     map("n", "]c", function()
-      if vim.wo.diff then
-        return "]c"
-      end
+      if vim.wo.diff then return "]c" end
       vim.schedule(function() require("gitsigns").next_hunk() end)
       return "<Ignore>"
     end, { buffer = bufnr, expr = true })
 
     map("n", "[c", function()
-      if vim.wo.diff then
-        return "[c"
-      end
+      if vim.wo.diff then return "[c" end
       vim.schedule(function() require("gitsigns").prev_hunk() end)
       return "<Ignore>"
     end, { buffer = bufnr, expr = true })
