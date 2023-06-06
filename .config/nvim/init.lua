@@ -35,6 +35,8 @@ require("paq") {
   "nvim-treesitter/nvim-treesitter",
   "nvim-treesitter/nvim-treesitter-context",
   "nvim-treesitter/nvim-treesitter-textobjects",
+  "RRethy/nvim-treesitter-endwise",
+  "windwp/nvim-ts-autotag",
   "drybalka/tree-climber.nvim",
   "andymass/vim-matchup",
 
@@ -489,6 +491,12 @@ require("nvim-treesitter.configs").setup {
   matchup = {
     enable = true,
   },
+  endwise = {
+    enable = true,
+  },
+  autotag = {
+    enable = true,
+  }
 }
 
 g.matchup_matchparen_offscreen = {}

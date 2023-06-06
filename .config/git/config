@@ -42,6 +42,7 @@
 
 [rebase]
     autoStash = true
+    autosquash = true
 
 [status]
     short = true
