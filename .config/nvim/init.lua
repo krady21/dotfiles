@@ -296,9 +296,8 @@ local servers = {
     libs = { "/usr/local/go", vim.env.GOPATH },
   },
   ["pyright-langserver"] = {
-    cmd = { "pyright-langserver" },
+    cmd = { "pyright-langserver", "--stdio" },
     filetypes = "python",
-    opts = { "--stdio" },
     root_pattern = { "setup.py", "requirements.txt", ".git" },
     settings = {
       python = {
@@ -337,20 +336,6 @@ local servers = {
     root_pattern = { "package.json", ".git" },
     libs = { "node_modules/" },
   },
-  ["vscode-html-language-server"] = {
-    cmd = { "vscode-html-language-server", "--stdio" },
-    filetypes = "html",
-    root_pattern = { "package.json", ".git" },
-    init_options = {
-      embeddedLanguages = { css = true, javascript = true },
-      configurationSection = { "html", "css", "javascript" },
-    },
-  },
-  -- ["emmet-ls"] = {
-  --   cmd = { "emmet-ls", "--stdio" },
-  --   filetypes = "html",
-  --   root_pattern = { "package.json", ".git" },
-  -- },
   ["vscode-css-language-server"] = {
     cmd = { "vscode-css-language-server", "--stdio" },
     filetypes = "css,scss,less",
@@ -387,7 +372,7 @@ for c, config in pairs(servers) do
       pattern = config.filetypes,
       callback = function(args)
         local bufname = uv.fs_realpath(args.file)
-        if not uv.fs_stat(bufname) then return end
+        if not bufname or not uv.fs_stat(bufname) then return end
 
         local root_dir = fs.dirname(fs.find(config.root_pattern or {}, {
           upward = true,
@@ -654,6 +639,7 @@ require("gitsigns").setup {
       return "<Ignore>"
     end, { buffer = bufnr, expr = true })
 
+    map("n", "<space>R", function() require("gitsigns").reset_hunk() end, { buffer = bufnr })
     map("n", "<space>p", function() require("gitsigns").preview_hunk() end, { buffer = bufnr })
   end,
 }
