@@ -12,7 +12,7 @@ local autocmd = vim.api.nvim_create_autocmd
 
 local paq_path = fn.stdpath("data") .. "/site/pack/paqs/start/paq-nvim"
 if fn.empty(fn.glob(paq_path)) > 0 then
-  fn.system { "git", "clone", "--depth", "1", "https://github.com/savq/paq-nvim.git", paq_path }
+  vim.system({ "git", "clone", "--depth", "1", "https://github.com/savq/paq-nvim.git", paq_path }):wait()
 end
 
 require("paq") {
@@ -24,7 +24,7 @@ require("paq") {
   "elihunter173/dirbuf.nvim",
   "gbprod/substitute.nvim",
   "milisims/nvim-luaref",
-  "j-hui/fidget.nvim",
+  {"j-hui/fidget.nvim", branch = "legacy"},
 
   "hrsh7th/nvim-cmp",
   "hrsh7th/cmp-nvim-lsp",
@@ -42,8 +42,6 @@ require("paq") {
 
   "mfussenegger/nvim-dap",
 
-  "nvim-lua/plenary.nvim",
-  "sindrets/diffview.nvim",
   "lewis6991/gitsigns.nvim",
   "rhysd/conflict-marker.vim",
 
@@ -167,6 +165,12 @@ end, {})
 command("Sbd", "b#|bd#", {})
 
 local gid = api.nvim_create_augroup("Personal", {})
+
+autocmd("TermOpen", {
+  group = gid,
+  pattern = "*",
+  command = "startinsert",
+})
 
 autocmd("QuickFixCmdPost", {
   group = gid,
@@ -326,9 +330,8 @@ local servers = {
     },
   },
   ["bash-language-server"] = {
-    cmd = { "bash-language-server" },
+    cmd = { "bash-language-server", "start" },
     filetypes = "sh,bash",
-    opts = { "start" },
   },
   ["typescript-language-server"] = {
     cmd = { "typescript-language-server", "--stdio" },
@@ -481,7 +484,7 @@ require("nvim-treesitter.configs").setup {
   },
   autotag = {
     enable = true,
-  }
+  },
 }
 
 g.matchup_matchparen_offscreen = {}
@@ -642,14 +645,6 @@ require("gitsigns").setup {
     map("n", "<space>R", function() require("gitsigns").reset_hunk() end, { buffer = bufnr })
     map("n", "<space>p", function() require("gitsigns").preview_hunk() end, { buffer = bufnr })
   end,
-}
-
--- diffview
-require("diffview").setup {
-  use_icons = false,
-  file_panel = {
-    listing_style = "list",
-  },
 }
 
 -- substitute
