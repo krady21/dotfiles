@@ -55,12 +55,9 @@ require("paq") {
 require("nightfox").setup {
   groups = {
     all = {
-      NormalFloat = {
-        link = "Normal",
-      },
-      TreesitterContext = {
-        bg = "palette.bg2",
-      },
+      NormalFloat = { link = "Normal" },
+      TreesitterContext = { bg = "palette.bg2" },
+      LspInlayHint = { link = "Comment" },
     },
   },
 }
@@ -258,7 +255,7 @@ diagnostic.config {
   float = border_opts,
   signs = false,
   underline = false,
-  virtual_text = false,
+  virtual_text = true,
 }
 
 -- LSP
@@ -326,6 +323,7 @@ local servers = {
       Lua = {
         telemetry = { enable = false },
         workspace = { checkThirdParty = false },
+        hint = { enable = true },
       },
     },
   },
@@ -338,6 +336,20 @@ local servers = {
     filetypes = "javascript,typescript",
     root_pattern = { "package.json", ".git" },
     libs = { "node_modules/" },
+    settings = {
+      typescript = {
+        inlayHints = {
+          includeInlayParameterNameHints = 'all',
+          includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+          includeInlayFunctionParameterTypeHints = true,
+          includeInlayVariableTypeHints = true,
+          includeInlayVariableTypeHintsWhenTypeMatchesName = false,
+          includeInlayPropertyDeclarationTypeHints = true,
+          includeInlayFunctionLikeReturnTypeHints = true,
+          includeInlayEnumMemberValueHints = true,
+        }
+      }
+    }
   },
   ["vscode-css-language-server"] = {
     cmd = { "vscode-css-language-server", "--stdio" },
@@ -429,6 +441,7 @@ autocmd("LspAttach", {
     map("i", "<C-k>", lsp.buf.signature_help, opts)
     map("n", "<space>=", lsp.buf.format, opts)
     map("n", "<space>w", lsp.buf.workspace_symbol, opts)
+    map("n", "<space>gh", function() lsp.buf.inlay_hint(0, nil) end, opts)
 
     local client = lsp.get_client_by_id(args.data.client_id)
     client.server_capabilities.semanticTokensProvider = nil
