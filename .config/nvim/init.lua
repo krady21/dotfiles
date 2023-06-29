@@ -12,7 +12,9 @@ local autocmd = vim.api.nvim_create_autocmd
 
 local paq_path = fn.stdpath("data") .. "/site/pack/paqs/start/paq-nvim"
 if fn.empty(fn.glob(paq_path)) > 0 then
-  vim.system({ "git", "clone", "--depth", "1", "https://github.com/savq/paq-nvim.git", paq_path }):wait()
+  vim
+    .system({ "git", "clone", "--depth", "1", "https://github.com/savq/paq-nvim.git", paq_path })
+    :wait()
 end
 
 require("paq") {
@@ -24,7 +26,6 @@ require("paq") {
   "elihunter173/dirbuf.nvim",
   "gbprod/substitute.nvim",
   "milisims/nvim-luaref",
-  {"j-hui/fidget.nvim", branch = "legacy"},
 
   "hrsh7th/nvim-cmp",
   "hrsh7th/cmp-nvim-lsp",
@@ -91,7 +92,7 @@ opt.smartcase = true
 opt.softtabstop = 4
 opt.splitbelow = true
 opt.splitright = true
-opt.statusline = "%< %f %m%r%w%=%l/%-6L %3c "
+opt.statusline = "%< %f %m%r%w%=%{v:lua.vim.lsp.status()}%6l/%-6L %3c "
 opt.swapfile = false
 opt.termguicolors = true
 opt.undofile = true
@@ -145,14 +146,14 @@ map(
 
 map({ "o", "x" }, "ae", function() cmd.normal("ggVG") end, { silent = true })
 
-cmd.cnoreabbrev { "Q", "q" }
-cmd.cnoreabbrev { "W", "w" }
-cmd.cnoreabbrev { "Wq", "wq" }
-cmd.cnoreabbrev { "Qa", "qa" }
+map("ca", "Q", "q")
+map("ca", "W", "w")
+map("ca", "Wq", "wq")
+map("ca", "Qa", "qa")
 
-cmd.cnoreabbrev { "tq", "tabclose" }
-cmd.cnoreabbrev { "grep", "silent grep!" }
-cmd.cnoreabbrev { "man", "Man" }
+map("ca", "tq", "tabclose")
+map("ca", "grep", "silent grep!")
+map("ca", "man", "Man")
 
 command("Whitespace", function()
   local save = fn.winsaveview()
@@ -185,6 +186,12 @@ autocmd("FileType", {
   group = gid,
   pattern = "c,cpp",
   callback = function() optl.commentstring = "// %s" end,
+})
+
+autocmd("LspProgress", {
+  group = gid,
+  pattern = "*",
+  command = "redrawstatus",
 })
 
 autocmd("FileType", {
@@ -339,7 +346,7 @@ local servers = {
     settings = {
       typescript = {
         inlayHints = {
-          includeInlayParameterNameHints = 'all',
+          includeInlayParameterNameHints = "all",
           includeInlayParameterNameHintsWhenArgumentMatchesName = false,
           includeInlayFunctionParameterTypeHints = true,
           includeInlayVariableTypeHints = true,
@@ -347,9 +354,9 @@ local servers = {
           includeInlayPropertyDeclarationTypeHints = true,
           includeInlayFunctionLikeReturnTypeHints = true,
           includeInlayEnumMemberValueHints = true,
-        }
-      }
-    }
+        },
+      },
+    },
   },
   ["vscode-css-language-server"] = {
     cmd = { "vscode-css-language-server", "--stdio" },
@@ -667,5 +674,3 @@ map("n", "s", function() require("substitute").operator() end)
 map("x", "s", function() require("substitute").visual() end)
 map("n", "cx", function() require("substitute.exchange").operator() end)
 map("n", "cxc", function() require("substitute.exchange").cancel() end)
-
-require("fidget").setup()
