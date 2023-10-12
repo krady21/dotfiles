@@ -26,6 +26,7 @@ require("paq") {
   "elihunter173/dirbuf.nvim",
   "gbprod/substitute.nvim",
   "milisims/nvim-luaref",
+  {"j-hui/fidget.nvim", branch = "legacy"},
 
   "hrsh7th/nvim-cmp",
   "hrsh7th/cmp-nvim-lsp",
@@ -43,6 +44,7 @@ require("paq") {
 
   "mfussenegger/nvim-dap",
 
+  "sindrets/diffview.nvim",
   "lewis6991/gitsigns.nvim",
   "rhysd/conflict-marker.vim",
 
@@ -92,7 +94,7 @@ opt.smartcase = true
 opt.softtabstop = 4
 opt.splitbelow = true
 opt.splitright = true
-opt.statusline = "%< %f %m%r%w%=%{v:lua.vim.lsp.status()}%6l/%-6L %3c "
+opt.statusline = "%< %f %m%r%w%=%l/%-6L %3c "
 opt.swapfile = false
 opt.termguicolors = true
 opt.undofile = true
@@ -667,6 +669,14 @@ require("gitsigns").setup {
   end,
 }
 
+-- diffview
+require("diffview").setup {
+  use_icons = false,
+  file_panel = {
+    listing_style = "list",
+  },
+}
+
 -- substitute
 require("substitute").setup()
 
@@ -674,3 +684,5 @@ map("n", "s", function() require("substitute").operator() end)
 map("x", "s", function() require("substitute").visual() end)
 map("n", "cx", function() require("substitute.exchange").operator() end)
 map("n", "cxc", function() require("substitute.exchange").cancel() end)
+
+require("fidget").setup()
