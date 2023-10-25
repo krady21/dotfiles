@@ -8,7 +8,7 @@
     pager = delta
 
 [delta]
-    light = false
+    light = true
 
 [diff]
     tool = vimdiff3

@@ -26,7 +26,7 @@ require("paq") {
   "elihunter173/dirbuf.nvim",
   "gbprod/substitute.nvim",
   "milisims/nvim-luaref",
-  {"j-hui/fidget.nvim", branch = "legacy"},
+  { "j-hui/fidget.nvim", branch = "legacy" },
 
   "hrsh7th/nvim-cmp",
   "hrsh7th/cmp-nvim-lsp",
@@ -65,8 +65,26 @@ require("nightfox").setup {
   },
 }
 
-cmd.colorscheme("nordfox")
+autocmd("ColorScheme", {
+  pattern = "retrobox",
+  callback = function()
+    cmd("hi! link TreesitterContext Pmenu")
+    cmd("hi! link NormalFloat Normal")
+    cmd("hi! link StatusLine Pmenu")
+    cmd("hi! link LspInlayHint Comment")
+    cmd("hi! Error cterm=bold gui=bold")
+    cmd("hi! MatchParen cterm=bold gui=bold")
+    cmd("hi! StatusLine cterm=reverse gui=reverse")
+    cmd("hi! StatusLineNC cterm=reverse gui=reverse")
+    cmd("hi! GitSignsAdd ctermfg=64 ctermbg=230 guifg=#79740e guibg=#fbf1c7")
+    cmd("hi! GitSignsDelete ctermfg=124 ctermbg=230 guifg=#9d0006 guibg=#fbf1c7")
+    cmd("hi! GitSignsChange ctermfg=29 ctermbg=230 guifg=#427b58 guibg=#fbf1c7")
+  end,
+})
 
+cmd.colorscheme("retrobox")
+
+opt.background = "light"
 opt.breakindent = true
 opt.clipboard = "unnamedplus"
 opt.completeopt = { "menuone", "noselect" }
@@ -74,6 +92,7 @@ opt.dictionary = "/usr/share/dict/words"
 opt.diffopt:append { "indent-heuristic", "algorithm:histogram", "linematch:60" }
 opt.expandtab = true
 opt.foldenable = false
+opt.foldmethod = "indent"
 opt.hlsearch = false
 opt.ignorecase = true
 opt.incsearch = true
@@ -108,6 +127,7 @@ if fn.executable("rg") > 0 then
 end
 
 g.peekaboo_window = "vert bo 40new"
+g.peekaboo_prefix = "<space>"
 g.editorconfig = false
 
 map({ "n", "x", "o" }, "H", "^")
@@ -266,6 +286,17 @@ diagnostic.config {
   underline = false,
   virtual_text = true,
 }
+
+map("n", "T", function()
+  if vim.b.show_diagnostics == nil then vim.b.show_diagnostics = true end
+  if vim.b.show_diagnostics then
+    vim.b.show_diagnostics = false
+    vim.diagnostic.hide(nil, 0)
+  else
+    vim.b.show_diagnostics = true
+    vim.diagnostic.show(nil, 0)
+  end
+end)
 
 -- LSP
 
@@ -475,7 +506,7 @@ lsp.handlers["textDocument/signatureHelp"] = lsp.with(lsp.handlers.signature_hel
 require("nvim-treesitter.configs").setup {
   ignore_install = { "comment" },
   highlight = {
-    enable = true,
+    enable = false,
     additional_vim_regex_highlighting = false,
     disable = function(_, buf)
       local max_filesize_KB = 200 * 1024
