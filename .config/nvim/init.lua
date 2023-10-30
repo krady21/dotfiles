@@ -72,6 +72,7 @@ autocmd("ColorScheme", {
     cmd("hi! link NormalFloat Normal")
     cmd("hi! link StatusLine Pmenu")
     cmd("hi! link LspInlayHint Comment")
+    cmd("hi! link SpecialComment Comment")
     cmd("hi! Error cterm=bold gui=bold")
     cmd("hi! MatchParen cterm=bold gui=bold")
     cmd("hi! StatusLine cterm=reverse gui=reverse")
@@ -299,15 +300,9 @@ map("n", "T", function()
 end)
 
 -- LSP
-
--- https://github.com/neovim/neovim/issues/23725
-local ok, wf = pcall(require, "vim.lsp._watchfiles")
-if ok then wf._watchfunc = function()
-  return function() end
-end end
-
 local capabilities = lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
+capabilities.workspace.didChangeWatchedFiles.dynamicRegistration = false -- https://github.com/neovim/neovim/issues/23725
 
 require("neodev").setup {
   lspconfig = false,

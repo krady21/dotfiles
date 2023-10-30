@@ -9,6 +9,7 @@
 
 [delta]
     light = true
+    navigate = true
 
 [diff]
     tool = vimdiff3
