@@ -29,6 +29,7 @@ fi
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 # export FZF_DEFAULT_OPTS="--color=info:#c9709e,bg:#faf4ed,spinner:#816b9a,hl:#9893a5,fg:#575279,bg+:#ebdfe4,pointer:#907aa9,fg+:#575279,header:#9893a5,marker:#907aa9,gutter:#faf4ed,prompt:#816b9a,hl+:#907aa9"
+export FZF_DEFAULT_OPTS="--color=info:#427b58,bg:#fbf1c7,spinner:#9d0006,hl:#928374,fg:#3c3836,bg+:#e5d4b1,pointer:#9d0006,fg+:#3c3836,header:#928374,marker:#9d0006,gutter:#fbf1c7,prompt:#9d0006,hl+:#9d0006"
 
 export GIT_PS1_SHOWDIRTYSTATE=1
 export PS1='\[\033[01;32m\]\u@\h\[\033[00m\] \[\033[01;33m\]\w\[\033[00m\]\[\033[01;34m\]$(__git_ps1 " (%s)")\[\033[00m\] \n\\$ \[$(tput sgr0)\]'

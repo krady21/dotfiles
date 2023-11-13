@@ -4,14 +4,12 @@ local fn, api, cmd = vim.fn, vim.api, vim.cmd
 local g, opt, optl = vim.g, vim.opt, vim.opt_local
 local map = vim.keymap.set
 local lsp, diagnostic = vim.lsp, vim.diagnostic
-local fs = vim.fs
-local uv = vim.loop
 
 local command = vim.api.nvim_create_user_command
 local autocmd = vim.api.nvim_create_autocmd
 
 local paq_path = fn.stdpath("data") .. "/site/pack/paqs/start/paq-nvim"
-if fn.empty(fn.glob(paq_path)) > 0 then
+if not vim.uv.fs_stat(paq_path) then
   vim
     .system({ "git", "clone", "--depth", "1", "https://github.com/savq/paq-nvim.git", paq_path })
     :wait()
@@ -31,8 +29,6 @@ require("paq") {
   "hrsh7th/nvim-cmp",
   "hrsh7th/cmp-nvim-lsp",
   "hrsh7th/cmp-path",
-  "dcampos/cmp-snippy",
-  "dcampos/nvim-snippy",
 
   "nvim-treesitter/nvim-treesitter",
   "nvim-treesitter/nvim-treesitter-context",
@@ -55,31 +51,52 @@ require("paq") {
   "tpope/vim-surround",
 }
 
-require("nightfox").setup {
-  groups = {
-    all = {
-      NormalFloat = { link = "Normal" },
-      TreesitterContext = { bg = "palette.bg2" },
-      LspInlayHint = { link = "Comment" },
-    },
-  },
-}
+-- require("nightfox").setup {
+--   groups = {
+--     all = {
+--       NormalFloat = { link = "Normal" },
+--       TreesitterContext = { bg = "palette.bg2" },
+--       LspInlayHint = { link = "Comment" },
+--     },
+--   },
+-- }
+
+local gid = api.nvim_create_augroup("Personal", {})
+
+local patch_hl = function(group, custom_hl, oldgroup)
+  local old_hl = api.nvim_get_hl(0, { name = oldgroup or group, link = false })
+  local new_hl = vim.tbl_deep_extend("force", old_hl, custom_hl)
+  api.nvim_set_hl(0, group, new_hl)
+end
 
 autocmd("ColorScheme", {
   pattern = "retrobox",
+  group = gid,
   callback = function()
-    cmd("hi! link TreesitterContext Pmenu")
-    cmd("hi! link NormalFloat Normal")
-    cmd("hi! link StatusLine Pmenu")
-    cmd("hi! link LspInlayHint Comment")
-    cmd("hi! link SpecialComment Comment")
-    cmd("hi! Error cterm=bold gui=bold")
-    cmd("hi! MatchParen cterm=bold gui=bold")
-    cmd("hi! StatusLine cterm=reverse gui=reverse")
-    cmd("hi! StatusLineNC cterm=reverse gui=reverse")
-    cmd("hi! GitSignsAdd ctermfg=64 ctermbg=230 guifg=#79740e guibg=#fbf1c7")
-    cmd("hi! GitSignsDelete ctermfg=124 ctermbg=230 guifg=#9d0006 guibg=#fbf1c7")
-    cmd("hi! GitSignsChange ctermfg=29 ctermbg=230 guifg=#427b58 guibg=#fbf1c7")
+    api.nvim_set_hl(0, "TreesitterContext", { link = "Pmenu" })
+    api.nvim_set_hl(0, "NormalFloat", { link = "Normal" })
+    api.nvim_set_hl(0, "LspInlayHint", { link = "Comment" })
+    api.nvim_set_hl(0, "SpecialComment", { link = "Comment" })
+    api.nvim_set_hl(0, "Visual", { link = "CursorLine" })
+
+    api.nvim_set_hl(0, "@variable", {})
+    api.nvim_set_hl(0, "@field", {})
+    api.nvim_set_hl(0, "@parameter", {})
+    api.nvim_set_hl(0, "@punctuation", {})
+    api.nvim_set_hl(0, "@constructor.lua", {})
+
+    api.nvim_set_hl(0, "@function", { link = "Identifier" })
+    api.nvim_set_hl(0, "@method", { link = "Identifier" })
+    api.nvim_set_hl(0, "@text.diff.add", { link = "diffAdded" })
+    api.nvim_set_hl(0, "@text.diff.delete", { link = "diffRemoved" })
+
+    patch_hl("Error", { reverse = false })
+    patch_hl("MatchParen", { underline = false })
+    patch_hl("StatusLine", {}, "Pmenu")
+    patch_hl("StatusLineNC", api.nvim_get_hl(0, { name = "Comment" }), "Pmenu")
+    patch_hl("GitSignsAdd", { reverse = false }, "DiffAdd")
+    patch_hl("GitSignsDelete", { reverse = false }, "DiffDelete")
+    patch_hl("GitSignsChange", { reverse = false }, "DiffChange")
   end,
 })
 
@@ -185,8 +202,6 @@ command("Whitespace", function()
 end, {})
 command("Sbd", "b#|bd#", {})
 
-local gid = api.nvim_create_augroup("Personal", {})
-
 autocmd("TermOpen", {
   group = gid,
   pattern = "*",
@@ -209,12 +224,6 @@ autocmd("FileType", {
   group = gid,
   pattern = "c,cpp",
   callback = function() optl.commentstring = "// %s" end,
-})
-
-autocmd("LspProgress", {
-  group = gid,
-  pattern = "*",
-  command = "redrawstatus",
 })
 
 autocmd("FileType", {
@@ -260,7 +269,7 @@ autocmd("FileType", {
 local cmp = require("cmp")
 cmp.setup {
   snippet = {
-    expand = function(args) require("snippy").expand_snippet(args.body) end,
+    expand = function(args) vim.snippet.expand(args.body) end,
   },
   preselect = cmp.PreselectMode.None,
   mapping = cmp.mapping.preset.insert {
@@ -271,12 +280,19 @@ cmp.setup {
   sources = {
     { name = "path" },
     { name = "nvim_lsp" },
-    { name = "snippy" },
   },
 }
 
-map({ "i", "s" }, "<Tab>", function() require("snippy.mapping").expand_or_advance("<Tab>")() end)
-map({ "i", "s" }, "<S-Tab>", function() require("snippy.mapping").previous("<S-Tab>")() end)
+local snippet_jump = function(key, direction)
+  return function()
+    if not vim.snippet.jumpable(direction) then return key end
+    vim.schedule(function() vim.snippet.jump(direction) end)
+    return "<Ignore>"
+  end
+end
+
+map({ "i", "s" }, "<Tab>", snippet_jump("<C-t>", 1), { expr = true })
+map({ "i", "s" }, "<S-Tab>", snippet_jump("<C-d>", -1), { expr = true })
 
 -- vim.diagnostic
 local border_opts = { border = "rounded" }
@@ -292,10 +308,10 @@ map("n", "T", function()
   if vim.b.show_diagnostics == nil then vim.b.show_diagnostics = true end
   if vim.b.show_diagnostics then
     vim.b.show_diagnostics = false
-    vim.diagnostic.hide(nil, 0)
+    vim.diagnostic.disable(0)
   else
     vim.b.show_diagnostics = true
-    vim.diagnostic.show(nil, 0)
+    vim.diagnostic.enable(0)
   end
 end)
 
@@ -413,7 +429,7 @@ local servers = {
 }
 
 local lsp_group = api.nvim_create_augroup("Lsp", {})
-local homedir = uv.os_homedir()
+local homedir = vim.uv.os_homedir()
 
 for c, config in pairs(servers) do
   if fn.executable(config.cmd[1]) == 1 then
@@ -421,13 +437,13 @@ for c, config in pairs(servers) do
       group = lsp_group,
       pattern = config.filetypes,
       callback = function(args)
-        local bufname = uv.fs_realpath(args.file)
-        if not bufname or not uv.fs_stat(bufname) then return end
+        local bufname = vim.uv.fs_realpath(args.file)
+        if not bufname or not vim.uv.fs_stat(bufname) then return end
 
-        local root_dir = fs.dirname(fs.find(config.root_pattern or {}, {
+        local root_dir = vim.fs.dirname(vim.fs.find(config.root_pattern or {}, {
           upward = true,
           stop = homedir,
-          path = fs.dirname(bufname),
+          path = vim.fs.dirname(bufname),
         })[1])
         if root_dir == homedir then root_dir = nil end
 
@@ -476,7 +492,12 @@ autocmd("LspAttach", {
     map("i", "<C-k>", lsp.buf.signature_help, opts)
     map("n", "<space>=", lsp.buf.format, opts)
     map("n", "<space>w", lsp.buf.workspace_symbol, opts)
-    map("n", "<space>gh", function() lsp.buf.inlay_hint(0, nil) end, opts)
+    map(
+      "n",
+      "<space>gh",
+      function() lsp.inlay_hint.enable(0, not lsp.inlay_hint.is_enabled(0)) end,
+      opts
+    )
 
     local client = lsp.get_client_by_id(args.data.client_id)
     client.server_capabilities.semanticTokensProvider = nil
@@ -501,11 +522,11 @@ lsp.handlers["textDocument/signatureHelp"] = lsp.with(lsp.handlers.signature_hel
 require("nvim-treesitter.configs").setup {
   ignore_install = { "comment" },
   highlight = {
-    enable = false,
+    enable = true,
     additional_vim_regex_highlighting = false,
     disable = function(_, buf)
       local max_filesize_KB = 200 * 1024
-      local stats = uv.fs_stat(api.nvim_buf_get_name(buf))
+      local stats = vim.uv.fs_stat(api.nvim_buf_get_name(buf))
       return stats and stats.size > max_filesize_KB
     end,
   },
@@ -520,7 +541,10 @@ require("nvim-treesitter.configs").setup {
         ["if"] = "@function.inner",
         ["aa"] = "@parameter.outer",
         ["ia"] = "@parameter.inner",
+        ["aC"] = "@conditional.outer",
         ["iC"] = "@conditional.inner",
+        ["al"] = "@loop.outer",
+        ["il"] = "@loop.inner",
       },
     },
   },
@@ -629,7 +653,7 @@ local lldb = {
     name = "Launch",
     type = "lldb",
     request = "launch",
-    program = function() return fn.input("Path: ", uv.cwd() .. "/", "file") end,
+    program = function() return fn.input("Path: ", vim.uv.cwd() .. "/", "file") end,
     stopOnEntry = false,
     args = {},
     runInTerminal = false,
