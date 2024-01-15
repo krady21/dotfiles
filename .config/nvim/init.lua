@@ -9,7 +9,7 @@ local command = vim.api.nvim_create_user_command
 local autocmd = vim.api.nvim_create_autocmd
 
 local paq_path = fn.stdpath("data") .. "/site/pack/paqs/start/paq-nvim"
-if not vim.uv.fs_stat(paq_path) then
+if fn.empty(fn.glob(paq_path)) > 0 then
   vim
     .system({ "git", "clone", "--depth", "1", "https://github.com/savq/paq-nvim.git", paq_path })
     :wait()
@@ -37,6 +37,7 @@ require("paq") {
   "windwp/nvim-ts-autotag",
   "drybalka/tree-climber.nvim",
   "andymass/vim-matchup",
+  "Wansmer/treesj",
 
   "mfussenegger/nvim-dap",
 
@@ -51,42 +52,28 @@ require("paq") {
   "tpope/vim-surround",
 }
 
--- require("nightfox").setup {
---   groups = {
---     all = {
---       NormalFloat = { link = "Normal" },
---       TreesitterContext = { bg = "palette.bg2" },
---       LspInlayHint = { link = "Comment" },
---     },
---   },
--- }
-
-local gid = api.nvim_create_augroup("Personal", {})
-
 local patch_hl = function(group, custom_hl, oldgroup)
   local old_hl = api.nvim_get_hl(0, { name = oldgroup or group, link = false })
   local new_hl = vim.tbl_deep_extend("force", old_hl, custom_hl)
   api.nvim_set_hl(0, group, new_hl)
 end
 
+local gid = api.nvim_create_augroup("Personal", {})
+
 autocmd("ColorScheme", {
   pattern = "retrobox",
   group = gid,
   callback = function()
-    api.nvim_set_hl(0, "TreesitterContext", { link = "Pmenu" })
     api.nvim_set_hl(0, "NormalFloat", { link = "Normal" })
     api.nvim_set_hl(0, "LspInlayHint", { link = "Comment" })
     api.nvim_set_hl(0, "SpecialComment", { link = "Comment" })
     api.nvim_set_hl(0, "Visual", { link = "CursorLine" })
 
-    api.nvim_set_hl(0, "@variable", {})
-    api.nvim_set_hl(0, "@field", {})
-    api.nvim_set_hl(0, "@parameter", {})
+    api.nvim_set_hl(0, "Function", api.nvim_get_hl(0, { name = "Identifier" }))
+    api.nvim_set_hl(0, "Identifier", {})
+
     api.nvim_set_hl(0, "@punctuation", {})
     api.nvim_set_hl(0, "@constructor.lua", {})
-
-    api.nvim_set_hl(0, "@function", { link = "Identifier" })
-    api.nvim_set_hl(0, "@method", { link = "Identifier" })
     api.nvim_set_hl(0, "@text.diff.add", { link = "diffAdded" })
     api.nvim_set_hl(0, "@text.diff.delete", { link = "diffRemoved" })
 
@@ -273,6 +260,8 @@ cmp.setup {
   },
   preselect = cmp.PreselectMode.None,
   mapping = cmp.mapping.preset.insert {
+    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ["<C-n>"] = cmp.mapping.select_next_item { behavior = cmp.SelectBehavior.Insert },
     ["<C-p>"] = cmp.mapping.select_prev_item { behavior = cmp.SelectBehavior.Insert },
     ["<C-y>"] = cmp.mapping.confirm { select = true },
@@ -281,7 +270,22 @@ cmp.setup {
     { name = "path" },
     { name = "nvim_lsp" },
   },
+  sorting =  {
+    comparators = {
+      cmp.config.compare.offset,
+      cmp.config.compare.exact,
+      cmp.config.compare.score,
+      cmp.config.compare.kind,
+      cmp.config.compare.sort_text,
+      cmp.config.compare.length,
+      cmp.config.compare.order,
+    }
+  },
 }
+
+vim.api.nvim_set_hl(0, 'CmpItemAbbrDeprecated', { strikethrough=true })
+vim.api.nvim_set_hl(0, 'CmpItemAbbrMatch', { link = "Structure"})
+vim.api.nvim_set_hl(0, 'CmpItemAbbrMatchFuzzy', { link='CmpIntemAbbrMatch' })
 
 local snippet_jump = function(key, direction)
   return function()
@@ -415,13 +419,35 @@ local servers = {
   ["rust-analyzer"] = {
     cmd = { "rustup", "run", "nightly", "rust-analyzer" },
     filetypes = "rust",
-    root_pattern = { ".git" },
+    root_pattern = { "Cargo.toml", ".git" },
+    find_root = function(bufname)
+      local dirname = vim.fs.dirname(bufname)
+      local metadata = vim.system({
+          "cargo",
+          "locate-project",
+          "--workspace",
+          "--quiet",
+          "--offline",
+          "--message-format",
+          "plain",
+      }, { cwd = dirname }):wait()
+
+      return vim.fs.dirname(metadata.stdout)
+    end,
     settings = {
       ["rust-analyzer"] = {
-        -- cachePriming = { numThreads = 1 },
-        cargo = { features = "all" },
-        checkOnSave = false,
-        diagnostics = { experimental = { enable = true } },
+        -- cachePriming = {
+        --   enable = false,
+        --   -- numThreads = 1 
+        -- },
+        cargo = {
+          features = "all",
+          buildScripts = { enable = false },
+        },
+        checkOnSave = true,
+        -- diagnostics = { experimental = { enable = false } },
+        completion = { postfix = { enable = false } },
+        procMacro = { enable = false },
       },
     },
     libs = { ".cargo/", ".rustup/" },
@@ -432,46 +458,52 @@ local lsp_group = api.nvim_create_augroup("Lsp", {})
 local homedir = vim.uv.os_homedir()
 
 for c, config in pairs(servers) do
-  if fn.executable(config.cmd[1]) == 1 then
-    autocmd("FileType", {
-      group = lsp_group,
-      pattern = config.filetypes,
-      callback = function(args)
-        local bufname = vim.uv.fs_realpath(args.file)
-        if not bufname or not vim.uv.fs_stat(bufname) then return end
+  autocmd("FileType", {
+    group = lsp_group,
+    pattern = config.filetypes,
+    callback = function(args)
+      if fn.executable(config.cmd[1]) == 0 then return end
 
-        local root_dir = vim.fs.dirname(vim.fs.find(config.root_pattern or {}, {
+      local bufname = vim.uv.fs_realpath(args.file)
+      if not bufname or not vim.uv.fs_stat(bufname) then return end
+
+      local root_dir
+      if config.find_root then
+        root_dir = config.find_root(bufname)
+      else
+        root_dir = vim.fs.dirname(vim.fs.find(config.root_pattern or {}, {
           upward = true,
           stop = homedir,
           path = vim.fs.dirname(bufname),
         })[1])
         if root_dir == homedir then root_dir = nil end
+      end
 
-        local reuse_client = function(client, conf)
-          if (client.name == conf.name) and (client.config.root_dir == conf.root_dir) then
-            return true
-          end
-          for _, lib_path in ipairs(servers[client.name].libs or {}) do
-            if string.match(bufname, lib_path) then return true end
-          end
-          return false
+
+      local reuse_client = function(client, conf)
+        if (client.name == conf.name) and (client.config.root_dir == conf.root_dir) then
+          return true
         end
 
-        lsp.start({
-          name = c,
-          cmd = config.cmd,
-          root_dir = root_dir,
-          cmd_cwd = root_dir,
-          capabilities = capabilities,
-          before_init = config.before_init,
-          init_options = config.init_options or vim.empty_dict(),
-          settings = config.settings or vim.empty_dict(),
-        }, {
-          reuse_client = reuse_client,
-        })
-      end,
-    })
-  end
+        return vim
+          .iter(servers[client.name].libs or {})
+          :any(function(lib_path) return string.match(bufname, lib_path) end)
+      end
+
+      lsp.start({
+        name = c,
+        cmd = config.cmd,
+        root_dir = root_dir,
+        cmd_cwd = root_dir,
+        capabilities = capabilities,
+        before_init = config.before_init,
+        init_options = config.init_options or vim.empty_dict(),
+        settings = config.settings or vim.empty_dict(),
+      }, {
+        reuse_client = reuse_client,
+      })
+    end,
+  })
 end
 
 autocmd("LspAttach", {
@@ -519,16 +551,18 @@ lsp.handlers["textDocument/hover"] = lsp.with(lsp.handlers.hover, border_opts)
 lsp.handlers["textDocument/signatureHelp"] = lsp.with(lsp.handlers.signature_help, border_opts)
 
 -- Treesitter
+local disable_fn = function(_, buf)
+  local max_filesize_KB = 200 * 1024
+  local stats = vim.uv.fs_stat(api.nvim_buf_get_name(buf))
+  return stats and stats.size > max_filesize_KB
+end
+
 require("nvim-treesitter.configs").setup {
   ignore_install = { "comment" },
   highlight = {
     enable = true,
     additional_vim_regex_highlighting = false,
-    disable = function(_, buf)
-      local max_filesize_KB = 200 * 1024
-      local stats = vim.uv.fs_stat(api.nvim_buf_get_name(buf))
-      return stats and stats.size > max_filesize_KB
-    end,
+    -- disable = disable_fn,
   },
   textobjects = {
     select = {
@@ -550,6 +584,7 @@ require("nvim-treesitter.configs").setup {
   },
   matchup = {
     enable = true,
+    disable = disable_fn,
   },
   endwise = {
     enable = true,
@@ -563,6 +598,9 @@ g.matchup_matchparen_offscreen = {}
 
 map("n", "<M-j>", function() require("tree-climber").swap_next() end)
 map("n", "<M-k>", function() require("tree-climber").swap_prev() end)
+
+map("n", "<space>J", function() require("treesj").join() end)
+map("n", "<space>K", function() require("treesj").split() end)
 
 require("treesitter-context").setup {
   max_lines = 2,
