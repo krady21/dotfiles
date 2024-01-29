@@ -611,11 +611,16 @@ require("treesitter-context").setup {
 local fzf = require("fzf-lua")
 -- fzf.register_ui_select()
 fzf.setup {
-  fzf_opts = {
-    ["--history"] = fn.stdpath("data") .. "/fzf-lua-history",
+  files = {
+    fzf_opts = {
+      ['--history'] = vim.fn.stdpath("data") .. '/fzf-lua-files-history',
+    },
   },
   grep = {
     rg_glob = true,
+    fzf_opts = {
+      ['--history'] = vim.fn.stdpath("data") .. '/fzf-lua-grep-history',
+    },
   },
   winopts = {
     preview = {
