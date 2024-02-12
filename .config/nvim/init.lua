@@ -24,7 +24,7 @@ require("paq") {
   "elihunter173/dirbuf.nvim",
   "gbprod/substitute.nvim",
   "milisims/nvim-luaref",
-  { "j-hui/fidget.nvim", branch = "legacy" },
+  "j-hui/fidget.nvim",
 
   "hrsh7th/nvim-cmp",
   "hrsh7th/cmp-nvim-lsp",
@@ -50,6 +50,9 @@ require("paq") {
   "tpope/vim-repeat",
   "tpope/vim-sleuth",
   "tpope/vim-surround",
+
+  { "AndrewRadev/qftools.vim", opt = true },
+  { "dstein64/vim-startuptime", opt = true },
 }
 
 local patch_hl = function(group, custom_hl, oldgroup)
