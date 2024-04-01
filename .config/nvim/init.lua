@@ -29,6 +29,8 @@ require("paq") {
   "hrsh7th/nvim-cmp",
   "hrsh7th/cmp-nvim-lsp",
   "hrsh7th/cmp-path",
+  "dcampos/cmp-snippy",
+  "dcampos/nvim-snippy",
 
   "nvim-treesitter/nvim-treesitter",
   "nvim-treesitter/nvim-treesitter-context",
@@ -50,6 +52,7 @@ require("paq") {
   "tpope/vim-repeat",
   "tpope/vim-sleuth",
   "tpope/vim-surround",
+  "tommcdo/vim-lion",
 
   { "AndrewRadev/qftools.vim", opt = true },
   { "dstein64/vim-startuptime", opt = true },
@@ -90,9 +93,24 @@ autocmd("ColorScheme", {
   end,
 })
 
-cmd.colorscheme("retrobox")
+require("nightfox").setup {
+  groups = {
+    all = {
+      NormalFloat = { link = "Normal" },
+      TreesitterContext = { bg = "palette.bg2" },
+      LspInlayHint = { link = "Comment" },
+      DiagnosticFloatingError = { link = "DiagnosticError" },
+      DiagnosticFloatingWarn = { link = "DiagnosticWarn" },
+      DiagnosticFloatingInfo = { link = "DiagnosticInfo" },
+      DiagnosticFloatingHint = { link = "DiagnosticHint" },
+      DiagnosticFloatingOk = { link = "DiagnosticOk" },
+    },
+  },
+}
 
-opt.background = "light"
+cmd.colorscheme("nordfox")
+
+opt.background = "dark"
 opt.breakindent = true
 opt.clipboard = "unnamedplus"
 opt.completeopt = { "menuone", "noselect" }
@@ -259,7 +277,7 @@ autocmd("FileType", {
 local cmp = require("cmp")
 cmp.setup {
   snippet = {
-    expand = function(args) vim.snippet.expand(args.body) end,
+    expand = function(args) require("snippy").expand_snippet(args.body) end,
   },
   preselect = cmp.PreselectMode.None,
   mapping = cmp.mapping.preset.insert {
@@ -272,6 +290,7 @@ cmp.setup {
   sources = {
     { name = "path" },
     { name = "nvim_lsp" },
+    -- { name = "snippy" },
   },
   sorting =  {
     comparators = {

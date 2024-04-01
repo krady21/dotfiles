@@ -8,7 +8,7 @@
     pager = delta
 
 [delta]
-    light = true
+    light = false
     navigate = true
 
 [diff]
