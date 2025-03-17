@@ -474,6 +474,23 @@ local servers = {
     },
     libs = { ".cargo/", ".rustup/" },
   },
+  ["angular-ls"] = {
+    cmd = {
+      "ngserver",
+      "--stdio",
+      "--tsProbeLocations",
+      vim.uv.cwd() .. "/node_modules",
+      "--ngProbeLocations",
+      vim.uv.cwd() .. "/node_modules",
+    },
+    filetypes = "html",
+    root_pattern = { "angular.json" },
+  },
+  ["dockerls"] = {
+    cmd = { "docker-langserver", "--stdio" },
+    filetypes = "dockerfile",
+    root_pattern = { "Dockerfile" },
+  }
 }
 
 local lsp_group = api.nvim_create_augroup("Lsp", {})
@@ -542,8 +559,8 @@ autocmd("LspAttach", {
     map("n", "<space>gr", lsp.buf.references, opts)
     map("n", "<space>gn", lsp.buf.rename, opts)
     map("n", "<space>ga", lsp.buf.code_action, opts)
-    map("n", "K", lsp.buf.hover, opts)
-    map("i", "<C-k>", lsp.buf.signature_help, opts)
+    map("n", "K", function() lsp.buf.hover(border_opts) end, opts)
+    map("i", "<C-k>", function() lsp.buf.signature_help(border_opts) end, opts)
     map("n", "<space>=", lsp.buf.format, opts)
     map("n", "<space>w", lsp.buf.workspace_symbol, opts)
     map(
@@ -568,9 +585,6 @@ end)
 map("n", "<space>e", function() diagnostic.open_float() end)
 map("n", "[g", function() diagnostic.goto_prev() end)
 map("n", "]g", function() diagnostic.goto_next() end)
-
-lsp.handlers["textDocument/hover"] = lsp.with(lsp.handlers.hover, border_opts)
-lsp.handlers["textDocument/signatureHelp"] = lsp.with(lsp.handlers.signature_help, border_opts)
 
 -- Treesitter
 local disable_fn = function(_, buf)
