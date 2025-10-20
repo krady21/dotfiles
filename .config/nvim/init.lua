@@ -29,8 +29,9 @@ require("paq") {
   "hrsh7th/nvim-cmp",
   "hrsh7th/cmp-nvim-lsp",
   "hrsh7th/cmp-path",
-  "dcampos/cmp-snippy",
-  "dcampos/nvim-snippy",
+
+  "zbirenbaum/copilot.lua",
+  "zbirenbaum/copilot-cmp",
 
   "nvim-treesitter/nvim-treesitter",
   "nvim-treesitter/nvim-treesitter-context",
@@ -274,12 +275,25 @@ autocmd("FileType", {
   end,
 })
 
+require("copilot").setup({
+  suggestion = { enabled = false },
+  panel = { enabled = false },
+  filetypes = {
+      rust = true,
+  },
+})
+require("copilot_cmp").setup()
+
 local cmp = require("cmp")
 cmp.setup {
   snippet = {
-    expand = function(args) require("snippy").expand_snippet(args.body) end,
+    -- expand = function(args) require("snippy").expand_snippet(args.body) end,
+    expand = function(args) vim.snippet.expand(args.body) end,
   },
   preselect = cmp.PreselectMode.None,
+  completion = {
+    completeopt = vim.o.completeopt
+  },
   mapping = cmp.mapping.preset.insert {
     ['<C-b>'] = cmp.mapping.scroll_docs(-4),
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
@@ -288,9 +302,9 @@ cmp.setup {
     ["<C-y>"] = cmp.mapping.confirm { select = true },
   },
   sources = {
+    { name = "copilot" },
     { name = "path" },
     { name = "nvim_lsp" },
-    -- { name = "snippy" },
   },
   sorting =  {
     comparators = {
@@ -311,7 +325,7 @@ vim.api.nvim_set_hl(0, 'CmpItemAbbrMatchFuzzy', { link='CmpIntemAbbrMatch' })
 
 local snippet_jump = function(key, direction)
   return function()
-    if not vim.snippet.jumpable(direction) then return key end
+    if not vim.snippet.active({ direction = direction } ) then return key end
     vim.schedule(function() vim.snippet.jump(direction) end)
     return "<Ignore>"
   end
@@ -345,6 +359,7 @@ end)
 local capabilities = lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 capabilities.workspace.didChangeWatchedFiles.dynamicRegistration = false -- https://github.com/neovim/neovim/issues/23725
+capabilities.general.positionEncodings = { "utf-16" }
 
 require("neodev").setup {
   lspconfig = false,
@@ -442,6 +457,7 @@ local servers = {
     cmd = { "rustup", "run", "nightly", "rust-analyzer" },
     filetypes = "rust",
     root_pattern = { "Cargo.toml", ".git" },
+    libs = { ".cargo/", ".rustup/" },
     find_root = function(bufname)
       local dirname = vim.fs.dirname(bufname)
       local metadata = vim.system({
@@ -466,13 +482,12 @@ local servers = {
           features = "all",
           buildScripts = { enable = false },
         },
-        checkOnSave = true,
+        -- checkOnSave = true,
         -- diagnostics = { experimental = { enable = false } },
-        completion = { postfix = { enable = false } },
+        -- completion = { postfix = { enable = false } },
         procMacro = { enable = false },
       },
     },
-    libs = { ".cargo/", ".rustup/" },
   },
   ["angular-ls"] = {
     cmd = {
@@ -490,6 +505,31 @@ local servers = {
     cmd = { "docker-langserver", "--stdio" },
     filetypes = "dockerfile",
     root_pattern = { "Dockerfile" },
+  },
+  ["ansible-language-server"] = {
+    cmd = { "ansible-language-server", "--stdio" },
+    root_pattern = { ".ansible.cfg" },
+    filetypes = "yaml",
+    settings = {
+      ansible = {
+        python = {
+          interpreterPath = "python3"
+        },
+        ansible = {
+          path = 'ansible',
+        },
+        executionEnvironment = {
+          enabled = false,
+        },
+        validation = {
+          enabled = true,
+          lint = {
+            enabled = true,
+            path = 'ansible-lint',
+          },
+        },
+      }
+    }
   }
 }
 
@@ -525,7 +565,7 @@ for c, config in pairs(servers) do
         end
 
         return vim
-          .iter(servers[client.name].libs or {})
+          .iter(servers[conf.name].libs or {})
           :any(function(lib_path) return string.match(bufname, lib_path) end)
       end
 
@@ -648,6 +688,7 @@ local fzf = require("fzf-lua")
 -- fzf.register_ui_select()
 fzf.setup {
   files = {
+    no_ignore = false,
     fzf_opts = {
       ['--history'] = vim.fn.stdpath("data") .. '/fzf-lua-files-history',
     },
