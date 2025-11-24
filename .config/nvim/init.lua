@@ -11,8 +11,8 @@ local autocmd = vim.api.nvim_create_autocmd
 local paq_path = fn.stdpath("data") .. "/site/pack/paqs/start/paq-nvim"
 if fn.empty(fn.glob(paq_path)) > 0 then
   vim
-    .system({ "git", "clone", "--depth", "1", "https://github.com/savq/paq-nvim.git", paq_path })
-    :wait()
+      .system({ "git", "clone", "--depth", "1", "https://github.com/savq/paq-nvim.git", paq_path })
+      :wait()
 end
 
 require("paq") {
@@ -55,7 +55,7 @@ require("paq") {
   "tpope/vim-surround",
   "tommcdo/vim-lion",
 
-  { "AndrewRadev/qftools.vim", opt = true },
+  { "AndrewRadev/qftools.vim",  opt = true },
   { "dstein64/vim-startuptime", opt = true },
 }
 
@@ -201,7 +201,7 @@ map("ca", "Wq", "wq")
 map("ca", "Qa", "qa")
 
 map("ca", "tq", "tabclose")
-map("ca", "grep", "silent grep!")
+-- map("ca", "grep", "silent grep!")
 map("ca", "man", "Man")
 
 command("Whitespace", function()
@@ -278,16 +278,12 @@ autocmd("FileType", {
 require("copilot").setup({
   suggestion = { enabled = false },
   panel = { enabled = false },
-  filetypes = {
-      rust = true,
-  },
 })
 require("copilot_cmp").setup()
 
 local cmp = require("cmp")
 cmp.setup {
   snippet = {
-    -- expand = function(args) require("snippy").expand_snippet(args.body) end,
     expand = function(args) vim.snippet.expand(args.body) end,
   },
   preselect = cmp.PreselectMode.None,
@@ -306,7 +302,7 @@ cmp.setup {
     { name = "path" },
     { name = "nvim_lsp" },
   },
-  sorting =  {
+  sorting = {
     comparators = {
       cmp.config.compare.offset,
       cmp.config.compare.exact,
@@ -319,13 +315,13 @@ cmp.setup {
   },
 }
 
-vim.api.nvim_set_hl(0, 'CmpItemAbbrDeprecated', { strikethrough=true })
-vim.api.nvim_set_hl(0, 'CmpItemAbbrMatch', { link = "Structure"})
-vim.api.nvim_set_hl(0, 'CmpItemAbbrMatchFuzzy', { link='CmpIntemAbbrMatch' })
+vim.api.nvim_set_hl(0, 'CmpItemAbbrDeprecated', { strikethrough = true })
+vim.api.nvim_set_hl(0, 'CmpItemAbbrMatch', { link = "Structure" })
+vim.api.nvim_set_hl(0, 'CmpItemAbbrMatchFuzzy', { link = 'CmpIntemAbbrMatch' })
 
 local snippet_jump = function(key, direction)
   return function()
-    if not vim.snippet.active({ direction = direction } ) then return key end
+    if not vim.snippet.active({ direction = direction }) then return key end
     vim.schedule(function() vim.snippet.jump(direction) end)
     return "<Ignore>"
   end
@@ -357,7 +353,7 @@ end)
 
 -- LSP
 local capabilities = lsp.protocol.make_client_capabilities()
-capabilities.textDocument.completion.completionItem.snippetSupport = true
+capabilities.textDocument.completion.completionItem.snippetSupport = false
 capabilities.workspace.didChangeWatchedFiles.dynamicRegistration = false -- https://github.com/neovim/neovim/issues/23725
 capabilities.general.positionEncodings = { "utf-16" }
 
@@ -365,224 +361,200 @@ require("neodev").setup {
   lspconfig = false,
 }
 
-local servers = {
-  ["clangd"] = {
-    cmd = { "clangd" },
-    filetypes = "c,cpp",
-    root_pattern = { "compile_commands.json", ".git" },
-    libs = { "/usr/" },
-  },
-  ["gopls"] = {
-    cmd = { "gopls", "serve" },
-    filetypes = "go",
-    root_pattern = { "go.mod", ".git" },
-    settings = {
-      gopls = {
-        analyses = {
-          unusedparams = true,
-          nilness = true,
-        },
-        staticcheck = true,
-        semanticTokens = true,
-      },
-    },
-    libs = { "/usr/local/go", vim.env.GOPATH },
-  },
-  ["pyright-langserver"] = {
-    cmd = { "pyright-langserver", "--stdio" },
-    filetypes = "python",
-    root_pattern = { "setup.py", "requirements.txt", ".git" },
-    settings = {
-      python = {
-        analysis = {
-          autoSearchPaths = true,
-          useLibraryCodeForTypes = true,
-          diagnosticMode = "openFilesOnly",
-        },
-      },
-    },
-  },
-  ["jdtls"] = {
-    cmd = { "jdtls" },
-    filetypes = "java",
-    root_pattern = { "gradlew", ".git", "mvnw" },
-  },
-  ["lua-language-server"] = {
-    cmd = { "lua-language-server" },
-    filetypes = "lua",
-    before_init = require("neodev.lsp").before_init,
-    settings = {
-      Lua = {
-        telemetry = { enable = false },
-        workspace = { checkThirdParty = false },
-        hint = { enable = true },
-      },
-    },
-  },
-  ["bash-language-server"] = {
-    cmd = { "bash-language-server", "start" },
-    filetypes = "sh,bash",
-  },
-  ["typescript-language-server"] = {
-    cmd = { "typescript-language-server", "--stdio" },
-    filetypes = "javascript,typescript",
-    root_pattern = { "package.json", ".git" },
-    libs = { "node_modules/" },
-    settings = {
-      typescript = {
-        inlayHints = {
-          includeInlayParameterNameHints = "all",
-          includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-          includeInlayFunctionParameterTypeHints = true,
-          includeInlayVariableTypeHints = true,
-          includeInlayVariableTypeHintsWhenTypeMatchesName = false,
-          includeInlayPropertyDeclarationTypeHints = true,
-          includeInlayFunctionLikeReturnTypeHints = true,
-          includeInlayEnumMemberValueHints = true,
-        },
-      },
-    },
-  },
-  ["vscode-css-language-server"] = {
-    cmd = { "vscode-css-language-server", "--stdio" },
-    filetypes = "css,scss,less",
-    root_pattern = { "package.json", ".git" },
-    settings = {
-      css = { validate = true },
-      scss = { validate = true },
-      less = { validate = true },
-    },
-  },
-  ["rust-analyzer"] = {
-    cmd = { "rustup", "run", "nightly", "rust-analyzer" },
-    filetypes = "rust",
-    root_pattern = { "Cargo.toml", ".git" },
-    libs = { ".cargo/", ".rustup/" },
-    find_root = function(bufname)
-      local dirname = vim.fs.dirname(bufname)
-      local metadata = vim.system({
-          "cargo",
-          "locate-project",
-          "--workspace",
-          "--quiet",
-          "--offline",
-          "--message-format",
-          "plain",
-      }, { cwd = dirname }):wait()
+function reuse_for_libs(libs)
+  return function(client, conf)
+    if (client.name == conf.name) and (client.config.root_dir == conf.root_dir) then
+      return true
+    end
 
-      return vim.fs.dirname(metadata.stdout)
-    end,
-    settings = {
-      ["rust-analyzer"] = {
-        -- cachePriming = {
-        --   enable = false,
-        --   -- numThreads = 1 
-        -- },
-        cargo = {
-          features = "all",
-          buildScripts = { enable = false },
-        },
-        -- checkOnSave = true,
-        -- diagnostics = { experimental = { enable = false } },
-        -- completion = { postfix = { enable = false } },
-        procMacro = { enable = false },
+    local bufname = vim.api.nvim_buf_get_name(0)
+    return vim
+        .iter(libs)
+        :any(function(lib_path) return string.match(bufname, lib_path) end)
+  end
+end
+
+vim.lsp.config("*", {
+  capabilities = capabilities,
+})
+
+vim.lsp.config.gopls = {
+  cmd = { "gopls", "serve" },
+  filetypes = { "go" },
+  root_markers = { "go.mod", ".git" },
+  reuse_client = reuse_for_libs({ "/usr/local/go", vim.env.GOPATH }),
+  settings = {
+    gopls = {
+      analyses = {
+        unusedparams = true,
+        nilness = true,
+      },
+      staticcheck = true,
+      semanticTokens = true,
+    },
+  },
+}
+
+vim.lsp.config.clangd = {
+  cmd = { "clangd" },
+  filetypes = { "c", "cpp" },
+  root_markers = { "compile_commands.json", ".git" },
+  reuse_client = reuse_for_libs({ "/usr/" }),
+}
+
+vim.lsp.config.pyright = {
+  cmd = { "pyright-langserver", "--stdio" },
+  filetypes = { "python" },
+  root_markers = { "setup.py", "requirements.txt", ".git" },
+  settings = {
+    python = {
+      analysis = {
+        autoSearchPaths = true,
+        useLibraryCodeForTypes = true,
+        diagnosticMode = "openFilesOnly",
       },
     },
   },
-  ["angular-ls"] = {
-    cmd = {
-      "ngserver",
-      "--stdio",
-      "--tsProbeLocations",
-      vim.uv.cwd() .. "/node_modules",
-      "--ngProbeLocations",
-      vim.uv.cwd() .. "/node_modules",
+}
+
+vim.lsp.config.jdtls = {
+  cmd = { "jdtls" },
+  filetypes = { "java" },
+  root_markers = { "gradlew", ".git", "mvnw" },
+}
+
+vim.lsp.config.luals = {
+  cmd = { "lua-language-server" },
+  filetypes = { "lua" },
+  before_init = require("neodev.lsp").before_init,
+  settings = {
+    Lua = {
+      telemetry = { enable = false },
+      workspace = { checkThirdParty = false },
+      hint = { enable = true },
     },
-    filetypes = "html",
-    root_pattern = { "angular.json" },
   },
-  ["dockerls"] = {
-    cmd = { "docker-langserver", "--stdio" },
-    filetypes = "dockerfile",
-    root_pattern = { "Dockerfile" },
+}
+
+vim.lsp.config.bash = {
+  cmd = { "bash-language-server", "start" },
+  filetypes = { "sh", "bash" },
+}
+
+vim.lsp.config.typescript = {
+  cmd = { "typescript-language-server", "--stdio" },
+  filetypes = { "javascript", "typescript" },
+  root_markers = { "package.json", ".git" },
+  reuse_client = reuse_for_libs({ "node_modules/" }),
+  settings = {
+    typescript = {
+      inlayHints = {
+        includeInlayParameterNameHints = "all",
+        includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+        includeInlayFunctionParameterTypeHints = true,
+        includeInlayVariableTypeHints = true,
+        includeInlayVariableTypeHintsWhenTypeMatchesName = false,
+        includeInlayPropertyDeclarationTypeHints = true,
+        includeInlayFunctionLikeReturnTypeHints = true,
+        includeInlayEnumMemberValueHints = true,
+      },
+    },
   },
-  ["ansible-language-server"] = {
-    cmd = { "ansible-language-server", "--stdio" },
-    root_pattern = { ".ansible.cfg" },
-    filetypes = "yaml",
-    settings = {
+}
+
+vim.lsp.config.css = {
+  cmd = { "vscode-css-language-server", "--stdio" },
+  filetypes = { "css", "scss", "less" },
+  root_markers = { "package.json", ".git" },
+  settings = {
+    css = { validate = true },
+    scss = { validate = true },
+    less = { validate = true },
+  },
+}
+
+vim.lsp.config.angular = {
+  cmd = {
+    "ngserver",
+    "--stdio",
+    "--tsProbeLocations",
+    vim.uv.cwd() .. "/node_modules",
+    "--ngProbeLocations",
+    vim.uv.cwd() .. "/node_modules",
+  },
+  filetypes = { "html" },
+  root_markers = { "angular.json" },
+}
+
+vim.lsp.config.docker = {
+  cmd = { "docker-langserver", "--stdio" },
+  filetypes = { "dockerfile" },
+  root_markers = { "Dockerfile" },
+}
+
+vim.lsp.config.ansible = {
+  cmd = { "ansible-language-server", "--stdio" },
+  filetypes = { "yaml" },
+  root_markers = { ".ansible.cfg" },
+  settings = {
+    ansible = {
+      python = {
+        interpreterPath = "python3"
+      },
       ansible = {
-        python = {
-          interpreterPath = "python3"
-        },
-        ansible = {
-          path = 'ansible',
-        },
-        executionEnvironment = {
-          enabled = false,
-        },
-        validation = {
+        path = 'ansible',
+      },
+      executionEnvironment = {
+        enabled = false,
+      },
+      validation = {
+        enabled = true,
+        lint = {
           enabled = true,
-          lint = {
-            enabled = true,
-            path = 'ansible-lint',
-          },
+          path = 'ansible-lint',
         },
-      }
+      },
     }
   }
 }
 
-local lsp_group = api.nvim_create_augroup("Lsp", {})
-local homedir = vim.uv.os_homedir()
+vim.lsp.config.rustanalyzer = {
+  cmd = { "rustup", "run", "nightly", "rust-analyzer" },
+  filetypes = { "rust" },
+  reuse_client = reuse_for_libs({ ".cargo", ".rustup" }),
+  root_dir = function(bufnr, on_dir)
+    local bufname = api.nvim_buf_get_name(bufnr)
+    local dirname = vim.fs.dirname(bufname)
+    local metadata = vim.system({
+      "cargo",
+      "locate-project",
+      "--workspace",
+      "--quiet",
+      "--offline",
+      "--message-format",
+      "plain",
+    }, { cwd = dirname }):wait()
 
-for c, config in pairs(servers) do
-  autocmd("FileType", {
-    group = lsp_group,
-    pattern = config.filetypes,
-    callback = function(args)
-      if fn.executable(config.cmd[1]) == 0 then return end
+    on_dir(vim.fs.dirname(metadata.stdout))
+  end,
+  settings = {
+    ["rust-analyzer"] = {
+      cargo = {
+        features = "all",
+        buildScripts = { enable = false },
+      },
+      -- checkOnSave = true,
+      -- diagnostics = { experimental = { enable = false } },
+      -- completion = { postfix = { enable = false } },
+      procMacro = { enable = false },
+    },
+  },
+}
 
-      local bufname = vim.uv.fs_realpath(args.file)
-      if not bufname or not vim.uv.fs_stat(bufname) then return end
-
-      local root_dir
-      if config.find_root then
-        root_dir = config.find_root(bufname)
-      else
-        root_dir = vim.fs.dirname(vim.fs.find(config.root_pattern or {}, {
-          upward = true,
-          stop = homedir,
-          path = vim.fs.dirname(bufname),
-        })[1])
-        if root_dir == homedir then root_dir = nil end
-      end
-
-
-      local reuse_client = function(client, conf)
-        if (client.name == conf.name) and (client.config.root_dir == conf.root_dir) then
-          return true
-        end
-
-        return vim
-          .iter(servers[conf.name].libs or {})
-          :any(function(lib_path) return string.match(bufname, lib_path) end)
-      end
-
-      lsp.start({
-        name = c,
-        cmd = config.cmd,
-        root_dir = root_dir,
-        cmd_cwd = root_dir,
-        capabilities = capabilities,
-        before_init = config.before_init,
-        init_options = config.init_options or vim.empty_dict(),
-        settings = config.settings or vim.empty_dict(),
-      }, {
-        reuse_client = reuse_client,
-      })
-    end,
-  })
+for name, _ in pairs(vim.lsp.config._configs) do
+  if name ~= "*" then
+    vim.lsp.enable(name)
+  end
 end
 
 autocmd("LspAttach", {
@@ -688,7 +660,7 @@ local fzf = require("fzf-lua")
 -- fzf.register_ui_select()
 fzf.setup {
   files = {
-    no_ignore = false,
+    no_ignore = true,
     fzf_opts = {
       ['--history'] = vim.fn.stdpath("data") .. '/fzf-lua-files-history',
     },
