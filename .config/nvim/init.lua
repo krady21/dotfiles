@@ -8,56 +8,79 @@ local lsp, diagnostic = vim.lsp, vim.diagnostic
 local command = vim.api.nvim_create_user_command
 local autocmd = vim.api.nvim_create_autocmd
 
-local paq_path = fn.stdpath("data") .. "/site/pack/paqs/start/paq-nvim"
-if fn.empty(fn.glob(paq_path)) > 0 then
-  vim
-      .system({ "git", "clone", "--depth", "1", "https://github.com/savq/paq-nvim.git", paq_path })
-      :wait()
-end
+local gh = function(x) return 'https://github.com/' .. x end
 
-require("paq") {
-  "savq/paq-nvim",
-  "EdenEast/nightfox.nvim",
-
-  "ibhagwan/fzf-lua",
-  "folke/neodev.nvim",
-  "elihunter173/dirbuf.nvim",
-  "gbprod/substitute.nvim",
-  "milisims/nvim-luaref",
-  "j-hui/fidget.nvim",
-
-  "hrsh7th/nvim-cmp",
-  "hrsh7th/cmp-nvim-lsp",
-  "hrsh7th/cmp-path",
-
-  "zbirenbaum/copilot.lua",
-  "zbirenbaum/copilot-cmp",
-
-  "nvim-treesitter/nvim-treesitter",
-  "nvim-treesitter/nvim-treesitter-context",
-  "nvim-treesitter/nvim-treesitter-textobjects",
-  "RRethy/nvim-treesitter-endwise",
-  "windwp/nvim-ts-autotag",
-  "drybalka/tree-climber.nvim",
-  "andymass/vim-matchup",
-  "Wansmer/treesj",
-
-  "mfussenegger/nvim-dap",
-
-  "sindrets/diffview.nvim",
-  "lewis6991/gitsigns.nvim",
-  "rhysd/conflict-marker.vim",
-
-  "junegunn/vim-peekaboo",
-  "tpope/vim-commentary",
-  "tpope/vim-repeat",
-  "tpope/vim-sleuth",
-  "tpope/vim-surround",
-  "tommcdo/vim-lion",
-
-  { "AndrewRadev/qftools.vim",  opt = true },
-  { "dstein64/vim-startuptime", opt = true },
+vim.pack.add {
+  gh("EdenEast/nightfox.nvim"),
+  gh("ibhagwan/fzf-lua"),
+  gh("folke/neodev.nvim"),
+  gh("elihunter173/dirbuf.nvim"),
+  gh("gbprod/substitute.nvim"),
+  gh("milisims/nvim-luaref"),
+  gh("j-hui/fidget.nvim"),
+  gh("nvim-treesitter/nvim-treesitter"),
+  gh("nvim-treesitter/nvim-treesitter-context"),
+  gh("nvim-treesitter/nvim-treesitter-textobjects"),
+  gh("RRethy/nvim-treesitter-endwise"),
+  gh("windwp/nvim-ts-autotag"),
+  gh("drybalka/tree-climber.nvim"),
+  gh("andymass/vim-matchup"),
+  gh("Wansmer/treesj"),
+  gh("mfussenegger/nvim-dap"),
+  gh("sindrets/diffview.nvim"),
+  gh("lewis6991/gitsigns.nvim"),
+  gh("rhysd/conflict-marker.vim"),
+  gh("junegunn/vim-peekaboo"),
+  gh("tpope/vim-commentary"),
+  gh("tpope/vim-repeat"),
+  gh("tpope/vim-sleuth"),
+  gh("tpope/vim-surround"),
+  gh("tommcdo/vim-lion"),
+  gh("AndrewRadev/qftools.vim"),
+  gh("dstein64/vim-startuptime"),
 }
+
+vim.api.nvim_create_autocmd('InsertEnter', { once = true, callback = function()
+  vim.pack.add {
+    gh("hrsh7th/nvim-cmp"),
+    gh("hrsh7th/cmp-nvim-lsp"),
+    gh("hrsh7th/cmp-path"),
+  }
+  local cmp = require("cmp")
+  cmp.setup {
+    snippet = {
+      expand = function(args) vim.snippet.expand(args.body) end,
+    },
+    preselect = cmp.PreselectMode.None,
+    completion = {
+      completeopt = vim.o.completeopt
+    },
+    mapping = cmp.mapping.preset.insert {
+      ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+      ['<C-f>'] = cmp.mapping.scroll_docs(4),
+      ["<C-n>"] = cmp.mapping.select_next_item { behavior = cmp.SelectBehavior.Insert },
+      ["<C-p>"] = cmp.mapping.select_prev_item { behavior = cmp.SelectBehavior.Insert },
+      ["<C-y>"] = cmp.mapping.confirm { select = true },
+    },
+    sources = {
+      { name = "copilot" },
+      { name = "path" },
+      { name = "nvim_lsp" },
+    },
+    sorting = {
+      comparators = {
+        cmp.config.compare.offset,
+        cmp.config.compare.exact,
+        cmp.config.compare.score,
+        cmp.config.compare.kind,
+        cmp.config.compare.sort_text,
+        cmp.config.compare.length,
+        cmp.config.compare.order,
+      }
+    },
+  }
+end })
+
 
 local patch_hl = function(group, custom_hl, oldgroup)
   local old_hl = api.nvim_get_hl(0, { name = oldgroup or group, link = false })
@@ -114,7 +137,6 @@ cmd.colorscheme("nordfox")
 opt.background = "dark"
 opt.breakindent = true
 opt.clipboard = "unnamedplus"
-opt.completeopt = { "menuone", "noselect" }
 opt.dictionary = "/usr/share/dict/words"
 opt.diffopt:append { "indent-heuristic", "algorithm:histogram", "linematch:60" }
 opt.expandtab = true
@@ -147,6 +169,13 @@ opt.undofile = true
 opt.virtualedit = { "block", "insert" }
 opt.wildignore = "*/.git/*,*/tmp/*,*.swp,*.o,*.pyc"
 opt.wildignorecase = true
+
+-- opt.complete = "o,.,w,b,u"
+opt.completeopt = { "menuone", "noselect" }
+
+-- opt.autocomplete = true
+-- opt.autocompletedelay = 100
+-- opt.autocompletetimeout = 100
 
 if fn.executable("rg") > 0 then
   opt.grepprg = "rg --no-heading --vimgrep"
@@ -275,45 +304,12 @@ autocmd("FileType", {
   end,
 })
 
-require("copilot").setup({
-  suggestion = { enabled = false },
-  panel = { enabled = false },
-})
-require("copilot_cmp").setup()
+-- require("copilot").setup({
+--   suggestion = { enabled = false },
+--   panel = { enabled = false },
+-- })
+-- require("copilot_cmp").setup()
 
-local cmp = require("cmp")
-cmp.setup {
-  snippet = {
-    expand = function(args) vim.snippet.expand(args.body) end,
-  },
-  preselect = cmp.PreselectMode.None,
-  completion = {
-    completeopt = vim.o.completeopt
-  },
-  mapping = cmp.mapping.preset.insert {
-    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ["<C-n>"] = cmp.mapping.select_next_item { behavior = cmp.SelectBehavior.Insert },
-    ["<C-p>"] = cmp.mapping.select_prev_item { behavior = cmp.SelectBehavior.Insert },
-    ["<C-y>"] = cmp.mapping.confirm { select = true },
-  },
-  sources = {
-    { name = "copilot" },
-    { name = "path" },
-    { name = "nvim_lsp" },
-  },
-  sorting = {
-    comparators = {
-      cmp.config.compare.offset,
-      cmp.config.compare.exact,
-      cmp.config.compare.score,
-      cmp.config.compare.kind,
-      cmp.config.compare.sort_text,
-      cmp.config.compare.length,
-      cmp.config.compare.order,
-    }
-  },
-}
 
 vim.api.nvim_set_hl(0, 'CmpItemAbbrDeprecated', { strikethrough = true })
 vim.api.nvim_set_hl(0, 'CmpItemAbbrMatch', { link = "Structure" })
@@ -340,16 +336,7 @@ diagnostic.config {
   virtual_text = true,
 }
 
-map("n", "T", function()
-  if vim.b.show_diagnostics == nil then vim.b.show_diagnostics = true end
-  if vim.b.show_diagnostics then
-    vim.b.show_diagnostics = false
-    vim.diagnostic.disable(0)
-  else
-    vim.b.show_diagnostics = true
-    vim.diagnostic.enable(0)
-  end
-end)
+map("n", "T", function() diagnostic.enable(not diagnostic.is_enabled()) end)
 
 -- LSP
 local capabilities = lsp.protocol.make_client_capabilities()
@@ -551,6 +538,12 @@ vim.lsp.config.rustanalyzer = {
   },
 }
 
+vim.lsp.config.nixd = {
+  cmd = { "nixd" },
+  filetypes = { "nix" },
+  root_markers = { "flake.nix" },
+}
+
 for name, _ in pairs(vim.lsp.config._configs) do
   if name ~= "*" then
     vim.lsp.enable(name)
@@ -578,7 +571,7 @@ autocmd("LspAttach", {
     map(
       "n",
       "<space>gh",
-      function() lsp.inlay_hint.enable(0, not lsp.inlay_hint.is_enabled(0)) end,
+      function() lsp.inlay_hint.enable(not lsp.inlay_hint.is_enabled()) end,
       opts
     )
 
@@ -605,42 +598,18 @@ local disable_fn = function(_, buf)
   return stats and stats.size > max_filesize_KB
 end
 
-require("nvim-treesitter.configs").setup {
-  ignore_install = { "comment" },
-  highlight = {
-    enable = true,
-    additional_vim_regex_highlighting = false,
-    -- disable = disable_fn,
-  },
-  textobjects = {
-    select = {
-      lookahead = true,
-      enable = true,
-      keymaps = {
-        ["ac"] = "@class.outer",
-        ["ic"] = "@class.inner",
-        ["af"] = "@function.outer",
-        ["if"] = "@function.inner",
-        ["aa"] = "@parameter.outer",
-        ["ia"] = "@parameter.inner",
-        ["aC"] = "@conditional.outer",
-        ["iC"] = "@conditional.inner",
-        ["al"] = "@loop.outer",
-        ["il"] = "@loop.inner",
-      },
-    },
-  },
-  matchup = {
-    enable = true,
-    disable = disable_fn,
-  },
-  endwise = {
-    enable = true,
-  },
-  autotag = {
-    enable = true,
-  },
-}
+local ts_select = require("nvim-treesitter-textobjects.select")
+
+map({ "x", "o" }, "af", function() ts_select.select_textobject("@function.outer", "textobjects") end)
+map({ "x", "o" }, "if", function() ts_select.select_textobject("@function.inner", "textobjects") end)
+map({ "x", "o" }, "ac", function() ts_select.select_textobject("@class.outer", "textobjects") end)
+map({ "x", "o" }, "ic", function() ts_select.select_textobject("@class.inner", "textobjects") end)
+map({ "x", "o" }, "aa", function() ts_select.select_textobject("@parameter.outer", "textobjects") end)
+map({ "x", "o" }, "ia", function() ts_select.select_textobject("@parameter.inner", "textobjects") end)
+map({ "x", "o" }, "aC", function() ts_select.select_textobject("@conditional.outer", "textobjects") end)
+map({ "x", "o" }, "iC", function() ts_select.select_textobject("@conditional.inner", "textobjects") end)
+map({ "x", "o" }, "al", function() ts_select.select_textobject("@loop.outer", "textobjects") end)
+map({ "x", "o" }, "il", function() ts_select.select_textobject("@loop.inner", "textobjects") end)
 
 g.matchup_matchparen_offscreen = {}
 
@@ -651,6 +620,7 @@ map("n", "<space>J", function() require("treesj").join() end)
 map("n", "<space>K", function() require("treesj").split() end)
 
 require("treesitter-context").setup {
+    enable = true,
   max_lines = 2,
   trim_scope = "inner",
 }
@@ -660,7 +630,8 @@ local fzf = require("fzf-lua")
 -- fzf.register_ui_select()
 fzf.setup {
   files = {
-    no_ignore = true,
+    -- no_ignore = true,
+    hidden = true,
     fzf_opts = {
       ['--history'] = vim.fn.stdpath("data") .. '/fzf-lua-files-history',
     },
@@ -828,3 +799,4 @@ map("n", "cx", function() require("substitute.exchange").operator() end)
 map("n", "cxc", function() require("substitute.exchange").cancel() end)
 
 require("fidget").setup()
+
